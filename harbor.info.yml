@@ -1,0 +1,14 @@
+name: Harbor
+type: theme
+description: 'Simple boilerplate for Drupal 8'
+core: 8.x
+package: Custom
+regions:
+  #  First region of the layout, this region should be rendered at the top of the current page.
+  top: 'top'
+  # Main section of the layout, all main content and/or modules should be defined within this region.
+  main: 'main'
+  # Last region of the layout, this region should be as last since it will function as our global footer with responsive sticky behaviour.
+  bottom: 'bottom'
+libraries:
+  - harbor/base

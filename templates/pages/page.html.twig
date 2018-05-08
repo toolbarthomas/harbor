@@ -1,0 +1,29 @@
+{#
+/**
+ * Default document layout for a Drupal Page
+ *
+#}
+
+{% block page_before %}{% endblock %}
+
+<div class="sticky-end">
+  <div class="sticky-end__header">
+    {{ block('top_before') }}
+    {{ page.top }}
+    {{ block('top_after') }}
+  </div>
+
+  <div class="sticky-end__main">
+    {{ block('main_before') }}
+    {{ page.main }}
+    {{ block('main_after') }}
+  </div>
+
+  <div class="sticky-end__footer">
+    {{ block('bottom_before') }}
+    {{ page.bottom }}
+    {{ block('bottom_after') }}
+  </div>
+</div>
+
+{% block page_after %}{% endblock %}

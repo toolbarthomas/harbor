@@ -1,0 +1,32 @@
+{#
+/**
+ * Default Frontpage document layout for a Drupal Page
+ *
+#}
+
+{# Inherit the HTML from the default Drupal page template #}
+{% extends "page.html.twig" %}
+
+{# Prepended twig block before region: top #}
+{% block page_before %}{% endblock %}
+
+{# Prepended twig block for region: top #}
+{% block top_before %}{% endblock %}
+
+{# Appended twig block for region: top #}
+{% block top_after %}{% endblock %}
+
+{# Prepended twig block for region: main #}
+{% block main_before %}{% endblock %}
+
+{# Appended twig block for region: main #}
+{% block main_after %}{% endblock %}
+
+{# Prepended twig block for region: bottom #}
+{% block bottom_before %}{% endblock %}
+
+{# Appended twig block for region: bottom #}
+{% block bottom_after %}{% endblock %}
+
+{# Prepended twig block after region: bottom #}
+{% block page_after %}{% endblock %}

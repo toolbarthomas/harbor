@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html{{ html_attributes }}>
+  <head>
+      <title>{{ head_title|safe_join(' | ') }}</title>
+      <head-placeholder token="{{ placeholder_token }}"></head-placeholder token>
+      <css-placeholder token="{{ placeholder_token }}"></css-placeholder>
+  </head>
+  <body{{ attributes }}>
+
+    {{ page }}
+
+    <js-bottom-placeholder token="{{ placeholder_token }}">
+  </body>
+</html>
