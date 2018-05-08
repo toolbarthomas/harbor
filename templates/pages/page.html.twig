@@ -4,26 +4,26 @@
  *
 #}
 
-{% block page_before %}{% endblock %}
+{% block document_before %}{% endblock %}
 
 <div class="sticky-end">
   <div class="sticky-end__header">
-    {{ block('top_before') }}
-    {{ page.top }}
-    {{ block('top_after') }}
+    {{ block('header_before') }}
+    {{ page.header }}
+    {{ block('header_after') }}
   </div>
 
   <div class="sticky-end__main">
-    {{ block('main_before') }}
-    {{ page.main }}
-    {{ block('main_after') }}
+    {{ block('content_before') }}
+    {{ page.content }}
+    {{ block('content_after') }}
   </div>
 
   <div class="sticky-end__footer">
-    {{ block('bottom_before') }}
-    {{ page.bottom }}
-    {{ block('bottom_after') }}
+    {{ block('footer_before') }}
+    {{ page.footer }}
+    {{ block('footer_after') }}
   </div>
 </div>
 
-{% block page_after %}{% endblock %}
+{% block document_after %}{% endblock %}

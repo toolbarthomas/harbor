@@ -7,26 +7,26 @@
 {# Inherit the HTML from the default Drupal page template #}
 {% extends "page.html.twig" %}
 
-{# Prepended twig block before region: top #}
-{% block page_before %}{% endblock %}
+{# Prepended twig block before region: header #}
+{% block document_before %}{% endblock %}
 
-{# Prepended twig block for region: top #}
-{% block top_before %}{% endblock %}
+{# Prepended twig block for region: header #}
+{% block header_before %}{% endblock %}
 
-{# Appended twig block for region: top #}
-{% block top_after %}{% endblock %}
+{# Appended twig block for region: header #}
+{% block header_after %}{% endblock %}
 
-{# Prepended twig block for region: main #}
-{% block main_before %}{% endblock %}
+{# Prepended twig block for region: content #}
+{% block content_before %}{% endblock %}
 
-{# Appended twig block for region: main #}
-{% block main_after %}{% endblock %}
+{# Appended twig block for region: content #}
+{% block content_after %}{% endblock %}
 
-{# Prepended twig block for region: bottom #}
-{% block bottom_before %}{% endblock %}
+{# Prepended twig block for region: footer #}
+{% block footer_before %}{% endblock %}
 
-{# Appended twig block for region: bottom #}
-{% block bottom_after %}{% endblock %}
+{# Appended twig block for region: footer #}
+{% block footer_after %}{% endblock %}
 
-{# Prepended twig block after region: bottom #}
-{% block page_after %}{% endblock %}
+{# Prepended twig block before page ned #}
+{% block document_after %}{% endblock %}
