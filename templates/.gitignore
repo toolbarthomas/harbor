@@ -1,0 +1,9 @@
+node_modules/
+
+*.map
+*.log
+
+.env
+
+stylesheets/dist
+javascripts/dist
