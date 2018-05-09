@@ -11,4 +11,4 @@ regions:
   # Last region of the layout, this region should be as last since it will function as our global footer with responsive sticky behaviour.
   footer: footer
 libraries:
-  - harbor/base
+  - harbor/main

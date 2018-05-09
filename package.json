@@ -12,13 +12,15 @@
   },
   "keywords": [
     "Drupal",
-    "OOCSS",
-    "modulair"
+    "Theme"
   ],
   "author": "Thomas van der Velde <contact@toolbarthomas.net>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/toolbarthomas/harbor/issues"
   },
-  "homepage": "https://github.com/toolbarthomas/harbor#readme"
+  "homepage": "https://github.com/toolbarthomas/harbor#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1"
+  }
 }

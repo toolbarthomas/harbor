@@ -1,5 +1,7 @@
-base:
+main:
   version: VERSION
   css:
     base:
-      templates/main/stylesheets/dist/index.css: { weight: -1 }
+      templates/main/stylesheets/dist/index.css: {}
+  js:
+    templates/main/javascripts/dist/index.js: { weight: -100}
