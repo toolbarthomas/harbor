@@ -3,3 +3,7 @@ bower_components/
 
 stylesheets/dist/
 javascripts/dist/
+
+*.map
+*.log
+.env
