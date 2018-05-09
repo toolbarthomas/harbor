@@ -24,13 +24,19 @@
     "chalk": "^2.4.1",
     "dotenv": "^5.0.1",
     "gulp": "^3.9.1",
+    "gulp-filter": "^5.1.0",
     "gulp-load-plugins": "^1.5.0",
     "gulp-newer": "^1.4.0",
+    "gulp-postcss": "^7.0.1",
+    "gulp-rename": "^1.2.2",
     "gulp-sass": "^4.0.1",
+    "gulp-sourcemaps": "^2.6.4",
     "merge-stream": "^1.0.1",
     "node-sass-glob-importer": "^5.1.2",
     "postcss-reporter": "^5.0.0",
     "run-sequence": "^2.2.1",
-    "stylelint": "^9.2.0"
+    "stylelint": "^9.2.0",
+    "stylelint-scss": "^3.1.0",
+    "stylelint-config-recommended-scss": "^3.2.0"
   }
 }

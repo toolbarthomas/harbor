@@ -2,6 +2,6 @@ main:
   version: VERSION
   css:
     base:
-      templates/main/stylesheets/dist/index.css: {}
+      templates/dist/main/stylesheets/index.css: {}
   js:
-    templates/main/javascripts/dist/index.js: { weight: -100}
+    templates/dist/main/javascripts/index.js: { weight: -100}

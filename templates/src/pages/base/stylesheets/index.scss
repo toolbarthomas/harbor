@@ -1,0 +1,55 @@
+@charset "UTF-8";
+
+///
+// @name: main
+// @type: Main
+///
+
+///
+// 1. Shared - Must use mixins & functions
+///
+@import "shared/*.scss";
+
+
+///
+// 2. Helpers - Helper functions to get a value from a mapped setting.
+///
+@import "helpers/*.scss";
+
+
+///
+// 3. Settings - All variables will be defined on the same level so we can share it in the whole project.
+///
+@import "settings/*.scss";
+
+
+///
+// 4. Tools - Mixins & functions for defining project styling should be defined here
+///
+@import "tools/*.scss";
+
+
+///
+// 5. Generic - Default tag style definitions for your app/module will be defined here. E.g. reset.css
+///
+@import "generic/*.scss";
+
+///
+// 6. Base - Typography and other global styling definitions should be defined here.
+///
+@import "base/*.scss";
+
+///
+// 7. Objects - Class-based selectors with undecorated design patterns i.e. layout definitions
+///
+@import "objects/*.scss";
+
+///
+// 8. Components - Specific UI components will be defined here.
+///
+@import "components/*.scss";
+
+///
+// 9. Utilities and helper classes with ability to override anything within the project. Usefull to define helper classes like: .hide
+///
+@import "utilities/*.scss";

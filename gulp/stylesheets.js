@@ -12,9 +12,9 @@ module.exports = (GULP, GULP_PLUGINS) => {
         var sources = [
             {
                 input: [
-                    process.env.HARBOR_SRC + '/main/stylesheets/index.scss',
-                    process.env.HARBOR_SRC + '/partials/**/stylesheets/index.scss',
-                    process.env.HARBOR_SRC + '/pages/**/stylesheets/index.scss',
+                    process.env.HARBOR_SRC + '/**/main/stylesheets/*.scss',
+                    process.env.HARBOR_SRC + '/**/partials/**/stylesheets/**.scss',
+                    process.env.HARBOR_SRC + '/**/pages/**/stylesheets/**.scss',
                 ],
                 output: process.env.HARBOR_DIST
             }

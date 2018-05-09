@@ -6,3 +6,6 @@ templates/dist/
 *.map
 *.log
 .env
+
+yarn.lock
+package-lock.json
