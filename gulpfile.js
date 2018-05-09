@@ -19,9 +19,9 @@ const NODE_MODULES = {
     runSequence: require('run-sequence').use(GULP),
 };
 
-// Gulp task that cleans up the distribution folder
-// before processing any new streams
+
 GULP.task('stylesheets', gulpTask('stylesheets'));
+GULP.task('watch', gulpTask('watch'));
 
 function gulpTask(file) {
     return require('./gulp/' + file)(GULP, GULP_PLUGINS);

@@ -21,10 +21,14 @@
 {% endblock %}
 
 {# Prepended twig block for region: content #}
-{% block content_before %}{% endblock %}
+{% block content_before %}
+    <div class="wrapper">
+{% endblock %}
 
 {# Appended twig block for region: content #}
-{% block content_after %}{% endblock %}
+{% block content_after %}
+    </div>
+{% endblock %}
 
 {# Prepended twig block for region: footer #}
 {% block footer_before %}
