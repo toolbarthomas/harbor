@@ -21,7 +21,9 @@
   },
   "homepage": "https://github.com/toolbarthomas/harbor#readme",
   "devDependencies": {
+    "autoprefixer": "^8.4.1",
     "chalk": "^2.4.1",
+    "cssnano": "^3.10.0",
     "dotenv": "^5.0.1",
     "gulp": "^3.9.1",
     "gulp-filter": "^5.1.0",
@@ -36,7 +38,10 @@
     "postcss-reporter": "^5.0.0",
     "run-sequence": "^2.2.1",
     "stylelint": "^9.2.0",
-    "stylelint-scss": "^3.1.0",
-    "stylelint-config-recommended-scss": "^3.2.0"
+    "stylelint-config-recommended-scss": "^3.2.0",
+    "stylelint-scss": "^3.1.0"
+  },
+  "dependencies": {
+    "normalize.css": "^8.0.0"
   }
 }

@@ -54,7 +54,8 @@ module.exports = (GULP, GULP_PLUGINS) => {
             .pipe(GULP_PLUGINS.sass({
                 outputStyle: 'expanded',
                 includePaths: [
-                    process.env.HARBOR_SRC
+                    process.env.HARBOR_SRC,
+                    process.env.HARBOR_PACKAGES
                 ],
                 importer: NODE_MODULES.sassGlobImporter()
             }).on('error', GULP_PLUGINS.sass.logError))

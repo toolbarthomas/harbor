@@ -6,20 +6,20 @@
 
 {% block document_before %}{% endblock %}
 
-<div class="sticky-end">
-  <div class="sticky-end__header">
+<div class="vertical-flow">
+  <div class="vertical-flow__header">
     {{ block('header_before') }}
     {{ page.header }}
     {{ block('header_after') }}
   </div>
 
-  <div class="sticky-end__main">
+  <div class="vertical-flow__main">
     {{ block('content_before') }}
     {{ page.content }}
     {{ block('content_after') }}
   </div>
 
-  <div class="sticky-end__footer">
+  <div class="vertical-flow__footer">
     {{ block('footer_before') }}
     {{ page.footer }}
     {{ block('footer_after') }}

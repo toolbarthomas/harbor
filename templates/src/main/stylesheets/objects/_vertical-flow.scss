@@ -1,0 +1,15 @@
+.vertical-flow {
+    display: flex;
+    width: 100%;
+    min-height: 100%;
+    min-height: 100vh;
+    flex-direction: column;
+    justify-content: space-between;
+
+    &__header,
+    &__main,
+    &__footer {
+        width: 100%;
+        flex-grow: 0;
+    }
+}

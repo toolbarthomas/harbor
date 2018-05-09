@@ -11,10 +11,14 @@
 {% block document_before %}{% endblock %}
 
 {# Prepended twig block for region: header #}
-{% block header_before %}{% endblock %}
+{% block header_before %}
+    <header class="app__header">
+{% endblock %}
 
 {# Appended twig block for region: header #}
-{% block header_after %}{% endblock %}
+{% block header_after %}
+    </header>
+{% endblock %}
 
 {# Prepended twig block for region: content #}
 {% block content_before %}{% endblock %}
@@ -23,10 +27,14 @@
 {% block content_after %}{% endblock %}
 
 {# Prepended twig block for region: footer #}
-{% block footer_before %}{% endblock %}
+{% block footer_before %}
+    <footer class="app__footer">
+{% endblock %}
 
 {# Appended twig block for region: footer #}
-{% block footer_after %}{% endblock %}
+{% block footer_after %}
+    </footer>
+{% endblock %}
 
 {# Prepended twig block before the documents ends #}
 {% block document_after %}{% endblock %}

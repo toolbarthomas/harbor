@@ -1,0 +1,32 @@
+.horizontal-flow {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: nowrap;
+
+    &__main,
+    &__aside {
+        padding-left: 8px;
+
+        &:first-child,
+        &:only-child {
+            padding-left: 0;
+        }
+    }
+
+    &__main {
+        flex-grow: 1;
+    }
+
+    &__aside {
+        flex-grow: 0;
+    }
+}
+
+.horizontal-flow--center {
+    align-items: center;
+}
+
+.horizontal-flow--bottom {
+    align-items: flex-end;
+}
