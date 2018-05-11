@@ -54,10 +54,13 @@ module.exports = (GULP, GULP_PLUGINS) => {
             .pipe(GULP_PLUGINS.sass({
                 outputStyle: 'expanded',
                 includePaths: [
+                    require('node-normalize-scss').includePaths,
                     process.env.HARBOR_SRC,
                     process.env.HARBOR_PACKAGES
                 ],
-                importer: NODE_MODULES.sassGlobImporter()
+                importer: [
+                    NODE_MODULES.sassGlobImporter()
+                ]
             }).on('error', GULP_PLUGINS.sass.logError))
             .pipe(GULP_PLUGINS.sourcemaps.write('./'))
             .pipe(GULP.dest(source.output))
