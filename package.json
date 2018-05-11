@@ -41,7 +41,8 @@
     "run-sequence": "^2.2.1",
     "stylelint": "^9.2.0",
     "stylelint-config-recommended-scss": "^3.2.0",
-    "stylelint-scss": "^3.1.0"
+    "stylelint-scss": "^3.1.0",
+    "svg-sprite-injector": "^1.0.0"
   },
   "dependencies": {
     "normalize.css": "^8.0.0"

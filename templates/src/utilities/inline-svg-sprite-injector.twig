@@ -1,0 +1,19 @@
+{#
+/**
+ * Async load svg-sprites with DOM injection and local storage support
+ *
+ * See: https://osvaldas.info/caching-svg-sprite-in-localstorage
+ *
+#}
+
+{% if svg_sprite is not empty %}
+
+    <script>
+        {% include theme_path ~ "/node_modules/svg-sprite-injector/svg-sprite-injector.js" %}
+
+        svgSpriteInjector(svg_sprite, {
+            revision: "{{ revision|default('now'|date('Y-m-d--H:i:s')) }}"
+        });
+    </script>
+
+{% endif %}

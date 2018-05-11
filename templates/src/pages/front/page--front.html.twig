@@ -1,43 +1,31 @@
 {#
-/**
- * Default Frontpage document layout for a Drupal Page
- *
+  /**
+  * Frontpage layout
+  *
+  * Example page for the document structure of the Harbor Theme
+  * This template uses the general page layout.
+  * Documentation of the availlable functions can be found at: ../default/page.html.twig
+  *
 #}
-{# Inherit the HTML from the default Drupal page template #}
+
+
 {% extends "@harbor/src/pages/default/page.html.twig" %}
 
 {% block document_head %}
-
-    {# Load stylesheets Asynchronous #}
-    {% include "@harbor/src/utilities/loadcss/loadcss.twig" with {
-        cwd: theme_path,
-        stylesheets: [
-            '/templates/dist/pages/front/stylesheets/index.css'
-        ]
-    } %}
-
+  {% include "@harbor/src/utilities/loadcss.twig" with {
+    cwd: theme_path,
+    stylesheets: [
+      '/templates/dist/pages/front/stylesheets/index.css'
+    ]
+  } %}
 {% endblock %}
 
-{# Prepended twig block before the documents ends #}
-{% block document_before %}{% endblock %}
+{% block content_before %}
+  hallo wereld
+{% endblock %}
 
-{# Prepended twig block for region: header #}
-{% block header_before %}{% endblock %}
-
-{# Appended twig block for region: header #}
-{% block header_after %}{% endblock %}
-
-{# Prepended twig block for region: content #}
-{% block content_before %}{% endblock %}
-
-{# Appended twig block for region: content #}
-{% block content_after %}{% endblock %}
-
-{# Prepended twig block for region: footer #}
-{% block footer_before %}{% endblock %}
-
-{# Appended twig block for region: footer #}
-{% block footer_after %}{% endblock %}
-
-{# Prepended twig block before the documents ends #}
-{% block document_after %}{% endblock %}
+{% block document_after %}
+  {% include "@harbor/src/utilities/inline-svg-sprite-injector.twig" with {
+    svg_sprite: theme_path ~ '/templates/dist/main/images/svg-sprite.svg',
+  } %}
+{% endblock %}

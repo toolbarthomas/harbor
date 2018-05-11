@@ -31,7 +31,7 @@
         *
     #}
     {% if exclude_polyfill is not defined %}
-        <script type="text/javascript">
+        <script>
             {% include theme_path ~ "/node_modules/fg-loadcss/dist/cssrelpreload.js" %}
         </script>
     {% endif %}
