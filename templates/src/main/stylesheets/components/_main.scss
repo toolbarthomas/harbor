@@ -1,0 +1,17 @@
+.main {
+    position: relative;
+
+    &__header,
+    &__footer {
+        padding: map-get($padding, 'small');
+    }
+
+    &__header {
+        background-color: get-setting($colors, 'body', 'light');
+        box-shadow: map-get($box-shadow, z1);
+    }
+
+    &__footer {
+        background-color: get-setting($colors, 'body', 'dark');
+    }
+}

@@ -4,12 +4,23 @@
     min-height: 100%;
     min-height: 100vh;
     flex-direction: column;
-    justify-content: space-between;
+    align-items: center;
 
     &__header,
     &__main,
     &__footer {
+        display: flex;
         width: 100%;
         flex-grow: 0;
+    }
+
+    &__main {
+        flex-grow: 1;
+        align-items: center;
+    }
+
+    &__wrapper {
+        display: block;
+        width: 100%;
     }
 }

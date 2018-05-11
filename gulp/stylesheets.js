@@ -13,7 +13,7 @@ module.exports = (GULP, GULP_PLUGINS) => {
             {
                 input: [
                     process.env.HARBOR_SRC + '/**/main/stylesheets/*.scss',
-                    process.env.HARBOR_SRC + '/**/partials/**/stylesheets/**.scss',
+                    process.env.HARBOR_SRC + '/**/components/**/stylesheets/**.scss',
                     process.env.HARBOR_SRC + '/**/pages/**/stylesheets/**.scss',
                 ],
                 output: process.env.HARBOR_DIST
@@ -54,9 +54,9 @@ module.exports = (GULP, GULP_PLUGINS) => {
             .pipe(GULP_PLUGINS.sass({
                 outputStyle: 'expanded',
                 includePaths: [
-                    require('node-normalize-scss').includePaths,
                     process.env.HARBOR_SRC,
-                    process.env.HARBOR_PACKAGES
+                    process.env.HARBOR_PACKAGES,
+                    require('node-normalize-scss').includePaths
                 ],
                 importer: [
                     NODE_MODULES.sassGlobImporter()

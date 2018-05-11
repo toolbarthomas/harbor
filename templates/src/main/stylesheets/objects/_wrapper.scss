@@ -2,7 +2,7 @@
     position: relative;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 20px;
-    padding-right: 20px;
-    max-width: 960px;
+    padding-left: map-get($padding, 'small');
+    padding-right: map-get($padding, 'small');
+    max-width: map-get($width, 'max');
 }

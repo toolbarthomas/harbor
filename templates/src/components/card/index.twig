@@ -1,0 +1,13 @@
+<div class="card">
+  {% if block('card__header') is not empty %}
+  <header class="card__header">{{ block('card__header') }}</header>
+  {% endif %}
+
+  {% if block('card__main') is not empty %}
+  <article class="card__main">{{ block('card__main') }}</article>
+  {% endif %}
+
+  {% if block('card__footer') is not empty %}
+  <footer class="card__footer">{{ block('card__footer') }}</footer>
+  {% endif %}
+</div>

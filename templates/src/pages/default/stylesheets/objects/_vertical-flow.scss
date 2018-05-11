@@ -1,0 +1,5 @@
+.vertical-flow {
+    .toolbar-vertical & {
+        min-height: calc(100vh - 39px);
+    }
+}

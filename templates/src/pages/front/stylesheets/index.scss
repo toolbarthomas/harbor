@@ -8,24 +8,28 @@
 ///
 // 1. Shared - Must use mixins & functions
 ///
+@import "main/stylesheets/shared/*.scss";
 @import "shared/*.scss";
 
 
 ///
 // 2. Helpers - Helper functions to get a value from a mapped setting.
 ///
+@import "main/stylesheets/helpers/*.scss";
 @import "helpers/*.scss";
 
 
 ///
 // 3. Settings - All variables will be defined on the same level so we can share it in the whole project.
 ///
+@import "main/stylesheets/settings/*.scss";
 @import "settings/*.scss";
 
 
 ///
 // 4. Tools - Mixins & functions for defining project styling should be defined here
 ///
+@import "main/stylesheets/tools/*.scss";
 @import "tools/*.scss";
 
 

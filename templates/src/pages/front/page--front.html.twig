@@ -4,28 +4,49 @@
   *
   * Example page for the document structure of the Harbor Theme
   * This template uses the general page layout.
-  * Documentation of the availlable functions can be found at: ../default/page.html.twig
+  * Documentation of the available functions can be found at: ../default/page.html.twig
   *
 #}
 
-
 {% extends "@harbor/src/pages/default/page.html.twig" %}
 
+
+{#
+  /**
+  * @block document_head
+  *
+  * Example snippet for Asynchronous CSS
+  *
+#}
 {% block document_head %}
-  {% include "@harbor/src/utilities/loadcss.twig" with {
+  {% include "@harbor/src/main/utilities/loadcss.twig" with {
     cwd: theme_path,
     stylesheets: [
-      '/templates/dist/pages/front/stylesheets/index.css'
+      '/templates/dist/pages/front/stylesheets/index.css',
+      '/templates/dist/components/card/stylesheets/index.css'
     ]
   } %}
 {% endblock %}
 
-{% block content_before %}
-  hallo wereld
+{% block content %}
+  <div class="wrapper">
+    {% embed "@harbor/src/components/card/index.twig" %}
+      {% block card__main %}
+        {{ page.content }}
+      {% endblock %}
+    {% endembed %}
+  </div>
 {% endblock %}
 
+{#
+  /**
+  * @block document_after
+  *
+  * Example snippet for the inline svg sprite
+  *
+#}
 {% block document_after %}
-  {% include "@harbor/src/utilities/inline-svg-sprite-injector.twig" with {
+  {% include "@harbor/src/main/utilities/inline-svg-sprite-injector.twig" with {
     svg_sprite: theme_path ~ '/templates/dist/main/images/svg-sprite.svg',
   } %}
 {% endblock %}
