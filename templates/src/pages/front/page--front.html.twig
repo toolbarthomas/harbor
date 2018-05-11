@@ -3,42 +3,41 @@
  * Default Frontpage document layout for a Drupal Page
  *
 #}
-
 {# Inherit the HTML from the default Drupal page template #}
-{% extends "@harbor/src/pages/base/page.html.twig" %}
+{% extends "@harbor/src/pages/default/page.html.twig" %}
+
+{% block document_head %}
+
+    {# Load stylesheets Asynchronous #}
+    {% include "@harbor/src/utilities/loadcss/loadcss.twig" with {
+        cwd: theme_path,
+        stylesheets: [
+            '/templates/dist/pages/front/stylesheets/index.css'
+        ]
+    } %}
+
+{% endblock %}
 
 {# Prepended twig block before the documents ends #}
 {% block document_before %}{% endblock %}
 
 {# Prepended twig block for region: header #}
-{% block header_before %}
-    <header class="app__header">
-{% endblock %}
+{% block header_before %}{% endblock %}
 
 {# Appended twig block for region: header #}
-{% block header_after %}
-    </header>
-{% endblock %}
+{% block header_after %}{% endblock %}
 
 {# Prepended twig block for region: content #}
-{% block content_before %}
-    <div class="wrapper">
-{% endblock %}
+{% block content_before %}{% endblock %}
 
 {# Appended twig block for region: content #}
-{% block content_after %}
-    </div>
-{% endblock %}
+{% block content_after %}{% endblock %}
 
 {# Prepended twig block for region: footer #}
-{% block footer_before %}
-    <footer class="app__footer">
-{% endblock %}
+{% block footer_before %}{% endblock %}
 
 {# Appended twig block for region: footer #}
-{% block footer_after %}
-    </footer>
-{% endblock %}
+{% block footer_after %}{% endblock %}
 
 {# Prepended twig block before the documents ends #}
 {% block document_after %}{% endblock %}

@@ -1,0 +1,39 @@
+{#
+/**
+ * Twig Snippet to load up stylesheets Asynchronously based on the implementation of the Filement Group Inc.
+ *
+ * See: https://github.com/filamentgroup/loadCSS
+ *
+#}
+
+{% if stylesheets is not empty %}
+
+    {#
+        /**
+         * @var stylesheets
+         *
+         * Iterate trough all defined stylesheets and load them asynchronous.
+         * Browsers that don't support Javascript and the preload attribute within stylesheets should fallback to the noscript defined stylesheet
+         *
+     #}
+    {% for stylesheet in stylesheets %}
+        <link rel="preload" href="{{ cwd|default(theme_path) ~ stylesheet }}" as="style" onload="this.onload=null;this.rel='stylesheet'" onerror="this.rel='stylesheet'" />
+        <noscript><link rel="stylesheet" href="{{ cwd|default(theme_path) ~ stylesheet }}" /></noscript>
+    {% endfor %}
+
+    {#
+        /**
+        * @var exclude_polyfill
+        *
+        * By including this script will automatically detect if a browser supports rel=preload.
+        * In browsers that natively support rel=preload, the script will do nothing, allowing the browser to load and apply the asynchronous CSS
+        * (note the onload attribute above, which is there to set the link's rel attribute to stylesheet once it finishes loading).
+        *
+    #}
+    {% if exclude_polyfill is not defined %}
+        <script type="text/javascript">
+            {% include theme_path ~ "/node_modules/fg-loadcss/dist/cssrelpreload.js" %}
+        </script>
+    {% endif %}
+
+{% endif %}

@@ -1,0 +1,6 @@
+<?php
+
+function harbor_preprocess_page(&$variables) {
+    // Add the current theme_path to our twig context
+    $variables['theme_path'] = base_path() . drupal_get_path('theme', 'harbor');
+}

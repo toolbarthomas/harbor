@@ -4,4 +4,4 @@ main:
     base:
       templates/dist/main/stylesheets/index.css: {}
   js:
-    templates/dist/main/javascripts/index.js: { weight: -100}
+    templates/dist/main/javascripts/index.js: {}

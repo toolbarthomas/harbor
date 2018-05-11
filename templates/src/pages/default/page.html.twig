@@ -1,0 +1,122 @@
+{#
+/**
+ * Default page layout for a Drupal Page
+ *
+ * This is the default page template for the theme hook: `page` and has addtional Twig blocks to interchange data.
+ * Sibling pages can define these blocks within this document to define additional elements.
+ *
+ * The current document is scaffoled out into 3 rows: header, main & footer
+ * Each row has additional hooks to gain more control over the HTML flow
+ *
+ * You can use `../front/page--front.html.twig` as reference.
+ *
+#}
+
+
+{#
+/**
+ * Block: html_head
+ *
+ * Renders content within the <head> tag to apply scoped stylesheets/javascripts
+ * Any inherited page should define this block to apply scoped declarations
+ * or load up specific assets within that document
+ *
+#}
+{% block document_head %}{% endblock %}
+
+
+{#
+/**
+ * Block: document_before
+ *
+ * The document_before block renders it's contents at the beginning of the theme hook : `page`.
+ * You should use this hook if you need to append extra elements before the main content.
+ *
+#}
+{% block document_before %}{% endblock %}
+
+<div class="vertical-flow">
+  <div class="vertical-flow__header">
+    {#
+    /**
+     * Block: header_before
+     *
+     * Renders content before the header region
+     *
+    #}
+    {% block header_before %}{% endblock %}
+
+
+    {# Render the header region #}
+    {{ page.header }}
+
+
+    {#
+    /**
+     * Block: header_after
+     *
+     * Renders content after the header region
+     *
+    #}
+    {% block header_after %}{% endblock %}
+  </div>
+
+  <div class="vertical-flow__main">
+    {#
+    /**
+     * Block: content
+     *
+     * Renders content before the content region
+     *
+    #}
+    {% block content_before %}{% endblock %}
+
+
+    {# Render the content region #}
+    {{ page.content }}
+
+
+    {#
+    /**
+     * Block: content_after
+     *
+     * Renders content after the content region
+     *
+    #}
+    {% block content_after %}{% endblock %}
+  </div>
+
+  <div class="vertical-flow__footer">
+    {#
+    /**
+     * Block: footer_before
+     *
+     * Renders content before the footer region
+     *
+    #}
+    {% block footer_before %}{% endblock %}
+
+    {# Render the footer region #}
+    {{ page.footer }}
+
+    {#
+    /**
+     * Block: footer_after
+     *
+     * Renders content after the footer region
+     *
+    #}
+    {% block footer_after %}{% endblock %}
+  </div>
+</div>
+
+
+{#
+/**
+ * Block: document_after
+ *
+ * The document_after block renders it's contents at the end of the theme hook : `page`.
+ * You should use this hook if you need to append extra elements after the main content.
+ *
+#}
+{% block document_after %}{% endblock %}
