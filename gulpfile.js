@@ -20,6 +20,7 @@ const NODE_MODULES = {
 };
 
 
+GULP.task('sync', gulpTask('sync'));
 GULP.task('stylesheets', gulpTask('stylesheets'));
 GULP.task('watch', gulpTask('watch'));
 

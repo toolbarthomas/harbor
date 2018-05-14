@@ -10,11 +10,11 @@
     {# Load Drupal related javascript assets before the main content #}
     <js-placeholder token="{{ placeholder_token }}">
     {# Display scoped declarations within this block, inherits it's contents from the inherited page template #}
-    {% block document_head %}{% endblock %}
+    {{ block("document_head") }}
   </head>
   <body{{ attributes }}>
     {# Append additional elements before Drupal appends any content #}
-    {{ block('document_before') }}
+    {{ block("document_before") }}
 
     {# This hook is required by Drupal: https://www.drupal.org/node/254940#closure #}
     {{ page_top }}
@@ -26,7 +26,7 @@
     {{ page_bottom }}
 
     {# Append additional elements before Drupal appends any content #}
-    {{ block('document_after') }}
+    {{ block("document_after") }}
 
     {# Load Drupal related javascript assets after the main content #}
     <js-bottom-placeholder token="{{ placeholder_token }}">
