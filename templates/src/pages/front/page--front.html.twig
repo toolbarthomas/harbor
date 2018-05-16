@@ -8,25 +8,16 @@
   *
 #}
 
-{% extends "@harbor/src/pages/default/page.html.twig" %}
+{% extends "@harbor/src/pages/default/layout/page.html.twig" %}
 
+{% set context = {
+  stylesheets: [
+    '/templates/dist/pages/front/stylesheets/index.css',
+    '/templates/dist/components/card/stylesheets/index.css',
+    '/templates/dist/components/menu/stylesheets/index.css'
+  ]
+} %}
 
-{#
-  /**
-  * @block document_head
-  *
-  * Example snippet for Asynchronous CSS
-  *
-#}
-{% block document_head %}
-  {% include "@harbor/src/main/utilities/loadcss.twig" with {
-    cwd: theme_path,
-    stylesheets: [
-      '/templates/dist/pages/front/stylesheets/index.css',
-      '/templates/dist/components/card/stylesheets/index.css'
-    ]
-  } %}
-{% endblock %}
 
 {% block content %}
   <div class="wrapper">
@@ -36,17 +27,4 @@
       {% endblock %}
     {% endembed %}
   </div>
-{% endblock %}
-
-{#
-  /**
-  * @block document_after
-  *
-  * Example snippet for the inline svg sprite
-  *
-#}
-{% block document_after %}
-  {% include "@harbor/src/main/utilities/inline-svg-sprite-injector.twig" with {
-    svg_sprite: theme_path ~ '/templates/dist/main/images/svg-sprite.svg',
-  } %}
 {% endblock %}

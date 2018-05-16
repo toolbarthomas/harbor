@@ -1,0 +1,102 @@
+.menu {
+    margin-right: (0 - map-get($menu, 'gutter'));
+    margin-left: (0 - map-get($menu, 'gutter'));
+
+    > ul,
+    > ol {
+        display: flex;
+        align-items: stretch;
+        height: 64px;
+
+        > li {
+            display: flex;
+            position: relative;
+            align-items: stretch;
+        }
+
+        ul,
+        ol {
+            display: block;
+        }
+    }
+
+    ol,
+    ul,
+    li {
+        margin: 0;
+        padding: 0;
+        line-height: normal;
+    }
+
+    ol,
+    ul {
+        list-style: none;
+    }
+
+    li {
+        display: block;
+        margin: 0;
+        padding: 0;
+
+        > a {
+            display: flex;
+            position: relative;
+            overflow: hidden;
+            flex-grow: 1;
+            align-items: center;
+            padding-right: map-get($menu, 'gutter');
+            padding-left: map-get($menu, 'gutter');
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+
+            &,
+            &:active,
+            &:focus,
+            &:hover {
+                text-decoration: none;
+            }
+
+            &::before {
+                display: block;
+                content: " ";
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                transform: translateX(-100%);
+                background-color: currentColor;
+                height: 2px;
+                opacity: 0;
+                will-change: (
+                    opacity,
+                    transform
+                );
+                transition: (
+                    opacity 200ms ease-in-out 0ms,
+                    transform 200ms ease-in-out 0ms
+                );
+            }
+
+            &:hover {
+                &::before {
+                    opacity: 1;
+                    transform: translateX(0);
+                    transition-timing-function: ease-out-in;
+                }
+            }
+        }
+    }
+
+    a {
+        color: inherit;
+    }
+
+    /*
+        Hide the label for screen reader devices
+    */
+    @if map-get($menu, 'hide_contextual_label') {
+        > h2 {
+            @include visually-hidden();
+        }
+    }
+}

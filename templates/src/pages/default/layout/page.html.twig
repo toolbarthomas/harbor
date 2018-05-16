@@ -1,0 +1,84 @@
+{#
+/**
+ * @file
+ * Default page layout for a Drupal Page
+ * This is the default page template for the theme hook: `page` and has addtional Twig blocks to interchange data.
+ * Sibling pages can define these blocks within this document to define additional elements.
+ *
+ * Regions:
+ * The current document is divided out into 3 specific regions.
+ *
+ * - page.header: Items for the header region
+ * - page.content: Items for the content region.
+ * - page.footer: Items for the footer region
+ *
+ * Blocks:
+ * Inherited Twig templates can use the following blocks for custom markup within each template.
+ *
+ * - document_head - Renders any specified content within the head tag. By default we load our stylesheets asynchronously.
+ * - document_before - Renders any specified content right at the <body> tag
+ * - header - Renders by default the page.header region
+ * - content - Renders by default the page.content region
+ * - footer - Renders by default the page.footer region
+ * - document_after - Renders any specified content right before the </body> tag
+*/
+#}
+
+{% block document_head %}
+  {#
+    Load all defined stylesheets asynchronously using the FG-Loadcss library.
+    Other templates that inherit this base template can hook extra stylesheets
+    by defining the corresponding files within: `context['stylesheets']`
+  #}
+  {% include "@harbor/src/main/utilities/loadcss.twig" with {
+    cwd: theme_path,
+    stylesheets: [
+      '/templates/dist/pages/default/stylesheets/index.css',
+    ]|merge(context.stylesheets)
+  } %}
+
+{% endblock %}
+
+{% block document_before %}{% endblock %}
+
+<div class="page">
+  <div class="vertical-flow">
+    <div class="vertical-flow__header">
+      <div class="vertical-flow__wrapper">
+        {% block header %}
+
+          {% include "@harbor/src/pages/default/layout/header.twig" with {
+              content: page.header
+          } %}
+
+        {% endblock %}
+      </div>
+    </div>
+
+    <div class="vertical-flow__main">
+      <div class="vertical-flow__wrapper">
+        {% block content %}
+          {{ page.content }}
+        {% endblock %}
+      </div>
+    </div>
+
+    <div class="vertical-flow__footer">
+      <div class="vertical-flow__wrapper">
+        {% block footer %}
+
+          {% include "@harbor/src/pages/default/layout/footer.twig" with {
+              content: page.footer
+          } %}
+
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block document_after %}
+  {% include "@harbor/src/main/utilities/inline-svg-sprite-injector.twig" with {
+    svg_sprite: theme_path ~ '/templates/dist/main/images/svg-sprite.svg',
+  } %}
+{% endblock %}
