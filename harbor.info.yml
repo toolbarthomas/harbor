@@ -12,3 +12,5 @@ regions:
   footer: footer
 libraries:
   - harbor/main
+libraries-override:
+  core/html5shiv: false
