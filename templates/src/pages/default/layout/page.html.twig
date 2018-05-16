@@ -30,11 +30,13 @@
     Other templates that inherit this base template can hook extra stylesheets
     by defining the corresponding files within: `context['stylesheets']`
   #}
-  {% include "@harbor/src/main/utilities/loadcss.twig" with {
+  {% include "@harbor/src/main/partials/loadcss.twig" with {
     cwd: theme_path,
     stylesheets: [
       '/templates/dist/pages/default/stylesheets/index.css',
-    ]|merge(context.stylesheets)
+      '/templates/dist/components/card/stylesheets/index.css',
+      '/templates/dist/components/menu/stylesheets/index.css'
+    ]|merge(context.stylesheets|default([]))
   } %}
 
 {% endblock %}
@@ -45,40 +47,44 @@
   <div class="vertical-flow">
     <div class="vertical-flow__header">
       <div class="vertical-flow__wrapper">
-        {% block header %}
-
-          {% include "@harbor/src/pages/default/layout/header.twig" with {
-              content: page.header
-          } %}
-
-        {% endblock %}
+          <header class="page__header">
+            {% block header %}
+              {% include "@harbor/src/pages/default/partials/header.twig" with {
+                  content: page.header
+              } %}
+            {% endblock %}
+          </header>
       </div>
     </div>
 
     <div class="vertical-flow__main">
       <div class="vertical-flow__wrapper">
-        {% block content %}
-          {{ page.content }}
-        {% endblock %}
+        <section class="page__content">
+          {% block content %}
+            {% include "@harbor/src/pages/default/partials/content.twig" with {
+              content: page.content
+            } %}
+          {% endblock %}
+        </section>
       </div>
     </div>
 
     <div class="vertical-flow__footer">
       <div class="vertical-flow__wrapper">
-        {% block footer %}
-
-          {% include "@harbor/src/pages/default/layout/footer.twig" with {
-              content: page.footer
-          } %}
-
-        {% endblock %}
+        <footer class="page__footer">
+          {% block footer %}
+            {% include "@harbor/src/pages/default/partials/footer.twig" with {
+                content: page.footer
+            } %}
+          {% endblock %}
+        </footer>
       </div>
     </div>
   </div>
 </div>
 
 {% block document_after %}
-  {% include "@harbor/src/main/utilities/inline-svg-sprite-injector.twig" with {
+  {% include "@harbor/src/main/partials/inline-svg-sprite-injector.twig" with {
     svg_sprite: theme_path ~ '/templates/dist/main/images/svg-sprite.svg',
   } %}
 {% endblock %}

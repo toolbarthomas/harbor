@@ -9,9 +9,9 @@
 {% if svg_sprite is not empty %}
 
     <script>
-        {% include theme_path ~ "/node_modules/svg-sprite-injector/svg-sprite-injector.js" %}
+        {% include theme_path|default('./') ~ "/" ~ packages_path|default('node_modules/')|trim('/', 'right') ~ "/svg-sprite-injector/svg-sprite-injector.js" %}
 
-        svgSpriteInjector(svg_sprite, {
+        svgSpriteInjector("{{ svg_sprite }}", {
             revision: "{{ revision|default('now'|date('Y-m-d--H:i:s')) }}"
         });
     </script>

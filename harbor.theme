@@ -1,6 +1,11 @@
 <?php
 
 function harbor_preprocess_page(&$variables) {
-    // Add the current theme_path to our twig context
-    $variables['theme_path'] = base_path() . drupal_get_path('theme', 'harbor');
+    // Add the path of the base folder for our Drupal theme
+    $variables['theme_path'] = getenv('HARBOR_SRC_PATH') ?: base_path() . drupal_get_path('theme', 'harbor');
+
+    // Path to or custom external packages e.g. node_modules, vendor etc.
+    // We use this path for including the required external packages within our Twig documents.
+    // Harbor will resolve all packages to the /vendors folder within the theme root by default
+    $variables['packages_path'] = getenv('HARBOR_PACKAGES_PATH') ?: 'node_modules/';
 }

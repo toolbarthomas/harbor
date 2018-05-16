@@ -13,18 +13,5 @@
 {% set context = {
   stylesheets: [
     '/templates/dist/pages/front/stylesheets/index.css',
-    '/templates/dist/components/card/stylesheets/index.css',
-    '/templates/dist/components/menu/stylesheets/index.css'
   ]
 } %}
-
-
-{% block content %}
-  <div class="wrapper">
-    {% embed "@harbor/src/components/card/index.twig" %}
-      {% block card__main %}
-        {{ page.content }}
-      {% endblock %}
-    {% endembed %}
-  </div>
-{% endblock %}
