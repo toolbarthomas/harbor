@@ -1,11 +1,6 @@
-node_modules/
-bower_components/
-
-templates/dist/
+node_modules
+dist
 
 *.map
 *.log
 .env
-
-yarn.lock
-package-lock.json

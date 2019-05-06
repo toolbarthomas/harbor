@@ -21,31 +21,12 @@
   },
   "homepage": "https://github.com/toolbarthomas/harbor#readme",
   "devDependencies": {
-    "autoprefixer": "^8.4.1",
-    "chalk": "^2.4.1",
-    "cssnano": "^3.10.0",
-    "dotenv": "^5.0.1",
-    "gulp": "^3.9.1",
-    "gulp-filter": "^5.1.0",
-    "gulp-load-plugins": "^1.5.0",
-    "gulp-newer": "^1.4.0",
-    "gulp-postcss": "^7.0.1",
-    "gulp-rename": "^1.2.2",
-    "gulp-sass": "^4.0.1",
-    "gulp-sourcemaps": "^2.6.4",
-    "gulp-watch": "^5.0.0",
-    "merge-stream": "^1.0.1",
-    "node-normalize-scss": "^8.0.0",
-    "node-sass-glob-importer": "^5.1.2",
-    "postcss-reporter": "^5.0.0",
-    "run-sequence": "^2.2.1",
-    "stylelint": "^9.2.0",
-    "stylelint-config-recommended-scss": "^3.2.0",
-    "stylelint-scss": "^3.1.0"
-  },
-  "dependencies": {
-    "fg-loadcss": "^2.0.1",
-    "normalize.css": "^8.0.0",
-    "svg-sprite-injector": "^1.0.0"
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.4",
+    "@babel/preset-env": "^7.4.4",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-prettier": "^4.2.0",
+    "prettier": "^1.17.0"
   }
 }
