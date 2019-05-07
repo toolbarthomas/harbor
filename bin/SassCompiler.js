@@ -2,7 +2,7 @@ const { statSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const { dirname, join } = require('path');
 const mkdirp = require('mkdirp');
-const { renderSync } = require('node-sass');
+const { render } = require('node-sass');
 const globImporter = require('node-sass-glob-importer');
 
 const Logger = require('./common/Logger');
@@ -16,17 +16,11 @@ class SassCompiler {
       modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.scss`),
     };
 
-    Object.keys(this.cwd).forEach(directory => {
-      const baseDirectory = this.cwd[directory];
-
-      if (baseDirectory.length === 0) {
+    Object.keys(this.cwd).forEach(async directory => {
+      if (this.cwd[directory].length === 0) {
         Logger.info(`Cannot find any stylesheet witin ${join(this.config.THEME_SRC, directory)}`);
       } else {
-        Logger.info(`Compiling stylesheets within: ${join(this.config.THEME_SRC, directory)}`);
-
-        this.compile(baseDirectory);
-
-        Logger.success(`Done compiling within ${join(this.config.THEME_SRC, directory)}`);
+        await this.renderCwd(directory);
       }
     });
   }
@@ -34,47 +28,105 @@ class SassCompiler {
   /**
    * Compiles each entry Sass file within the defined baseDirectory.
    *
-   * @param {Array} baseDirectory The directory where each entry file
-   * should exist in.
+   * @param {String} directory Key name of the defined cwd Array.
+
    */
-  compile(baseDirectory) {
-    baseDirectory.forEach(entry => {
-      if (!statSync(entry).size) {
-        Logger.warning(`Skipping empty file: ${entry}`);
-      } else {
-        Logger.info(`Compiling: ${entry}`);
+  renderCwd(directory) {
+    const cwd = this.cwd[directory];
 
-        const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
+    // Keep track of the actual processing queue.
+    let renderQueue = 0;
 
-        const source = renderSync({
+    /**
+     * Use an adjustable limit in order to return the Promise Callback even if
+     * some files were not processed correctly.
+     */
+    let renderLimit = cwd.length;
+
+    Logger.info(`Compiling stylesheets within: ${join(this.config.THEME_SRC, directory)}`);
+
+    return new Promise(cb => {
+      cwd.forEach(async entry => {
+        if (!statSync(entry).size) {
+          Logger.warning(`Skipping empty file: ${entry}`);
+
+          renderLimit -= 1;
+        } else {
+          await this.render(entry);
+
+          renderQueue += 1;
+        }
+
+        /**
+         * Only return the Promise Callback after each entry file has been
+         * processed.
+         */
+        if (renderQueue >= renderLimit) {
+          Logger.success(`Done compiling within ${join(this.config.THEME_SRC, directory)}`);
+
+          cb();
+        }
+      });
+    });
+  }
+
+  render(entry) {
+    const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
+
+    Logger.info(`Compiling: ${entry}`);
+
+    return new Promise(cb => {
+      render(
+        {
           file: entry,
           outputStyle: 'compact',
           importer: globImporter(),
           includePaths: [this.config.THEME_SRC],
           sourceMap: this.config.THEME_DEVMODE,
           outFile: destination,
-        });
-
-        /**
-         * Create the destination directory before writing the source to
-         * the filesystem.
-         */
-        mkdirp(dirname(destination), error => {
+        },
+        async (error, result) => {
           if (error) {
-            Logger.error(error);
+            // Use console.log in favor of message() since nodemon only accepts the log method.
+            // eslint-disable-next-line no-console
+            console.log(
+              `Error at line: ${error.line}, column: ${error.column}.`,
+              error.message,
+              error.file
+            );
           }
 
-          // Write the actual css to the filesystem.
-          writeFileSync(destination.replace('.scss', '.css'), source.css.toString());
+          await this.writeFile(result, destination);
 
-          // Also write the map file if the development environment is active.
-          if (this.config.THEME_DEVMODE) {
-            writeFileSync(destination.replace('.scss', '.css.map'), source.map.toString());
-          }
+          cb();
+        }
+      );
+    });
+  }
 
-          Logger.success(`Successfully compiled: ${destination.replace('.scss', '.css')}`);
-        });
-      }
+  /**
+   * Create the destination directory before writing the source to
+   * the filesystem.
+   */
+  writeFile(result, destination) {
+    return new Promise(cb => {
+      mkdirp(dirname(destination), error => {
+        if (error) {
+          Logger.error(error);
+        }
+
+        // Write the actual css to the filesystem.
+        writeFileSync(destination.replace('.scss', '.css'), result.css.toString());
+
+        // Also write the map file if the development environment is active.
+        if (this.config.THEME_DEVMODE) {
+          writeFileSync(destination.replace('.scss', '.css.map'), result.map.toString());
+        }
+
+        Logger.success(`Successfully compiled: ${destination.replace('.scss', '.css')}`);
+
+        cb();
+      });
     });
   }
 }

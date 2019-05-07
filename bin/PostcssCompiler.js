@@ -1,4 +1,4 @@
-const { existsSync, statSync, readFileSync, writeFileSync } = require('fs');
+const { statSync, readFileSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const { dirname, join } = require('path');
 const mkdirp = require('mkdirp');
@@ -6,7 +6,7 @@ const { load } = require('module-config-loader');
 const postcss = require('postcss');
 const Logger = require('./common/Logger');
 
-class CssCompiler {
+class PostcssCompiler {
   init(config) {
     this.config = config;
 
@@ -18,46 +18,63 @@ class CssCompiler {
     this.postcssConfig = load('postcss.config.js');
 
     Object.keys(this.cwd).forEach(async directory => {
-      const baseDirectory = this.cwd[directory];
-
-      if (baseDirectory.length === 0) {
+      if (this.cwd[directory].length === 0) {
         Logger.info(`Cannot find any stylesheet witin ${join(this.config.THEME_SRC, directory)}`);
       } else {
-        Logger.info(`Compiling stylesheets within: ${join(this.config.THEME_SRC, directory)}`);
-
-        await this.compile(baseDirectory);
-
-        Logger.success(`Done compiling within ${join(this.config.THEME_SRC, directory)}`);
+        await this.processCwd(directory);
       }
     });
   }
 
   /**
-   * Compi;es each entry stylesheet within the defined baseDirectory.
+   * Process all stylesheets within the defined baseDirectory asynchronously.
    *
-   * @param {Array} baseDirectory The directory where each entry file
-   * should exist in.
+   * @param {String} directory Key name of the defined cwd Array.
    */
-  compile(baseDirectory) {
+  processCwd(directory) {
+    const cwd = this.cwd[directory];
+
+    // Keep track of the actual processing queue.
     let renderQueue = 0;
 
+    /**
+     * Use an adjustable limit in order to return the Promise Callback even if
+     * some files were not processed correctly.
+     */
+    let renderLimit = cwd.length;
+
+    Logger.info(`Compiling stylesheets within: ${join(this.config.THEME_SRC, directory)}`);
+
     return new Promise(cb => {
-      baseDirectory.forEach(async entry => {
+      cwd.forEach(async entry => {
         if (!statSync(entry).size) {
           Logger.warning(`Skipping empty file: ${entry}`);
+
+          renderLimit -= 1;
         } else {
           await this.process(entry);
 
           renderQueue += 1;
+        }
 
-          if (renderQueue >= baseDirectory.length) {
-            cb();
-          }
+        /**
+         * Only return the Promise Callback after each entry file has been
+         * processed.
+         */
+        if (renderQueue >= renderLimit) {
+          Logger.success(`Done compiling within ${join(this.config.THEME_SRC, directory)}`);
+
+          cb();
         }
       });
     });
   }
 
+  /**
+   * Process the defined stylesheet asynchronously.
+   *
+   * @param {String} entry The sourcepath of the actual stylesheet.
+   */
   process(entry) {
     const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
     const source = readFileSync(entry);
@@ -91,4 +108,4 @@ class CssCompiler {
   }
 }
 
-module.exports = CssCompiler;
+module.exports = PostcssCompiler;
