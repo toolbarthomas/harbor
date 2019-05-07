@@ -8,21 +8,23 @@ const Logger = require('./common/Logger');
  */
 class FileSync {
   constructor() {
-    this.defaultEntries = ['main/webfonts', 'main/vendor', 'main/images'];
+    this.defaultEntries = ['main/webfonts', 'main/vendor'];
   }
 
   init(config) {
-    this.cwd = relative(process.cwd(), config.THEME_SRC);
-    this.dist = relative(process.cwd(), config.THEME_DIST);
+    this.config = config;
+
+    this.cwd = relative(process.cwd(), this.config.THEME_SRC);
+    this.dist = relative(process.cwd(), this.config.THEME_DIST);
 
     // Get the optional defined resource paths to sync.
-    this.resourceEntries = FileSync.defineResourceEntries(config);
+    this.resourceEntries = this.defineResourceEntries();
 
     /**
      * Resolve all defined path and apply the globbing pattern to sync all files
      * within that directory.
      */
-    this.entries = FileSync.resolveEntries(this.defaultEntries.concat(this.resourceEntries));
+    this.entries = this.resolveEntries(this.defaultEntries.concat(this.resourceEntries));
 
     // Push the destination path
     this.entries.push(this.dist);
@@ -45,16 +47,14 @@ class FileSync {
   /**
    * Check if the defined resource path can be resolved form the cwd variable.
    * Also make sure if the actual path already has the working path defined.
-   *
-   * @param {Object} config The Harbor environment configuration.
    */
-  static defineResourceEntries(config) {
-    if (!config || !config.THEME_RESOURCES) {
+  defineResourceEntries() {
+    if (!this.config || !this.config.THEME_STATIC_DIRECTORIES) {
       return null;
     }
 
     // Filter out non-existing paths.
-    const entries = config.THEME_RESOURCES.split(',').map(t => {
+    const entries = this.config.THEME_STATIC_DIRECTORIES.split(',').map(t => {
       return t.trim();
     });
 
@@ -65,19 +65,22 @@ class FileSync {
    * Check if the working directory and the actual glob pattern are defined for
    * each existing entry path.
    *
-   * @param {String} cwd The path of the working directory.
    * @param {Array} entries Array with all existing paths to sync.
    */
-  static resolveEntries(cwd, entries) {
+  resolveEntries(entries) {
     let resolvedEntries = [...new Set(entries)];
+
+    // Exclude any empty entries.
+    resolvedEntries = resolvedEntries.filter(entry => {
+      return entry;
+    });
 
     // Make sure the path is relative to the cwd path.
     resolvedEntries = resolvedEntries.map(entry => {
-      if (entry) {
-        return String(entry).startsWith(cwd) ? entry : join(cwd, entry);
-      }
+      return String(entry).startsWith(this.cwd) ? entry : join(this.cwd, entry);
     });
 
+    // Make sure only existing entries are returned.
     resolvedEntries = resolvedEntries.filter(entry => {
       return existsSync(entry) ? entry : false;
     });

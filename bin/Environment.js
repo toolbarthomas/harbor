@@ -3,7 +3,7 @@ const { existsSync } = require('fs');
 const { resolve } = require('path');
 
 /**
- * Exposes the environment variables that has been defined
+ * Exposes the environment variables that have been defined
  * within the optional dotenv (.env) file.
  *
  * Harbor will define these environment variables and will fall back
@@ -17,7 +17,7 @@ class Environment {
       THEME_PORT: 8080,
       THEME_ENVIRONMENT: 'development',
       THEME_STYLEGUIDE_DIRECTORY: 'styleguide',
-      THEME_RESOURCES: [],
+      THEME_STATIC_DIRECTORIES: [],
     };
   }
 
