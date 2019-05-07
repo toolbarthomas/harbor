@@ -3,7 +3,7 @@ const Cleaner = require('./Cleaner');
 const CssCompiler = require('./CssCompiler');
 const Environment = require('./Environment');
 const FileSync = require('./FileSync');
-const JSCompiler = require('./JSCompiler');
+const JsCompiler = require('./JsCompiler');
 const Logger = require('./common/Logger');
 const Server = require('./Server');
 const SassCompiler = require('./SassCompiler');
@@ -18,7 +18,7 @@ class Harbor {
     this.CssCompiler = new CssCompiler();
     this.Environment = new Environment();
     this.FileSync = new FileSync();
-    this.JSCompiler = new JSCompiler();
+    this.JSCompiler = new JsCompiler();
     this.SassCompiler = new SassCompiler();
     this.Server = new Server();
   }
@@ -76,6 +76,7 @@ class Harbor {
    */
   stylesheets(config) {
     this.SassCompiler.init(config);
+    this.CssCompiler.init(config);
   }
 
   /**
@@ -84,7 +85,7 @@ class Harbor {
    * @param {Object} config The Harbor environment configuration object.
    */
   javascripts(config) {
-    this.JSCompiler.init(config);
+    this.JsCompiler.init(config);
   }
 
   /**

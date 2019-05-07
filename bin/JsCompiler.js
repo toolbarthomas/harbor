@@ -5,7 +5,7 @@ const mkdirp = require('mkdirp');
 const { dirname, join } = require('path');
 const Logger = require('./common/Logger');
 
-class JSCompiler {
+class JsCompiler {
   init(config) {
     this.config = config;
 
@@ -66,4 +66,4 @@ class JSCompiler {
   }
 }
 
-module.exports = JSCompiler;
+module.exports = JsCompiler;
