@@ -27,6 +27,8 @@ class FileSync {
     // Push the destination path
     this.entries.push(this.dist);
 
+    Logger.info('Starting filesync...');
+
     // Sync the actual files.
     copyfiles(
       this.entries,
@@ -35,7 +37,7 @@ class FileSync {
         up: 1,
       },
       () => {
-        Logger.success('FileSync Finished');
+        Logger.success('FileSync finished.');
       }
     );
   }
