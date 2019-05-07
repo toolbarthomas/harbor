@@ -14,6 +14,7 @@ class Harbor {
     this.Cleaner = new Cleaner();
     this.Environment = new Environment();
     this.FileSync = new FileSync();
+    this.Server = new Server();
   }
 
   /**
@@ -48,6 +49,10 @@ class Harbor {
 
   sync(config) {
     this.FileSync.init(config);
+  }
+
+  serve(config) {
+    this.Server.init(config);
   }
 }
 
