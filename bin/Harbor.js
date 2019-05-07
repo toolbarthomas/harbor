@@ -1,6 +1,7 @@
 const Argv = require('./Argv');
 const Cleaner = require('./Cleaner');
 const Environment = require('./Environment');
+const JSCompiler = require('./JSCompiler');
 const Logger = require('./common/Logger');
 const Server = require('./Server');
 const FileSync = require('./FileSync');
@@ -14,6 +15,7 @@ class Harbor {
     this.Cleaner = new Cleaner();
     this.Environment = new Environment();
     this.FileSync = new FileSync();
+    this.JSCompiler = new JSCompiler();
     this.Server = new Server();
   }
 
@@ -49,6 +51,10 @@ class Harbor {
 
   sync(config) {
     this.FileSync.init(config);
+  }
+
+  javascripts(config) {
+    this.JSCompiler.init(config);
   }
 
   serve(config) {
