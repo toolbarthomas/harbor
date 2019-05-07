@@ -34,6 +34,9 @@ class Environment {
       }
     });
 
+    // Enable DEVMODE flag if the current environment is set to 'development'.
+    parsed.THEME_DEVMODE = parsed.THEME_ENVIRONMENT === 'development';
+
     return parsed;
   }
 }
