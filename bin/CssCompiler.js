@@ -17,7 +17,7 @@ class CssCompiler {
 
     this.postcssConfig = load('postcss.config.js');
 
-    Object.keys(this.cwd).forEach(directory => {
+    Object.keys(this.cwd).forEach(async directory => {
       const baseDirectory = this.cwd[directory];
 
       if (baseDirectory.length === 0) {
@@ -25,7 +25,7 @@ class CssCompiler {
       } else {
         Logger.info(`Compiling stylesheets within: ${join(this.config.THEME_SRC, directory)}`);
 
-        this.compile(baseDirectory);
+        await this.compile(baseDirectory);
 
         Logger.success(`Done compiling within ${join(this.config.THEME_SRC, directory)}`);
       }
@@ -39,36 +39,54 @@ class CssCompiler {
    * should exist in.
    */
   compile(baseDirectory) {
-    baseDirectory.forEach(entry => {
-      if (!statSync(entry).size) {
-        Logger.warning(`Skipping empty file: ${entry}`);
-      } else {
-        const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
-        const source = readFileSync(entry);
+    let renderQueue = 0;
 
-        Logger.info(`Compiling: ${entry}`);
+    return new Promise(cb => {
+      baseDirectory.forEach(async entry => {
+        if (!statSync(entry).size) {
+          Logger.warning(`Skipping empty file: ${entry}`);
+        } else {
+          await this.process(entry);
 
-        postcss(this.postcssConfig.plugins)
-          .process(source, {
-            from: entry,
-          })
-          .then(result => {
-            result.warnings().forEach(warning => {
-              Logger.warning(warning.toString());
-            });
+          renderQueue += 1;
 
-            mkdirp(dirname(destination), error => {
-              if (error) {
-                Logger.error(error);
-              }
+          if (renderQueue >= baseDirectory.length) {
+            cb();
+          }
+        }
+      });
+    });
+  }
 
-              // Write the actual css to the filesystem.
-              writeFileSync(destination, result.css);
+  process(entry) {
+    const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
+    const source = readFileSync(entry);
 
-              Logger.success(`Successfully compiled: ${destination}`);
-            });
+    Logger.info(`Compiling: ${entry}`);
+
+    return new Promise(cb => {
+      postcss(this.postcssConfig.plugins)
+        .process(source, {
+          from: entry,
+        })
+        .then(result => {
+          result.warnings().forEach(warning => {
+            Logger.warning(warning.toString());
           });
-      }
+
+          mkdirp(dirname(destination), error => {
+            if (error) {
+              Logger.error(error);
+            }
+
+            // Write the actual css to the filesystem.
+            writeFileSync(destination, result.css);
+
+            Logger.success(`Successfully compiled: ${destination}`);
+
+            cb();
+          });
+        });
     });
   }
 }
