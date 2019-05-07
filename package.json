@@ -4,7 +4,8 @@
   "description": "Simple boilerplate for Drupal 8",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "node ./index.js"
   },
   "repository": {
     "type": "git",
@@ -24,9 +25,17 @@
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
+    "browser-sync": "^2.26.5",
+    "chalk": "^2.4.2",
+    "copyfiles": "^2.1.0",
+    "dotenv": "^8.0.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-config-prettier": "^4.2.0",
-    "prettier": "^1.17.0"
+    "eslint-plugin-import": "^2.17.2",
+    "eslint-plugin-prettier": "^3.0.1",
+    "log-symbols": "^3.0.0",
+    "prettier": "^1.17.0",
+    "rimraf": "^2.6.3"
   }
 }

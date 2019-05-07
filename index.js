@@ -1,3 +1,3 @@
-const Harbor = './bin/Harbor';
+const Harbor = require('./bin/Harbor');
 
-console.log(Harbor.Environment.config);
+Harbor.init();
