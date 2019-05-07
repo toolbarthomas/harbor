@@ -44,22 +44,22 @@ class JSCompiler {
       } else {
         Logger.info(`Transpiling: ${entry}`);
 
-        this.source = readFileSync(entry, 'utf8');
-        this.transpiledSource = transform(this.source, { presets: ['@babel/env'] });
-        this.destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
+        const source = readFileSync(entry, 'utf8');
+        const transpiledSource = transform(source, { presets: ['@babel/env'] });
+        const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
 
         /**
          * Create the destination directory before writing the source to
          * the filesystem.
          */
-        mkdirp(dirname(this.destination), error => {
+        mkdirp(dirname(destination), error => {
           if (error) {
             Logger.error(error);
           }
 
-          writeFileSync(this.destination, this.transpiledSource.code);
+          writeFileSync(destination, transpiledSource.code);
 
-          Logger.success(`Successfully transpiled: ${this.destination}`);
+          Logger.success(`Successfully transpiled: ${destination}`);
         });
       }
     });

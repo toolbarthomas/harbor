@@ -1,5 +1,6 @@
 const Argv = require('./Argv');
 const Cleaner = require('./Cleaner');
+const CssCompiler = require('./CssCompiler');
 const Environment = require('./Environment');
 const FileSync = require('./FileSync');
 const JSCompiler = require('./JSCompiler');
@@ -14,6 +15,7 @@ class Harbor {
   constructor() {
     this.Argv = new Argv();
     this.Cleaner = new Cleaner();
+    this.CssCompiler = new CssCompiler();
     this.Environment = new Environment();
     this.FileSync = new FileSync();
     this.JSCompiler = new JSCompiler();

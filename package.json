@@ -25,6 +25,7 @@
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
+    "autoprefixer": "^9.5.1",
     "browser-sync": "^2.26.5",
     "chalk": "^2.4.2",
     "copyfiles": "^2.1.0",
@@ -35,6 +36,11 @@
     "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-prettier": "^3.0.1",
     "log-symbols": "^3.0.0",
+    "module-config-loader": "^0.2.0",
+    "node-sass": "^4.12.0",
+    "node-sass-glob-importer": "^5.3.1",
+    "postcss": "^7.0.16",
+    "postcss-preset-env": "^6.6.0",
     "prettier": "^1.17.0",
     "rimraf": "^2.6.3"
   }
