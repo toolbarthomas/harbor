@@ -48,7 +48,7 @@ class JSCompiler {
          * Create the destination directory before writing the source to
          * the filesystem.
          */
-        mkdirp(dirname(this.destination), (error) => {
+        mkdirp(dirname(this.destination), error => {
           if (error) {
             Logger.error(error);
           }
