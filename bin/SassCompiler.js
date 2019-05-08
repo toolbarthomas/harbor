@@ -29,7 +29,7 @@ class SassCompiler {
             `Cannot find any stylesheets witin ${join(this.config.THEME_SRC, directory)}`
           );
         } else {
-          await this.renderCwd(directory);
+          await this.renderCwd(cwd);
         }
 
         queue += 1;
@@ -42,14 +42,12 @@ class SassCompiler {
   }
 
   /**
-   * Compiles each entry Sass file within the defined baseDirectory.
+   * Compiles each entry Sass file within the defined cwd asynchronously.
    *
-   * @param {String} directory Key name of the defined cwd Array.
+   * @param {Array} cwd The actual array to process.
    */
-  renderCwd(directory) {
+  renderCwd(cwd) {
     return new Promise(cb => {
-      const cwd = this.cwd[directory];
-
       // Keep track of the actual processing queue.
       let queue = 0;
 

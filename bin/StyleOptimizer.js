@@ -3,7 +3,7 @@ const cssnano = require('cssnano');
 const { readFileSync, statSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const mkdirp = require('mkdirp');
-const { dirname, join } = require('path');
+const { dirname } = require('path');
 const postcss = require('postcss');
 const combineDuplicateSelectors = require('postcss-combine-duplicated-selectors');
 const Logger = require('./common/Logger');
@@ -37,7 +37,7 @@ class StyleOptimizer {
         const cwd = this.cwd[directory];
 
         if (cwd.length > 0) {
-          await this.optimizeCwd(directory);
+          await this.optimizeCwd(cwd);
         }
 
         queue += 1;
@@ -52,12 +52,10 @@ class StyleOptimizer {
   /**
    * Optimize each stylesheet within the defined baseDirectory.
    *
-   * @param {String} directory Key name of the defined cwd Array.
+   * @param {Array} cwd The actual array to process.
    */
-  optimizeCwd(directory) {
+  optimizeCwd(cwd) {
     return new Promise(cb => {
-      const cwd = this.cwd[directory];
-
       // Keep track of the actual processing queue.
       let queue = 0;
 

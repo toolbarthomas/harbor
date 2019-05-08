@@ -30,7 +30,7 @@ class PostcssCompiler {
             `Cannot find any stylesheet witin ${join(this.config.THEME_SRC, directory)}`
           );
         } else {
-          await this.processCwd(directory);
+          await this.processCwd(cwd);
         }
 
         queue += 1;
@@ -43,14 +43,12 @@ class PostcssCompiler {
   }
 
   /**
-   * Process all stylesheets within the defined baseDirectory asynchronously.
+   * Process all stylesheets within the defined cwd asynchronously.
    *
-   * @param {String} directory Key name of the defined cwd Array.
+   * @param {Array} cwd The actual array to process.
    */
-  processCwd(directory) {
+  processCwd(cwd) {
     return new Promise(cb => {
-      const cwd = this.cwd[directory];
-
       // Keep track of the actual processing queue.
       let queue = 0;
 
