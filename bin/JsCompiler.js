@@ -44,7 +44,7 @@ class JsCompiler {
       } else {
         Logger.info(`Transpiling: ${entry}`);
 
-        const source = readFileSync(entry, 'utf8');
+        const source = readFileSync(entry);
         const transpiledSource = transform(source, { presets: ['@babel/env'] });
         const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
 
