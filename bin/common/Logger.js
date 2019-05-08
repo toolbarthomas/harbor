@@ -8,11 +8,15 @@ class Logger {
    * Prints out an error message & exit the current process.
    *
    * @param {String|Array} message The message to display.
+   * @param {Boolean} keepAlive Onlu exit running Node process but
+   * don't kill the process.
    */
-  error(message) {
+  error(message, keepAlive) {
     Logger.outputMessages(message, 'error', 'error');
 
-    process.exit(1);
+    if (!keepAlive) {
+      process.exit(1);
+    }
   }
 
   /**
