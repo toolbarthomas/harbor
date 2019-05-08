@@ -29,7 +29,6 @@ class SassCompiler {
             `Cannot find any stylesheets witin ${join(this.config.THEME_SRC, directory)}`
           );
         } else {
-          Logger.info(`Compiling stylesheets within: ${join(this.config.THEME_SRC, directory)}`);
           await this.renderCwd(directory);
         }
 
@@ -37,11 +36,6 @@ class SassCompiler {
 
         if (queue >= baseDirectories.length) {
           cb();
-
-          // Only output a success message if any files have been processed.
-          if (cwd.length > 0) {
-            Logger.success(`Done compiling within ${join(this.config.THEME_SRC, directory)}`);
-          }
         }
       });
     });
@@ -51,7 +45,6 @@ class SassCompiler {
    * Compiles each entry Sass file within the defined baseDirectory.
    *
    * @param {String} directory Key name of the defined cwd Array.
-
    */
   renderCwd(directory) {
     return new Promise(cb => {
@@ -63,11 +56,11 @@ class SassCompiler {
       cwd.forEach(async entry => {
         if (!statSync(entry).size) {
           Logger.warning(`Skipping empty file: ${entry}`);
-          queue += 1;
         } else {
           await this.renderFile(entry);
-          queue += 1;
         }
+
+        queue += 1;
 
         /**
          * Only return the Promise Callback after each entry file has been
@@ -80,6 +73,11 @@ class SassCompiler {
     });
   }
 
+  /**
+   * Compile the given entry Sass file and prepare it for the Filesystem.
+   *
+   * @param {String} entry Path to the source stylesheet to render.
+   */
   renderFile(entry) {
     return new Promise(cb => {
       const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
@@ -133,7 +131,7 @@ class SassCompiler {
           writeFileSync(destination.replace('.scss', '.css.map'), result.map.toString());
         }
 
-        Logger.success(`Successfully compiled: ${destination.replace('.scss', '.css')}`);
+        Logger.success(`Done compiling: ${destination.replace('.scss', '.css')}`);
 
         cb();
       });

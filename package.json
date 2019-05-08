@@ -29,6 +29,7 @@
     "browser-sync": "^2.26.5",
     "chalk": "^2.4.2",
     "copyfiles": "^2.1.0",
+    "cssnano": "^4.1.10",
     "dotenv": "^8.0.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^13.1.0",
@@ -40,6 +41,8 @@
     "node-sass": "^4.12.0",
     "node-sass-glob-importer": "^5.3.1",
     "postcss": "^7.0.16",
+    "postcss-combine-duplicated-selectors": "^7.0.0",
+    "postcss-nested": "^4.1.2",
     "postcss-preset-env": "^6.6.0",
     "prettier": "^1.17.0",
     "rimraf": "^2.6.3"

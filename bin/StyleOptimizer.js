@@ -1,36 +1,43 @@
+const autoprefixer = require('autoprefixer');
+const cssnano = require('cssnano');
 const { readFileSync, statSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const mkdirp = require('mkdirp');
-const { load } = require('module-config-loader');
 const { dirname, join } = require('path');
 const postcss = require('postcss');
+const combineDuplicateSelectors = require('postcss-combine-duplicated-selectors');
 const Logger = require('./common/Logger');
 
-class PostcssCompiler {
+class StyleOptimizer {
   init(config) {
     return new Promise(cb => {
       this.config = config;
 
       this.cwd = {
-        main: sync(`${this.config.THEME_SRC}/main/stylesheets/*.css`),
-        modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.css`),
+        main: sync(`${config.THEME_DIST}/main/stylesheets/*.css`),
+        modules: sync(`${config.THEME_DIST}/main/stylesheets/*.css`),
       };
 
       const baseDirectories = Object.keys(this.cwd);
 
-      this.postcssConfig = load('postcss.config.js');
+      this.postcssConfig = {
+        plugins: [autoprefixer()],
+      };
+
+      if (!config.THEME_DEVMODE) {
+        this.postcssConfig.plugins.push(
+          combineDuplicateSelectors({ removeDuplicatedProperties: true })
+        );
+        this.postcssConfig.plugins.push(cssnano({ mergeLonghand: false }));
+      }
 
       let queue = 0;
 
       baseDirectories.forEach(async directory => {
         const cwd = this.cwd[directory];
 
-        if (cwd.length === 0) {
-          Logger.warning(
-            `Cannot find any stylesheet witin ${join(this.config.THEME_SRC, directory)}`
-          );
-        } else {
-          await this.processCwd(directory);
+        if (cwd.length > 0) {
+          await this.optimizeCwd(directory);
         }
 
         queue += 1;
@@ -43,11 +50,11 @@ class PostcssCompiler {
   }
 
   /**
-   * Process all stylesheets within the defined baseDirectory asynchronously.
+   * Optimize each stylesheet within the defined baseDirectory.
    *
    * @param {String} directory Key name of the defined cwd Array.
    */
-  processCwd(directory) {
+  optimizeCwd(directory) {
     return new Promise(cb => {
       const cwd = this.cwd[directory];
 
@@ -55,13 +62,11 @@ class PostcssCompiler {
       let queue = 0;
 
       cwd.forEach(async entry => {
-        if (!statSync(entry).size) {
-          Logger.warning(`Skipping empty file: ${entry}`);
-          queue += 1;
-        } else {
-          await this.processFile(entry);
-          queue += 1;
+        if (statSync(entry).size) {
+          await this.optimizeFile(entry);
         }
+
+        queue += 1;
 
         /**
          * Only return the Promise Callback after each entry file has been
@@ -75,18 +80,17 @@ class PostcssCompiler {
   }
 
   /**
-   * Process the defined stylesheet asynchronously.
+   * Optimize the stylesheet from the defined entry path.
    *
-   * @param {String} entry The sourcepath of the actual stylesheet.
+   * @param {String} entry Path of the stylesheet to optimize.
    */
-  processFile(entry) {
+  optimizeFile(entry) {
     return new Promise(cb => {
-      const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
       const source = readFileSync(entry);
 
-      Logger.info(`Compiling: ${entry}`);
+      Logger.info(`Optimizing: ${entry}`);
 
-      postcss(this.postcssConfig.plugins)
+      postcss(this.postcssConfig)
         .process(source, {
           from: entry,
         })
@@ -94,16 +98,15 @@ class PostcssCompiler {
           result.warnings().forEach(warning => {
             Logger.warning(warning.toString());
           });
-
-          mkdirp(dirname(destination), async error => {
+          mkdirp(dirname(entry), async error => {
             if (error) {
               Logger.error(error);
             }
 
             // Write the actual css to the filesystem.
-            writeFileSync(destination, result.css);
+            writeFileSync(`${entry}`, result.css);
 
-            Logger.success(`Done compiling: ${destination}`);
+            Logger.success(`Successfully optimized: ${entry}`);
 
             cb();
           });
@@ -112,4 +115,4 @@ class PostcssCompiler {
   }
 }
 
-module.exports = PostcssCompiler;
+module.exports = StyleOptimizer;

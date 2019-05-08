@@ -5,8 +5,9 @@ const Environment = require('./Environment');
 const FileSync = require('./FileSync');
 const JsCompiler = require('./JsCompiler');
 const Logger = require('./common/Logger');
-const Server = require('./Server');
 const SassCompiler = require('./SassCompiler');
+const Server = require('./Server');
+const StyleOptimizer = require('./StyleOptimizer');
 
 /**
  * Factory setup for Harbor.
@@ -21,6 +22,7 @@ class Harbor {
     this.JSCompiler = new JsCompiler();
     this.SassCompiler = new SassCompiler();
     this.Server = new Server();
+    this.StyleOptimizer = new StyleOptimizer();
   }
 
   /**
@@ -79,6 +81,7 @@ class Harbor {
   async stylesheets(config) {
     await this.SassCompiler.init(config);
     await this.PostcssCompiler.init(config);
+    await this.StyleOptimizer.init(config);
   }
 
   /**
