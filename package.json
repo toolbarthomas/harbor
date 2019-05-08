@@ -36,6 +36,8 @@
     "eslint-config-prettier": "^4.2.0",
     "eslint-plugin-import": "^2.17.2",
     "eslint-plugin-prettier": "^3.0.1",
+    "imagemin": "^6.1.0",
+    "imagemin-svgo": "^7.0.0",
     "log-symbols": "^3.0.0",
     "module-config-loader": "^0.2.0",
     "node-sass": "^4.12.0",
@@ -45,6 +47,7 @@
     "postcss-nested": "^4.1.2",
     "postcss-preset-env": "^6.6.0",
     "prettier": "^1.17.0",
-    "rimraf": "^2.6.3"
-  }
+    "rimraf": "^2.6.3",
+    "svgstore": "^3.0.0-2"
+  },
 }

@@ -8,6 +8,7 @@ const Logger = require('./common/Logger');
 const SassCompiler = require('./SassCompiler');
 const Server = require('./Server');
 const StyleOptimizer = require('./StyleOptimizer');
+const SvgSpriteCompiler = require('./SvgSpriteCompiler');
 
 /**
  * Factory setup for Harbor.
@@ -23,6 +24,7 @@ class Harbor {
     this.SassCompiler = new SassCompiler();
     this.Server = new Server();
     this.StyleOptimizer = new StyleOptimizer();
+    this.SvgSpriteCompiler = new SvgSpriteCompiler();
   }
 
   /**
@@ -91,6 +93,15 @@ class Harbor {
    */
   javascripts(config) {
     this.JsCompiler.init(config);
+  }
+
+  /**
+   * Harbor task to transform the source images like sprites.
+   *
+   * @param {Object} config The Harbor environment configuration object.
+   */
+  async images(config) {
+    await this.SvgSpriteCompiler.init(config);
   }
 
   /**
