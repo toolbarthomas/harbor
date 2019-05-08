@@ -37,13 +37,15 @@ class Harbor {
       const { config } = this.Environment;
 
       // Run all defined tasks in a Synchronous order.
-      tasks.forEach(name => {
+      tasks.forEach(async name => {
         if (typeof this[name] === 'function') {
           Logger.info(`Running task: ${name}`);
 
-          this[name](config);
+          await this[name](config);
+
+          Logger.success(`Done - ${name}`);
         } else {
-          Logger.warning(`Skipping undefined task: ${name}.`);
+          Logger.warning(`Finished: ${name}.`);
         }
       });
     }
@@ -74,9 +76,9 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  stylesheets(config) {
-    this.SassCompiler.init(config);
-    this.CssCompiler.init(config);
+  async stylesheets(config) {
+    await this.SassCompiler.init(config);
+    await this.PostcssCompiler.init(config);
   }
 
   /**

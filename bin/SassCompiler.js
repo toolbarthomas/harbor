@@ -9,19 +9,41 @@ const Logger = require('./common/Logger');
 
 class SassCompiler {
   init(config) {
-    this.config = config;
+    return new Promise(cb => {
+      this.config = config;
 
-    this.cwd = {
-      main: sync(`${this.config.THEME_SRC}/main/stylesheets/*.scss`),
-      modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.scss`),
-    };
+      this.cwd = {
+        main: sync(`${this.config.THEME_SRC}/main/stylesheets/*.scss`),
+        modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.scss`),
+      };
 
-    Object.keys(this.cwd).forEach(async directory => {
-      if (this.cwd[directory].length === 0) {
-        Logger.info(`Cannot find any stylesheet witin ${join(this.config.THEME_SRC, directory)}`);
-      } else {
-        await this.renderCwd(directory);
-      }
+      const baseDirectories = Object.keys(this.cwd);
+
+      let queue = 0;
+
+      baseDirectories.forEach(async directory => {
+        const cwd = this.cwd[directory];
+
+        if (cwd.length === 0) {
+          Logger.warning(
+            `Cannot find any stylesheets witin ${join(this.config.THEME_SRC, directory)}`
+          );
+        } else {
+          Logger.info(`Compiling stylesheets within: ${join(this.config.THEME_SRC, directory)}`);
+          await this.renderCwd(directory);
+        }
+
+        queue += 1;
+
+        if (queue >= baseDirectories.length) {
+          cb();
+
+          // Only output a success message if any files have been processed.
+          if (cwd.length > 0) {
+            Logger.success(`Done compiling within ${join(this.config.THEME_SRC, directory)}`);
+          }
+        }
+      });
     });
   }
 
@@ -32,50 +54,38 @@ class SassCompiler {
 
    */
   renderCwd(directory) {
-    const cwd = this.cwd[directory];
-
-    // Keep track of the actual processing queue.
-    let renderQueue = 0;
-
-    /**
-     * Use an adjustable limit in order to return the Promise Callback even if
-     * some files were not processed correctly.
-     */
-    let renderLimit = cwd.length;
-
-    Logger.info(`Compiling stylesheets within: ${join(this.config.THEME_SRC, directory)}`);
-
     return new Promise(cb => {
+      const cwd = this.cwd[directory];
+
+      // Keep track of the actual processing queue.
+      let queue = 0;
+
       cwd.forEach(async entry => {
         if (!statSync(entry).size) {
           Logger.warning(`Skipping empty file: ${entry}`);
-
-          renderLimit -= 1;
+          queue += 1;
         } else {
-          await this.render(entry);
-
-          renderQueue += 1;
+          await this.renderFile(entry);
+          queue += 1;
         }
 
         /**
          * Only return the Promise Callback after each entry file has been
          * processed.
          */
-        if (renderQueue >= renderLimit) {
-          Logger.success(`Done compiling within ${join(this.config.THEME_SRC, directory)}`);
-
+        if (queue >= cwd.length) {
           cb();
         }
       });
     });
   }
 
-  render(entry) {
-    const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
-
-    Logger.info(`Compiling: ${entry}`);
-
+  renderFile(entry) {
     return new Promise(cb => {
+      const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
+
+      Logger.info(`Compiling: ${entry}`);
+
       render(
         {
           file: entry,

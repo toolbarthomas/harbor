@@ -8,21 +8,41 @@ const Logger = require('./common/Logger');
 
 class PostcssCompiler {
   init(config) {
-    this.config = config;
+    return new Promise(cb => {
+      this.config = config;
 
-    this.cwd = {
-      main: sync(`${this.config.THEME_SRC}/main/stylesheets/*.css`),
-      modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.css`),
-    };
+      this.cwd = {
+        main: sync(`${this.config.THEME_SRC}/main/stylesheets/*.css`),
+        modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.css`),
+      };
 
-    this.postcssConfig = load('postcss.config.js');
+      const baseDirectories = Object.keys(this.cwd);
 
-    Object.keys(this.cwd).forEach(async directory => {
-      if (this.cwd[directory].length === 0) {
-        Logger.info(`Cannot find any stylesheet witin ${join(this.config.THEME_SRC, directory)}`);
-      } else {
-        await this.processCwd(directory);
-      }
+      this.postcssConfig = load('postcss.config.js');
+
+      let queue = 0;
+
+      baseDirectories.forEach(async directory => {
+        const cwd = this.cwd[directory];
+
+        if (cwd.length === 0) {
+          Logger.warning(`Cannot find any stylesheet witin ${join(this.config.THEME_SRC, directory)}`);
+        } else {
+          Logger.info(`Compiling stylesheets within: ${join(this.config.THEME_SRC, directory)}`);
+          await this.processCwd(directory);
+        }
+
+        queue += 1;
+
+        if (queue >= baseDirectories.length) {
+          cb();
+
+          // Only ouput a success message if any files have been processed.
+          if (cwd.length > 0) {
+            Logger.success(`Done compiling within ${join(this.config.THEME_SRC, directory)}`);
+          }
+        }
+      });
     });
   }
 
@@ -32,38 +52,26 @@ class PostcssCompiler {
    * @param {String} directory Key name of the defined cwd Array.
    */
   processCwd(directory) {
-    const cwd = this.cwd[directory];
-
-    // Keep track of the actual processing queue.
-    let renderQueue = 0;
-
-    /**
-     * Use an adjustable limit in order to return the Promise Callback even if
-     * some files were not processed correctly.
-     */
-    let renderLimit = cwd.length;
-
-    Logger.info(`Compiling stylesheets within: ${join(this.config.THEME_SRC, directory)}`);
-
     return new Promise(cb => {
+      const cwd = this.cwd[directory];
+
+      // Keep track of the actual processing queue.
+      let queue = 0;
+
       cwd.forEach(async entry => {
         if (!statSync(entry).size) {
           Logger.warning(`Skipping empty file: ${entry}`);
-
-          renderLimit -= 1;
+          queue += 1;
         } else {
-          await this.process(entry);
-
-          renderQueue += 1;
+          await this.processFile(entry);
+          queue += 1;
         }
 
         /**
          * Only return the Promise Callback after each entry file has been
          * processed.
          */
-        if (renderQueue >= renderLimit) {
-          Logger.success(`Done compiling within ${join(this.config.THEME_SRC, directory)}`);
-
+        if (queue >= cwd.length) {
           cb();
         }
       });
@@ -75,13 +83,13 @@ class PostcssCompiler {
    *
    * @param {String} entry The sourcepath of the actual stylesheet.
    */
-  process(entry) {
-    const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
-    const source = readFileSync(entry);
-
-    Logger.info(`Compiling: ${entry}`);
-
+  processFile(entry) {
     return new Promise(cb => {
+      const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
+      const source = readFileSync(entry);
+
+      Logger.info(`Compiling: ${entry}`);
+
       postcss(this.postcssConfig.plugins)
         .process(source, {
           from: entry,
@@ -91,13 +99,13 @@ class PostcssCompiler {
             Logger.warning(warning.toString());
           });
 
-          mkdirp(dirname(destination), error => {
+          mkdirp(dirname(destination), async error => {
             if (error) {
               Logger.error(error);
             }
 
             // Write the actual css to the filesystem.
-            writeFileSync(destination, result.css);
+            await writeFileSync(destination, result.css);
 
             Logger.success(`Successfully compiled: ${destination}`);
 
