@@ -1,7 +1,0 @@
-main:
-  version: VERSION
-  css:
-    base:
-      templates/dist/main/stylesheets/index.css: {}
-  js:
-    templates/dist/main/javascripts/index.js: {}
