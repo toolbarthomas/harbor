@@ -15,7 +15,7 @@ class StyleOptimizer {
 
       this.cwd = {
         main: sync(`${config.THEME_DIST}/main/stylesheets/*.css`),
-        modules: sync(`${config.THEME_DIST}/main/stylesheets/*.css`),
+        modules: sync(`${config.THEME_DIST}/modules/*/*/*.css`),
       };
 
       const baseDirectories = Object.keys(this.cwd);
