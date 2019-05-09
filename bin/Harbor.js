@@ -1,13 +1,13 @@
-const Argv = require('./bin/Argv');
-const Cleaner = require('./bin/Cleaner');
-const Environment = require('./bin/Environment');
-const FileSync = require('./bin/FileSync');
-const JsCompiler = require('./bin/JsCompiler');
-const Logger = require('./bin/common/Logger');
-const SassCompiler = require('./bin/SassCompiler');
-const Server = require('./bin/Server');
-const StyleOptimizer = require('./bin/StyleOptimizer');
-const SvgSpriteCompiler = require('./bin/SvgSpriteCompiler');
+const Argv = require('./Argv');
+const Cleaner = require('./Cleaner');
+const Environment = require('./Environment');
+const FileSync = require('./FileSync');
+const JsCompiler = require('./JsCompiler');
+const Logger = require('./common/Logger');
+const SassCompiler = require('./SassCompiler');
+const Server = require('./Server');
+const StyleOptimizer = require('./StyleOptimizer');
+const SvgSpriteCompiler = require('./SvgSpriteCompiler');
 
 /**
  * Factory setup for Harbor.

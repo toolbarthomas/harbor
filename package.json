@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Boilerplate for Drupal Themes",
   "main": "./Harbor.js",
   "scripts": {
@@ -70,9 +70,6 @@
     "stylelint-config-recommended-scss": "^3.3.0",
     "stylelint-scss": "^3.6.1",
     "svgstore": "^3.0.0-2"
-  },
-  "bin": {
-    "harbor": "Argv.js"
   },
   "devDependencies": {}
 }
