@@ -16,7 +16,7 @@ class Environment {
       THEME_DIST: './dist',
       THEME_PORT: 8080,
       THEME_ENVIRONMENT: 'development',
-      THEME_STYLEGUIDE_DIRECTORY: 'styleguide',
+      THEME_STYLEGUIDE_DIRECTORY: './styleguide',
       THEME_STATIC_DIRECTORIES: '',
     };
   }
