@@ -53,11 +53,11 @@ class FileSync {
     const packagePath = resolve(process.cwd(), 'package.json');
 
     if (existsSync(packagePath)) {
-      const { fileSyncDirectories } = JSON.parse(readFileSync(packagePath));
+      const { harbor } = JSON.parse(readFileSync(packagePath));
 
-      if (fileSyncDirectories) {
-        if (Array.isArray(fileSyncDirectories)) {
-          this.resourceEntries = fileSyncDirectories;
+      if (harbor && harbor.fileSyncDirectories) {
+        if (Array.isArray(harbor.fileSyncDirectories)) {
+          this.resourceEntries = harbor.fileSyncDirectories;
         }
       }
     }
