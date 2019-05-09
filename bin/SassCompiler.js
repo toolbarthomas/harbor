@@ -1,4 +1,3 @@
-const breakpoints = require('drupal-breakpoints-scss');
 const { statSync, readFileSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const { basename, dirname } = require('path');
@@ -44,11 +43,6 @@ class SassCompiler {
 
       let queue = 0;
 
-      /**
-       * Prepare Drupal specific utility functions for Sass.
-       */
-      this.prepareDrupalUtilities();
-
       baseDirectories.forEach(async directory => {
         const cwd = this.cwd[directory];
 
@@ -63,22 +57,6 @@ class SassCompiler {
         }
       });
     });
-  }
-
-  /**
-   * Prepares Drupal specific utility functions for Sass.
-   */
-  prepareDrupalUtilities() {
-    const breakpointConfig = sync(`${process.cwd()}/*.breakpoints.yml`);
-
-    if (breakpointConfig.length > 0 && statSync(breakpointConfig[0]).size) {
-      const source = breakpoints.read(breakpointConfig[0], {
-        vars: true,
-        varsPrefix: 'breakpoint--',
-      });
-
-      this.commonData += source.read().toString();
-    }
   }
 
   /**
@@ -171,11 +149,10 @@ class SassCompiler {
 
         render(
           {
-            file: null,
-            data: this.commonData + readFileSync(entry).toString(),
+            file: entry,
             outputStyle: 'compact',
             importer: globImporter(),
-            includePaths: [dirname(entry), this.config.THEME_SRC],
+            includePaths: [this.config.THEME_SRC],
             sourceMap: this.config.THEME_DEVMODE,
             outFile: destination,
           },

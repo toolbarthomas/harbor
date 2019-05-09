@@ -28,10 +28,7 @@ class SvgSpriteCompiler {
         if (cwd.length > 0) {
           await this.prepareCwd(cwd);
           await this.processCwd(cwd);
-          console.log('done');
         }
-
-        console.log('plus');
 
         queue += 1;
 

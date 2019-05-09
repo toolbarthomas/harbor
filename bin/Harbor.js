@@ -1,6 +1,5 @@
 const Argv = require('./Argv');
 const Cleaner = require('./Cleaner');
-const PostcssCompiler = require('./PostcssCompiler');
 const Environment = require('./Environment');
 const FileSync = require('./FileSync');
 const JsCompiler = require('./JsCompiler');
@@ -17,10 +16,9 @@ class Harbor {
   constructor() {
     this.Argv = new Argv();
     this.Cleaner = new Cleaner();
-    this.PostcssCompiler = new PostcssCompiler();
     this.Environment = new Environment();
     this.FileSync = new FileSync();
-    this.JSCompiler = new JsCompiler();
+    this.JsCompiler = new JsCompiler();
     this.SassCompiler = new SassCompiler();
     this.Server = new Server();
     this.StyleOptimizer = new StyleOptimizer();
@@ -82,7 +80,6 @@ class Harbor {
    */
   async stylesheets(config) {
     await this.SassCompiler.init(config);
-    await this.PostcssCompiler.init(config);
     await this.StyleOptimizer.init(config);
   }
 

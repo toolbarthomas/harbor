@@ -2,17 +2,22 @@ const { readFileSync, statSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const mkdirp = require('mkdirp');
 const { load } = require('module-config-loader');
-const { dirname, join } = require('path');
+const { dirname } = require('path');
 const postcss = require('postcss');
+const stylelint = require('stylelint');
 const Logger = require('./common/Logger');
 
 class PostcssCompiler {
+  constructor() {
+    this.styleLintError = false;
+  }
+
   init(config) {
     return new Promise(cb => {
       this.config = config;
 
       this.cwd = {
-        main: sync(`${this.config.THEME_SRC}/main/stylesheets/*.css`),
+        main: sync(`${this.config.THEME_SRC} / main / stylesheets/*.css`),
         modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.css`),
       };
 
@@ -20,16 +25,24 @@ class PostcssCompiler {
 
       this.postcssConfig = load('postcss.config.js');
 
+      if (Array.isArray(this.postcssConfig.plugins)) {
+        this.postcssConfig.plugins.push(stylelint());
+      } else if (this.postcssConfig.plugins instanceof Object) {
+        this.postcssConfig.plugins.stylelint = {};
+      }
+
+      // Include the stylelinter.
+      this.postcssConfig = Object.assign(this.postcssConfig, {
+        plugins: [],
+        extends: ['stylelint-config-recommended', 'stylelint'],
+      });
+
       let queue = 0;
 
       baseDirectories.forEach(async directory => {
         const cwd = this.cwd[directory];
 
-        if (cwd.length === 0) {
-          Logger.warning(
-            `Cannot find any stylesheet witin ${join(this.config.THEME_SRC, directory)}`
-          );
-        } else {
+        if (cwd.length > 0) {
           await this.processCwd(cwd);
         }
 
@@ -55,11 +68,11 @@ class PostcssCompiler {
       cwd.forEach(async entry => {
         if (!statSync(entry).size) {
           Logger.warning(`Skipping empty file: ${entry}`);
-          queue += 1;
         } else {
           await this.processFile(entry);
-          queue += 1;
         }
+
+        queue += 1;
 
         /**
          * Only return the Promise Callback after each entry file has been
@@ -96,12 +109,12 @@ class PostcssCompiler {
           mkdirp(dirname(destination), async error => {
             if (error) {
               Logger.error(error);
+            } else {
+              // Write the actual css to the filesystem.
+              writeFileSync(destination, result.css);
+
+              Logger.success(`Done compiling: ${destination}`);
             }
-
-            // Write the actual css to the filesystem.
-            writeFileSync(destination, result.css);
-
-            Logger.success(`Done compiling: ${destination}`);
 
             cb();
           });
