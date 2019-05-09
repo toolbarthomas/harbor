@@ -1,8 +1,8 @@
 {
-  "name": "harbor",
-  "version": "0.4.0",
+  "name": "@toolbarthomas/harbor",
+  "version": "0.4.1",
   "description": "Boilerplate for Drupal Themes",
-  "main": "./bin/Harbor.js",
+  "main": "./Harbor.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "run-s clean sync && run-p stylesheets javascripts images",
@@ -13,6 +13,15 @@
     "images": "node ./index.js task=images",
     "serve": "node ./index.js task=serve"
   },
+  "files": [
+    "bin/",
+    ".babelrc",
+    ".browserlistrc",
+    ".eslintignore",
+    ".eslintrc",
+    ".prettierrc",
+    ".stylelintrc"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/toolbarthomas/harbor.git"
@@ -61,5 +70,9 @@
     "stylelint-config-recommended-scss": "^3.3.0",
     "stylelint-scss": "^3.6.1",
     "svgstore": "^3.0.0-2"
-  }
+  },
+  "bin": {
+    "harbor": "Argv.js"
+  },
+  "devDependencies": {}
 }

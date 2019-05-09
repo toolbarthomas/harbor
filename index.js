@@ -1,3 +1,3 @@
-const Harbor = require('./bin/Harbor');
+const Harbor = require('./Harbor');
 
 Harbor.init();
