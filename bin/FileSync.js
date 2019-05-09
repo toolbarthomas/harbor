@@ -1,5 +1,6 @@
-const { join, relative } = require('path');
 const copyfiles = require('copyfiles');
+const { existsSync, readFileSync } = require('fs');
+const { join, relative, resolve } = require('path');
 const Logger = require('./common/Logger');
 
 /**
@@ -8,6 +9,7 @@ const Logger = require('./common/Logger');
 class FileSync {
   constructor() {
     this.defaultEntries = [];
+    this.resourceEntries = [];
   }
 
   init(config) {
@@ -17,7 +19,7 @@ class FileSync {
     this.dist = relative(process.cwd(), this.config.THEME_DIST);
 
     // Get the optional defined resource paths to sync.
-    this.resourceEntries = this.defineResourceEntries();
+    this.defineResourceEntries();
 
     /**
      * Resolve all defined path and apply the globbing pattern to sync all files
@@ -48,16 +50,17 @@ class FileSync {
    * Also make sure if the actual path already has the working path defined.
    */
   defineResourceEntries() {
-    if (!this.config || !this.config.THEME_STATIC_DIRECTORIES) {
-      return null;
+    const packagePath = resolve(process.cwd(), 'package.json');
+
+    if (existsSync(packagePath)) {
+      const { fileSyncDirectories } = JSON.parse(readFileSync(packagePath));
+
+      if (fileSyncDirectories) {
+        if (Array.isArray(fileSyncDirectories)) {
+          this.resourceEntries = fileSyncDirectories;
+        }
+      }
     }
-
-    // Filter out non-existing paths.
-    const entries = this.config.THEME_STATIC_DIRECTORIES.split(',').map(t => {
-      return t.trim();
-    });
-
-    return entries;
   }
 
   /**
