@@ -1,4 +1,3 @@
-const { existsSync } = require('fs');
 const { join, relative } = require('path');
 const copyfiles = require('copyfiles');
 const Logger = require('./common/Logger');
@@ -8,7 +7,7 @@ const Logger = require('./common/Logger');
  */
 class FileSync {
   constructor() {
-    this.defaultEntries = ['main/webfonts/*.svg', 'main/vendor'];
+    this.defaultEntries = [];
   }
 
   init(config) {

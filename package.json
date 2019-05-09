@@ -11,8 +11,7 @@
     "stylesheets": "node ./index.js task=stylesheets",
     "javascripts": "node ./index.js task=javascripts",
     "images": "node ./index.js task=images",
-    "serve": "node ./index.js task=serve",
-    "watch": "run-p build serve"
+    "serve": "node ./index.js task=serve"
   },
   "repository": {
     "type": "git",
@@ -28,7 +27,7 @@
     "url": "https://github.com/toolbarthomas/harbor/issues"
   },
   "homepage": "https://github.com/toolbarthomas/harbor#readme",
-  "devDependencies": {
+  "dependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
@@ -62,6 +61,5 @@
     "stylelint-config-recommended-scss": "^3.3.0",
     "stylelint-scss": "^3.6.1",
     "svgstore": "^3.0.0-2"
-  },
-  "dependencies": {}
+  }
 }
