@@ -8,7 +8,7 @@ const Logger = require('./common/Logger');
  */
 class FileSync {
   constructor() {
-    this.defaultEntries = ['main/webfonts', 'main/vendor'];
+    this.defaultEntries = ['main/webfonts/*.svg', 'main/vendor'];
   }
 
   init(config) {
@@ -80,14 +80,9 @@ class FileSync {
       return String(entry).startsWith(this.cwd) ? entry : join(this.cwd, entry);
     });
 
-    // Make sure only existing entries are returned.
-    resolvedEntries = resolvedEntries.filter(entry => {
-      return existsSync(entry) ? entry : false;
-    });
-
     // Make sure the actual globbing path is defined.
     resolvedEntries = resolvedEntries.map(entry => {
-      return String(entry).endsWith('/**') ? entry : `${entry}/**`;
+      return String(entry).indexOf('*') < 0 ? `${entry}/**` : entry;
     });
 
     return resolvedEntries;
