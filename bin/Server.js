@@ -11,8 +11,12 @@ class Server {
     this.instance.init({
       open: false,
       port: config.THEME_PORT,
-      server: [resolve(config.THEME_DIST)],
+      server: {
+        baseDir: resolve(config.THEME_DIST),
+        directory: true,
+      },
       watch: true,
+      files: [`${resolve(config.THEME_DIST)}/**/*.css`],
     });
   }
 }
