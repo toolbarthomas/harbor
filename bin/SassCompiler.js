@@ -1,6 +1,6 @@
 const { statSync, readFileSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
-const { basename, dirname } = require('path');
+const { basename, dirname, resolve } = require('path');
 const mkdirp = require('mkdirp');
 const { render } = require('node-sass');
 const globImporter = require('node-sass-glob-importer');
@@ -142,7 +142,9 @@ class SassCompiler {
         Logger.info(`Ignoring file due to Stylelint errors: ${entry}`);
         cb();
       } else {
-        const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
+        const destination = entry
+          .replace(this.config.THEME_SRC, this.config.THEME_DIST)
+          .replace('.scss', '.css');
 
         Logger.info(`Compiling: ${entry}`);
 
@@ -184,14 +186,14 @@ class SassCompiler {
           Logger.error(error);
         } else {
           // Write the actual css to the filesystem.
-          writeFileSync(destination.replace('.scss', '.css'), result.css.toString());
+          writeFileSync(destination, result.css.toString());
 
           // Also write the map file if the development environment is active.
           if (this.config.THEME_DEVMODE) {
-            writeFileSync(destination.replace('.scss', '.css.map'), result.map.toString());
+            writeFileSync(`${destination}.map`, result.map.toString());
           }
 
-          Logger.success(`Done compiling: ${destination.replace('.scss', '.css')}`);
+          Logger.success(`Done compiling: ${destination}`);
         }
 
         cb();
