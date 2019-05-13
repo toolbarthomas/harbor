@@ -1,6 +1,7 @@
 const copyfiles = require('copyfiles');
-const { existsSync, readFileSync } = require('fs');
-const { join, relative, resolve } = require('path');
+const { existsSync, statSync } = require('fs');
+const { join, relative } = require('path');
+const ConfigManager = require('./common/ConfigManager');
 const Logger = require('./common/Logger');
 
 /**
@@ -8,8 +9,8 @@ const Logger = require('./common/Logger');
  */
 class FileSync {
   constructor() {
-    this.defaultEntries = [];
-    this.resourceEntries = [];
+    this.defaultPatterns = [];
+    this.resourcePatterns = [];
   }
 
   init(config) {
@@ -19,22 +20,22 @@ class FileSync {
     this.dist = relative(process.cwd(), this.config.THEME_DIST);
 
     // Get the optional defined resource paths to sync.
-    this.defineResourceEntries();
+    this.defineResourcePatterns();
 
     /**
      * Resolve all defined path and apply the globbing pattern to sync all files
      * within that directory.
      */
-    this.entries = this.resolveEntries(this.defaultEntries.concat(this.resourceEntries));
+    this.patterns = this.resolvePatterns(this.defaultPatterns.concat(this.resourcePatterns));
 
     // Push the destination path
-    this.entries.push(this.dist);
+    this.patterns.push(this.dist);
 
     Logger.info('Starting filesync...');
 
     // Sync the actual files.
     copyfiles(
-      this.entries,
+      this.patterns,
       {
         verbose: false,
         up: 1,
@@ -49,45 +50,43 @@ class FileSync {
    * Check if the defined resource path can be resolved form the cwd variable.
    * Also make sure if the actual path already has the working path defined.
    */
-  defineResourceEntries() {
-    const packagePath = resolve(process.cwd(), 'package.json');
+  defineResourcePatterns() {
+    const { patterns } = ConfigManager.load('fileSync');
 
-    if (existsSync(packagePath)) {
-      const { harbor } = JSON.parse(readFileSync(packagePath));
-
-      if (harbor && harbor.fileSyncDirectories) {
-        if (Array.isArray(harbor.fileSyncDirectories)) {
-          this.resourceEntries = harbor.fileSyncDirectories;
-        }
-      }
+    if (Array.isArray(patterns)) {
+      this.resourcePatterns = patterns;
     }
   }
 
   /**
-   * Check if the working directory and the actual glob pattern are defined for
-   * each existing entry path.
+   * Make sure that each entry is resolved correctly and that a globbing pattern
+   * is also defined for directory defined paths.
    *
    * @param {Array} entries Array with all existing paths to sync.
    */
-  resolveEntries(entries) {
-    let resolvedEntries = [...new Set(entries)];
+  resolvePatterns(entries) {
+    let resolvedPatterns = [...new Set(entries)];
 
     // Exclude any empty entries.
-    resolvedEntries = resolvedEntries.filter(entry => {
+    resolvedPatterns = resolvedPatterns.filter(entry => {
       return entry;
     });
 
     // Make sure the path is relative to the cwd path.
-    resolvedEntries = resolvedEntries.map(entry => {
+    resolvedPatterns = resolvedPatterns.map(entry => {
       return String(entry).startsWith(this.cwd) ? entry : join(this.cwd, entry);
     });
 
-    // Make sure the actual globbing path is defined.
-    resolvedEntries = resolvedEntries.map(entry => {
-      return String(entry).indexOf('*') < 0 ? `${entry}/**` : entry;
+    // Append a glob pattern is the current pattern is an actual directory.
+    resolvedPatterns = resolvedPatterns.map(entry => {
+      if (existsSync(entry) && statSync(entry).isDirectory()) {
+        return `${entry}/**`;
+      }
+
+      return entry;
     });
 
-    return resolvedEntries;
+    return resolvedPatterns;
   }
 }
 
