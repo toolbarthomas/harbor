@@ -31,7 +31,6 @@ class SassCompiler {
 
       this.cwd = {
         main: sync(`${this.config.THEME_SRC}/main/stylesheets/*.scss`),
-        modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.scss`),
       };
 
       const baseDirectories = Object.keys(this.cwd);
