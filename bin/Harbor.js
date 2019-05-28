@@ -4,6 +4,7 @@ const Environment = require('./Environment');
 const FileSync = require('./FileSync');
 const JsCompiler = require('./JsCompiler');
 const Logger = require('./common/Logger');
+const Resolver = require('./Resolver');
 const SassCompiler = require('./SassCompiler');
 const Server = require('./Server');
 const StyleOptimizer = require('./StyleOptimizer');
@@ -19,6 +20,7 @@ class Harbor {
     this.Environment = new Environment();
     this.FileSync = new FileSync();
     this.JsCompiler = new JsCompiler();
+    this.Resolver = new Resolver();
     this.SassCompiler = new SassCompiler();
     this.Server = new Server();
     this.StyleOptimizer = new StyleOptimizer();
@@ -71,6 +73,16 @@ class Harbor {
    */
   sync(config) {
     this.FileSync.init(config);
+  }
+
+  /**
+   * Harbor tasks for resolving specific dependencies that are not defined within
+   * the src directory.
+   *
+   * @param {Object} config The Harbor environment configuration object.
+   */
+  async resolve(config) {
+    await this.Resolver.init(config);
   }
 
   /**

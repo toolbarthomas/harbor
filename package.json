@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "run-s clean sync && run-p stylesheets javascripts images",
     "clean": "node ./index.js task=clean",
+    "resolver": "node ./index.js task=resolver",
     "sync": "node ./index.js task=sync",
     "stylesheets": "node ./index.js task=stylesheets",
     "javascripts": "node ./index.js task=javascripts",
@@ -54,6 +55,7 @@
     "imagemin": "^6.1.0",
     "imagemin-svgo": "^7.0.0",
     "log-symbols": "^3.0.0",
+    "mkdirp": "^0.5.1",
     "module-config-loader": "^0.2.0",
     "node-sass": "^4.12.0",
     "node-sass-glob-importer": "^5.3.1",
@@ -70,6 +72,5 @@
     "stylelint-config-recommended-scss": "^3.3.0",
     "stylelint-scss": "^3.6.1",
     "svgstore": "^3.0.0-2"
-  },
-  "devDependencies": {}
+  }
 }
