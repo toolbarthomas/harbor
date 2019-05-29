@@ -1,6 +1,6 @@
 const { statSync, readFileSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
-const { basename, dirname, resolve } = require('path');
+const { basename, dirname } = require('path');
 const mkdirp = require('mkdirp');
 const { render } = require('node-sass');
 const globImporter = require('node-sass-glob-importer');

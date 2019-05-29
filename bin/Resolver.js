@@ -1,8 +1,8 @@
 const { existsSync, createReadStream, createWriteStream } = require('fs');
+const mkdirp = require('mkdirp');
 const { basename, dirname, join, resolve } = require('path');
 const { error, warning, success } = require('./common/Logger');
 const ConfigManager = require('./common/ConfigManager');
-const mkdirp = require('mkdirp')
 
 class Resolver {
   init(config) {
