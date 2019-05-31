@@ -49,7 +49,7 @@ class Harbor {
 
           Logger.success(`Done - ${name}`);
         } else {
-          Logger.warning(`Finished: ${name}.`);
+          Logger.error(`Task '${name}' does not exists.`);
         }
       });
     }
