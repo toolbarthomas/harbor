@@ -3,16 +3,19 @@
   "version": "0.8.0",
   "description": "Boilerplate for Drupal Themes",
   "main": "./index.js",
+  "bin": {
+    "harbor": "./bin/cli.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "run-s clean sync && run-p stylesheets javascripts images",
-    "clean": "node ./bin/index.js task=clean",
-    "resolver": "node ./bin/index.js task=resolver",
-    "sync": "node ./bin/index.js task=sync",
-    "stylesheets": "node ./bin/index.js task=stylesheets",
-    "javascripts": "node ./bin/index.js task=javascripts",
-    "images": "node ./bin/index.js task=images",
-    "serve": "node ./bin/index.js task=serve"
+    "clean": "node ./index.js task=clean",
+    "resolver": "node ./index.js task=resolver",
+    "sync": "node ./index.js task=sync",
+    "stylesheets": "node ./index.js task=stylesheets",
+    "javascripts": "node ./index.js task=javascripts",
+    "images": "node ./index.js task=images",
+    "serve": "node ./index.js task=serve"
   },
   "files": [
     "bin/",
@@ -21,7 +24,8 @@
     ".eslintignore",
     ".eslintrc",
     ".prettierrc",
-    ".stylelintrc"
+    ".stylelintrc",
+    "index.js"
   ],
   "repository": {
     "type": "git",
