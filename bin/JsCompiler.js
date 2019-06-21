@@ -26,12 +26,9 @@ class JsCompiler {
           await this.transpileCwd(cwd);
         }
 
-        console.log(directory);
-
         queue += 1;
 
         if (queue >= baseDirectories.length) {
-          console.log('callback');
           cb();
         }
       });
