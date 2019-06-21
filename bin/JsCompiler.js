@@ -2,66 +2,87 @@ const { transform } = require('@babel/core');
 const { statSync, readFileSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const mkdirp = require('mkdirp');
-const { dirname, join } = require('path');
+const { dirname } = require('path');
 const Logger = require('./common/Logger');
 
 class JsCompiler {
   init(config) {
-    this.config = config;
+    return new Promise(cb => {
+      this.config = config;
 
-    this.cwd = {
-      main: sync(`${this.config.THEME_SRC}/main/javascripts/**/*.js`),
-      modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.js`),
-    };
+      this.cwd = {
+        main: sync(`${this.config.THEME_SRC}/main/javascripts/**/*.js`),
+        modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.js`),
+      };
 
-    Object.keys(this.cwd).forEach(directory => {
-      const baseDirectory = this.cwd[directory];
+      const baseDirectories = Object.keys(this.cwd);
 
-      if (baseDirectory.length === 0) {
-        Logger.info(
-          `Cannot find any javascript files witin ${join(this.config.THEME_SRC, directory)}`
-        );
-      } else {
-        Logger.info(`Transpiling javascripts within: ${join(this.config.THEME_SRC, directory)}`);
+      let queue = 0;
 
-        this.transpile(baseDirectory, this.config);
+      baseDirectories.forEach(async directory => {
+        const cwd = this.cwd[directory];
 
-        Logger.success(`Done transpiling within ${join(this.config.THEME_SRC, directory)}`);
-      }
+        if (cwd.length > 0) {
+          await this.transpileCwd(cwd);
+        }
+
+        console.log(directory);
+
+        queue += 1;
+
+        if (queue >= baseDirectories.length) {
+          console.log('callback');
+          cb();
+        }
+      });
     });
   }
 
   /**
    * Transpile the javascript files defined within the given baseDirectory.
    *
-   * @param {Array} baseDirectory Array of javascript files defined from
-   * a specific directory.
+   * @param {Array} cwd Array of javascript files to process.
    */
-  transpile(baseDirectory) {
-    baseDirectory.forEach(entry => {
-      if (!statSync(entry).size) {
-        Logger.warning(`Skipping empty file: ${entry}`);
-      } else {
-        Logger.info(`Transpiling: ${entry}`);
+  transpileCwd(cwd) {
+    return new Promise(cb => {
+      // Keep track of the actual processing queue.
+      let queue = 0;
 
-        const source = readFileSync(entry);
-        const transpiledSource = transform(source, { presets: ['@babel/env'] });
-        const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
+      cwd.forEach(entry => {
+        queue += 1;
 
-        /**
-         * Create the destination directory before writing the source to
-         * the filesystem.
-         */
-        mkdirp(dirname(destination), error => {
-          if (error) {
-            Logger.error(error);
-          }
+        if (!statSync(entry).size) {
+          Logger.warning(`Skipping empty file: ${entry}`);
+        } else {
+          Logger.info(`Transpiling: ${entry}`);
 
-          writeFileSync(destination, transpiledSource.code);
+          const source = readFileSync(entry);
+          const transpiledSource = transform(source, { presets: ['@babel/env'] });
+          const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
 
-          Logger.success(`Successfully transpiled: ${destination}`);
-        });
-      }
+          /**
+           * Create the destination directory before writing the source to
+           * the filesystem.
+           */
+          mkdirp(dirname(destination), error => {
+            if (error) {
+              Logger.error(error);
+            }
+
+            writeFileSync(destination, transpiledSource.code);
+
+            Logger.success(`Successfully transpiled: ${destination}`);
+
+            /**
+             * Resolve the actual Promise if all files within the current cwd
+             * are transpiled.
+             */
+            if (queue >= cwd.length) {
+              cb();
+            }
+          });
+        }
+      });
     });
   }
 }

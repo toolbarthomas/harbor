@@ -33,26 +33,28 @@ class Harbor {
   init() {
     const { task } = this.Argv.args;
 
-    if (task) {
-      const tasks = task.split(',').map(t => {
-        return t.trim();
-      });
-
-      const { config } = this.Environment;
-
-      // Run all defined tasks in a Synchronous order.
-      tasks.forEach(async name => {
-        if (typeof this[name] === 'function') {
-          Logger.info(`Running task: ${name}`);
-
-          await this[name](config);
-
-          Logger.success(`Done - ${name}`);
-        } else {
-          Logger.error(`Task '${name}' does not exists.`);
-        }
-      });
+    if (!task) {
+      Logger.error('No task has been defined.');
     }
+
+    const queue = task.split(',').map(t => {
+      return t.trim();
+    });
+
+    const { config } = this.Environment;
+
+    // Run all defined tasks in a Synchronous order.
+    queue.forEach(async name => {
+      if (typeof this[name] === 'function') {
+        Logger.info(`Running task: ${name}`);
+
+        await this[name](config);
+
+        Logger.success(`Done - ${name}`);
+      } else {
+        Logger.error(`Task '${name}' does not exists.`);
+      }
+    });
   }
 
   /**
@@ -100,8 +102,8 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  javascripts(config) {
-    this.JsCompiler.init(config);
+  async javascripts(config) {
+    await this.JsCompiler.init(config);
   }
 
   /**
