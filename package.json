@@ -1,11 +1,8 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "description": "Boilerplate for Drupal Themes",
-  "main": "./index.js",
-  "bin": {
-    "harbor": "./bin/cli.js"
-  },
+  "main": "./bin/Harbor.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "run-s clean sync && run-p stylesheets javascripts images",
@@ -24,8 +21,7 @@
     ".eslintignore",
     ".eslintrc",
     ".prettierrc",
-    ".stylelintrc",
-    "index.js"
+    ".stylelintrc"
   ],
   "repository": {
     "type": "git",
