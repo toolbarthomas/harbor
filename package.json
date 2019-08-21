@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "description": "Boilerplate for Drupal Themes",
   "main": "./bin/Harbor.js",
   "scripts": {
@@ -46,10 +46,10 @@
     "chalk": "^2.4.2",
     "copyfiles": "^2.1.1",
     "cssnano": "^4.1.10",
-    "dotenv": "^8.0.0",
-    "eslint": "^6.1.0",
-    "eslint-config-airbnb-base": "^13.2.0",
-    "eslint-config-prettier": "^6.0.0",
+    "dotenv": "^8.1.0",
+    "eslint": "^6.2.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-prettier": "^6.1.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-prettier": "^3.1.0",
     "imagemin": "^7.0.0",
@@ -66,11 +66,11 @@
     "postcss-preset-env": "^6.7.0",
     "postcss-scss": "^2.0.0",
     "prettier": "^1.18.2",
-    "rimraf": "^2.6.3",
+    "rimraf": "^3.0.0",
     "stylelint": "^10.1.0",
     "stylelint-config-recommended": "^2.2.0",
     "stylelint-config-recommended-scss": "^3.3.0",
-    "stylelint-scss": "^3.9.2",
+    "stylelint-scss": "^3.9.4",
     "svgstore": "^3.0.0-2"
   }
 }
