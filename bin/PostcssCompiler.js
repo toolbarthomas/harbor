@@ -106,7 +106,7 @@ class PostcssCompiler {
             Logger.warning(warning.toString());
           });
 
-          mkdirp(dirname(destination), async error => {
+          mkdirp(dirname(destination)).then((dirPath, error) => {
             if (error) {
               Logger.error(error);
             } else {

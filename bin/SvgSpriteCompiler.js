@@ -96,7 +96,7 @@ class SvgSpriteCompiler {
       );
 
       if (sprite) {
-        mkdirp(destination, error => {
+        mkdirp(destination).then((dirPath, error) => {
           if (error) {
             Logger.error(error);
           }

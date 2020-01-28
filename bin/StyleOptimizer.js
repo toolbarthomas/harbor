@@ -92,24 +92,39 @@ class StyleOptimizer {
         .process(source, {
           from: entry,
         })
-        .then(result => {
+        .then(async result => {
           result.warnings().forEach(warning => {
             Logger.warning(warning.toString());
           });
-          mkdirp(dirname(entry), async error => {
-            if (error) {
-              Logger.error(error);
-            }
 
-            // Write the actual css to the filesystem.
-            writeFileSync(`${entry}`, result.css);
+          await this.writeFile(entry, result);
 
-            Logger.success(`Successfully optimized: ${entry}`);
-
-            cb();
-          });
+          cb();
         });
     });
+  }
+
+  /**
+   * Writes the optimized stylesheet to the Filesystem.
+   *
+   * @param {String} entry Path of the stylesheet.
+   * @param {Object} result The optimized code of the entry stylesheet.
+   */
+  writeFile(entry, result) {
+    return new Promise(cb => {
+      mkdirp(dirname(entry)).then((dirPath, error) => {
+        if (error) {
+          Logger.error(error);
+        }
+
+        // Write the actual css to the filesystem.
+        writeFileSync(`${entry}`, result.css);
+
+        Logger.success(`Successfully optimized: ${entry}`);
+
+        cb();
+      });
+    })
   }
 }
 

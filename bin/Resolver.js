@@ -1,7 +1,7 @@
 const { existsSync, createReadStream, createWriteStream } = require('fs');
 const mkdirp = require('mkdirp');
 const { basename, dirname, join, resolve } = require('path');
-const { error, warning, success } = require('./common/Logger');
+const Logger = require('./common/Logger');
 const ConfigManager = require('./common/ConfigManager');
 
 class Resolver {
@@ -10,7 +10,7 @@ class Resolver {
 
     // Throw an exception if vendors is not a valid Object.
     if (!vendors || !(vendors instanceof Object) || Array.isArray(vendors)) {
-      error(`The 'resolve' key must be a valid Object.`);
+      Logger.error(`The 'resolve' key must be a valid Object.`);
     }
 
     /**
@@ -40,7 +40,7 @@ class Resolver {
          * exists.
          */
         if (!existsSync(path)) {
-          warning(`Unable to find ${vendor} from vendor: ${name}. Skipping dependency...`);
+          Logger.warning(`Unable to find ${vendor} from vendor: ${name}. Skipping dependency...`);
 
           this.entries -= 1;
 
@@ -50,15 +50,14 @@ class Resolver {
         // Define the destination path for the current module.
         const dest = resolve(config.THEME_DIST, 'main/vendors/', name, basename(path));
 
-        mkdirp(dirname(dest), err => {
-          if (err) {
-            error(err);
+        mkdirp(dirname(dest)).then((dirPath, error) => {
+          if (error) {
+            Logger.error(error);
           }
-
           // Stream the actual contents in order to resolve each module faster.
           createReadStream(path).pipe(
             createWriteStream(dest).on('close', () => {
-              success(`'${name}' has been resolved successfully!`);
+              Logger.success(`'${name}' has been resolved successfully!`);
 
               this.queue += 1;
 

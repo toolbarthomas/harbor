@@ -181,7 +181,7 @@ class SassCompiler {
    */
   writeFile(result, destination) {
     return new Promise(cb => {
-      mkdirp(dirname(destination), error => {
+      mkdirp(dirname(destination)).then((dirPath, error) => {
         if (error) {
           Logger.error(error);
         } else {
