@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.9.3",
+  "version": "0.9.4",
   "description": "Boilerplate for Drupal Themes",
   "main": "./bin/Harbor.js",
   "scripts": {
@@ -38,11 +38,11 @@
   },
   "homepage": "https://github.com/toolbarthomas/harbor#readme",
   "dependencies": {
-    "@babel/cli": "^7.10.3",
-    "@babel/core": "^7.10.3",
-    "@babel/polyfill": "^7.10.1",
-    "@babel/preset-env": "^7.10.3",
-    "autoprefixer": "^9.8.2",
+    "@babel/cli": "^7.10.4",
+    "@babel/core": "^7.10.4",
+    "@babel/polyfill": "^7.10.4",
+    "@babel/preset-env": "^7.10.4",
+    "autoprefixer": "^9.8.4",
     "browser-sync": "^2.26.7",
     "chalk": "^4.1.0",
     "copyfiles": "^2.3.0",
@@ -51,7 +51,7 @@
     "eslint": "^7.3.1",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.11.0",
-    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-import": "^2.22.0",
     "eslint-plugin-prettier": "^3.1.4",
     "imagemin": "^7.0.1",
     "imagemin-svgo": "^8.0.0",
