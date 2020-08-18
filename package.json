@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.9.5",
+  "version": "0.9.6",
   "description": "Boilerplate for Drupal Themes",
   "main": "./bin/Harbor.js",
   "scripts": {
@@ -48,7 +48,7 @@
     "copyfiles": "^2.3.0",
     "cssnano": "^4.1.10",
     "dotenv": "^8.2.0",
-    "eslint": "^7.6.0",
+    "eslint": "^7.7.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-import": "^2.22.0",
@@ -57,7 +57,7 @@
     "imagemin-svgo": "^8.0.0",
     "log-symbols": "^4.0.0",
     "mkdirp": "^1.0.4",
-    "module-config-loader": "^0.3.2",
+    "module-config-loader": "^0.3.3",
     "node-sass": "^4.14.1",
     "node-sass-glob-importer": "^5.3.2",
     "npm-run-all": "^4.1.5",
