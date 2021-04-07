@@ -1,14 +1,15 @@
-const Argv = require('./Argv');
-const Cleaner = require('./Cleaner');
-const Environment = require('./Environment');
-const FileSync = require('./FileSync');
-const JsCompiler = require('./JsCompiler');
+const Argv = require('./common/Argv');
+const Environment = require('./common/Environment');
 const Logger = require('./common/Logger');
-const Resolver = require('./Resolver');
-const SassCompiler = require('./SassCompiler');
-const Server = require('./Server');
-const StyleOptimizer = require('./StyleOptimizer');
-const SvgSpriteCompiler = require('./SvgSpriteCompiler');
+
+const Cleaner = require('./services/Cleaner');
+const FileSync = require('./services/FileSync');
+const JsCompiler = require('./services/JsCompiler');
+const Resolver = require('./services/Resolver');
+const SassCompiler = require('./services/SassCompiler');
+const Server = require('./services/Server');
+const StyleOptimizer = require('./services/StyleOptimizer');
+const SvgSpriteCompiler = require('./services/SvgSpriteCompiler');
 
 /**
  * Factory setup for Harbor.
@@ -37,18 +38,18 @@ class Harbor {
       Logger.error('No task has been defined.');
     }
 
-    const queue = task.split(',').map(t => {
+    const queue = task.split(',').map((t) => {
       return t.trim();
     });
 
-    const { config } = this.Environment;
+    const environment = this.Environment.define();
 
     // Run all defined tasks in a Synchronous order.
-    queue.forEach(async name => {
+    queue.forEach(async (name) => {
       if (typeof this[name] === 'function') {
         Logger.info(`Running task: ${name}`);
 
-        await this[name](config);
+        await this[name](environment);
 
         Logger.success(`Done - ${name}`);
       } else {
@@ -62,8 +63,8 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  clean(config) {
-    this.Cleaner.init(config);
+  clean(environment) {
+    this.Cleaner.init(environment);
   }
 
   /**
@@ -73,8 +74,8 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  sync(config) {
-    this.FileSync.init(config);
+  sync(environment) {
+    this.FileSync.init(environment);
   }
 
   /**
@@ -83,8 +84,8 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  async resolve(config) {
-    await this.Resolver.init(config);
+  async resolve(environment) {
+    await this.Resolver.init(environment);
   }
 
   /**
@@ -92,9 +93,9 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  async stylesheets(config) {
-    await this.SassCompiler.init(config);
-    await this.StyleOptimizer.init(config);
+  async stylesheets(environment) {
+    await this.SassCompiler.init(environment);
+    await this.StyleOptimizer.init(environment);
   }
 
   /**
@@ -102,8 +103,8 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  async javascripts(config) {
-    await this.JsCompiler.init(config);
+  async javascripts(environment) {
+    await this.JsCompiler.init(environment);
   }
 
   /**
@@ -111,8 +112,8 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  async images(config) {
-    await this.SvgSpriteCompiler.init(config);
+  async images(environment) {
+    await this.SvgSpriteCompiler.init(environment);
   }
 
   /**
@@ -120,8 +121,8 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  serve(config) {
-    this.Server.init(config);
+  serve(environment) {
+    this.Server.init(environment);
   }
 }
 

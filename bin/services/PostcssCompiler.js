@@ -4,43 +4,24 @@ const mkdirp = require('mkdirp');
 const { load } = require('module-config-loader');
 const { dirname } = require('path');
 const postcss = require('postcss');
-const stylelint = require('stylelint');
-const Logger = require('./common/Logger');
+const Logger = require('../common/Logger');
 
-class PostcssCompiler {
+class PostCssCompiler {
   constructor() {
+    super();
+
     this.styleLintError = false;
   }
 
   init(config) {
-    return new Promise(cb => {
-      this.config = config;
-
-      this.cwd = {
-        main: sync(`${this.config.THEME_SRC} / main / stylesheets/*.css`),
-        modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.css`),
-      };
-
-      const baseDirectories = Object.keys(this.cwd);
-
-      this.postcssConfig = load('postcss.config.js');
-
-      if (Array.isArray(this.postcssConfig.plugins)) {
-        this.postcssConfig.plugins.push(stylelint());
-      } else if (this.postcssConfig.plugins instanceof Object) {
-        this.postcssConfig.plugins.stylelint = {};
-      }
-
-      // Include the stylelinter.
-      this.postcssConfig = Object.assign(this.postcssConfig, {
-        plugins: [],
-        extends: ['stylelint-config-recommended', 'stylelint'],
-      });
+    return new Promise((cb) => {
+      this.environment = config;
 
       let queue = 0;
 
-      baseDirectories.forEach(async directory => {
-        const cwd = this.cwd[directory];
+      const baseDirectories = Object.keys(this.environment.entry);
+      baseDirectories.forEach(async (name) => {
+        const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
 
         if (cwd.length > 0) {
           await this.processCwd(cwd);
@@ -61,11 +42,11 @@ class PostcssCompiler {
    * @param {Array} cwd The actual array to process.
    */
   processCwd(cwd) {
-    return new Promise(cb => {
+    return new Promise((cb) => {
       // Keep track of the actual processing queue.
       let queue = 0;
 
-      cwd.forEach(async entry => {
+      cwd.forEach(async (entry) => {
         if (!statSync(entry).size) {
           Logger.warning(`Skipping empty file: ${entry}`);
         } else {
@@ -91,18 +72,18 @@ class PostcssCompiler {
    * @param {String} entry The sourcepath of the actual stylesheet.
    */
   processFile(entry) {
-    return new Promise(cb => {
-      const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
+    return new Promise((cb) => {
+      const destination = entry.replace(this.environment.THEME_SRC, this.environment.THEME_DIST);
       const source = readFileSync(entry);
 
       Logger.info(`Compiling: ${entry}`);
 
-      postcss(this.postcssConfig.plugins)
+      postcss(this.config.options.plugins)
         .process(source, {
           from: entry,
         })
-        .then(result => {
-          result.warnings().forEach(warning => {
+        .then((result) => {
+          result.warnings().forEach((warning) => {
             Logger.warning(warning.toString());
           });
 
@@ -123,4 +104,4 @@ class PostcssCompiler {
   }
 }
 
-module.exports = PostcssCompiler;
+module.exports = PostCssCompiler;

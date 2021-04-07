@@ -1,23 +1,24 @@
 const copyfiles = require('copyfiles');
 const { existsSync, statSync } = require('fs');
 const { join, relative } = require('path');
-const ConfigManager = require('./common/ConfigManager');
-const Logger = require('./common/Logger');
+
+const Logger = require('../common/Logger');
+const BaseService = require('./BaseService');
 
 /**
  * Copies all defined files to the `THEME_DIST` directory.
  */
-class FileSync {
+class FileSync extends BaseService {
   constructor() {
+    super();
+
     this.defaultPatterns = [];
     this.resourcePatterns = [];
   }
 
-  init(config) {
-    this.config = config;
-
-    this.cwd = relative(process.cwd(), this.config.THEME_SRC);
-    this.dist = relative(process.cwd(), this.config.THEME_DIST);
+  init(environment) {
+    this.cwd = relative(process.cwd(), environment.THEME_SRC);
+    this.dist = relative(process.cwd(), environment.THEME_DIST);
 
     // Get the optional defined resource paths to sync.
     this.defineResourcePatterns();
@@ -51,7 +52,7 @@ class FileSync {
    * Also make sure if the actual path already has the working path defined.
    */
   defineResourcePatterns() {
-    const { patterns } = ConfigManager.load('fileSync');
+    const { patterns } = this.config;
 
     if (Array.isArray(patterns)) {
       this.resourcePatterns = patterns;
@@ -68,17 +69,17 @@ class FileSync {
     let resolvedPatterns = [...new Set(entries)];
 
     // Exclude any empty entries.
-    resolvedPatterns = resolvedPatterns.filter(entry => {
+    resolvedPatterns = resolvedPatterns.filter((entry) => {
       return entry;
     });
 
     // Make sure the path is relative to the cwd path.
-    resolvedPatterns = resolvedPatterns.map(entry => {
+    resolvedPatterns = resolvedPatterns.map((entry) => {
       return String(entry).startsWith(this.cwd) ? entry : join(this.cwd, entry);
     });
 
     // Append a glob pattern is the current pattern is an actual directory.
-    resolvedPatterns = resolvedPatterns.map(entry => {
+    resolvedPatterns = resolvedPatterns.map((entry) => {
       if (existsSync(entry) && statSync(entry).isDirectory()) {
         return `${entry}/**`;
       }

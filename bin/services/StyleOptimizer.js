@@ -3,38 +3,41 @@ const cssnano = require('cssnano');
 const { readFileSync, statSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const mkdirp = require('mkdirp');
-const { dirname } = require('path');
+const { dirname, join } = require('path');
 const postcss = require('postcss');
 const combineDuplicateSelectors = require('postcss-combine-duplicated-selectors');
-const Logger = require('./common/Logger');
 
-class StyleOptimizer {
-  init(config) {
-    return new Promise(cb => {
-      this.config = config;
+const Logger = require('../common/Logger');
+const BaseService = require('./BaseService');
 
-      this.cwd = {
-        main: sync(`${config.THEME_DIST}/main/stylesheets/*.css`),
-        modules: sync(`${config.THEME_DIST}/modules/*/*/*.css`),
-      };
+class StyleOptimizer extends BaseService {
+  constructor() {
+    super();
+  }
 
-      const baseDirectories = Object.keys(this.cwd);
+  init(environment) {
+    return new Promise((cb) => {
+      this.environment = environment;
 
-      this.postcssConfig = {
-        plugins: [autoprefixer()],
-      };
+      if (!this.config.entry instanceof Object) {
+        cb();
+      }
 
-      if (!config.THEME_DEVMODE) {
-        this.postcssConfig.plugins.push(
+      let queue = 0;
+
+      const baseDirectories = Object.keys(this.config.entry);
+
+      this.postcssConfig = this.config.options;
+
+      if (!this.environment.THEME_DEVMODE) {
+        this.postTHEME_THEME_ssConfig.plugins.push(
           combineDuplicateSelectors({ removeDuplicatedProperties: true })
         );
         this.postcssConfig.plugins.push(cssnano({ mergeLonghand: false }));
       }
 
-      let queue = 0;
-
-      baseDirectories.forEach(async directory => {
-        const cwd = this.cwd[directory];
+      baseDirectories.forEach(async (name) => {
+        const cwd = sync(join(this.environment.THEME_DIST, this.config.entry[name]));
 
         if (cwd.length > 0) {
           await this.optimizeCwd(cwd);
@@ -55,11 +58,11 @@ class StyleOptimizer {
    * @param {Array} cwd The actual array to process.
    */
   optimizeCwd(cwd) {
-    return new Promise(cb => {
+    return new Promise((cb) => {
       // Keep track of the actual processing queue.
       let queue = 0;
 
-      cwd.forEach(async entry => {
+      cwd.forEach(async (entry) => {
         if (statSync(entry).size) {
           await this.optimizeFile(entry);
         }
@@ -83,7 +86,7 @@ class StyleOptimizer {
    * @param {String} entry Path of the stylesheet to optimize.
    */
   optimizeFile(entry) {
-    return new Promise(cb => {
+    return new Promise((cb) => {
       const source = readFileSync(entry);
 
       Logger.info(`Optimizing: ${entry}`);
@@ -92,8 +95,8 @@ class StyleOptimizer {
         .process(source, {
           from: entry,
         })
-        .then(async result => {
-          result.warnings().forEach(warning => {
+        .then(async (result) => {
+          result.warnings().forEach((warning) => {
             Logger.warning(warning.toString());
           });
 
@@ -111,7 +114,7 @@ class StyleOptimizer {
    * @param {Object} result The optimized code of the entry stylesheet.
    */
   writeFile(entry, result) {
-    return new Promise(cb => {
+    return new Promise((cb) => {
       mkdirp(dirname(entry)).then((dirPath, error) => {
         if (error) {
           Logger.error(error);
@@ -124,7 +127,7 @@ class StyleOptimizer {
 
         cb();
       });
-    })
+    });
   }
 }
 

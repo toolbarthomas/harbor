@@ -1,6 +1,6 @@
 const { statSync, readFileSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
-const { basename, dirname } = require('path');
+const { basename, dirname, join, resolve } = require('path');
 const mkdirp = require('mkdirp');
 const { render } = require('node-sass');
 const globImporter = require('node-sass-glob-importer');
@@ -8,10 +8,14 @@ const postcss = require('postcss');
 const postcssScss = require('postcss-scss');
 const stylelint = require('stylelint');
 
-const Logger = require('./common/Logger');
+const Logger = require('../common/Logger');
+const ConfigManager = require('../common/ConfigManager');
+const BaseService = require('./BaseService');
 
-class SassCompiler {
+class SassCompiler extends BaseService {
   constructor() {
+    super();
+
     /**
      * Flag to prevent files from being written to the Filesystem if the given
      * file has any Stylelint errors.
@@ -25,25 +29,17 @@ class SassCompiler {
     this.commonData = '';
   }
 
-  init(config) {
-    return new Promise(cb => {
-      this.config = config;
+  init(environment) {
+    return new Promise((cb) => {
+      this.environment = environment;
 
-      this.cwd = {
-        main: sync(`${this.config.THEME_SRC}/main/stylesheets/*.scss`),
-      };
-
-      const baseDirectories = Object.keys(this.cwd);
-
-      this.postcssConfig = {
-        plugins: [stylelint()],
-        extends: ['stylelint-config-recommended-scss', 'stylelint-scss'],
-      };
+      this.postcssConfig = ConfigManager.load('PostCssCompiler').options;
 
       let queue = 0;
 
-      baseDirectories.forEach(async directory => {
-        const cwd = this.cwd[directory];
+      const baseDirectories = Object.keys(this.config.entry);
+      baseDirectories.forEach(async (name) => {
+        const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
 
         if (cwd.length > 0) {
           await this.renderCwd(cwd);
@@ -64,11 +60,11 @@ class SassCompiler {
    * @param {Array} cwd The actual array to process.
    */
   renderCwd(cwd) {
-    return new Promise(cb => {
+    return new Promise((cb) => {
       // Keep track of the actual processing queue.
       let queue = 0;
 
-      cwd.forEach(async entry => {
+      cwd.forEach(async (entry) => {
         if (String(basename(entry)).indexOf('_') !== 0) {
           if (!statSync(entry).size) {
             Logger.warning(`Skipping empty file: ${entry}`);
@@ -97,8 +93,8 @@ class SassCompiler {
    * @param {String} entry Path to the source stylesheet to render.
    */
   lintFile(entry) {
-    return new Promise(cb => {
-      if (!this.config.THEME_DEVMODE) {
+    return new Promise((cb) => {
+      if (!this.environment.THEME_DEVMODE) {
         return cb();
       }
 
@@ -109,7 +105,7 @@ class SassCompiler {
           from: entry,
           syntax: postcssScss,
         })
-        .then(result => {
+        .then((result) => {
           this.stylelintError = result.stylelint ? result.stylelint.stylelintError || false : false;
 
           if (this.stylelintError) {
@@ -117,7 +113,7 @@ class SassCompiler {
           }
 
           if (result.messages) {
-            result.messages.forEach(message => {
+            result.messages.forEach((message) => {
               if (message.text) {
                 Logger[message.type || 'info'](
                   `- ${message.text} | ${entry}:${message.line}:${message.column}`
@@ -137,26 +133,25 @@ class SassCompiler {
    * @param {String} entry Path to the source stylesheet to render.
    */
   renderFile(entry) {
-    return new Promise(cb => {
+    return new Promise((cb) => {
       if (this.stylelintError) {
         Logger.info(`Ignoring file due to Stylelint errors: ${entry}`);
         cb();
       } else {
-        const destination = entry
-          .replace(this.config.THEME_SRC, this.config.THEME_DIST)
+        const destination = resolve(entry)
+          .replace(resolve(this.environment.THEME_SRC), resolve(this.environment.THEME_DIST))
           .replace('.scss', '.css');
 
         Logger.info(`Compiling: ${entry}`);
 
         render(
-          {
+          Object.assign(this.config.options, {
             file: entry,
-            outputStyle: 'compact',
+            includePaths: [this.environment.THEME_SRC],
+            sourceMap: this.environment.THEME_DEVMODE,
             importer: globImporter(),
-            includePaths: [this.config.THEME_SRC],
-            sourceMap: this.config.THEME_DEVMODE,
             outFile: destination,
-          },
+          }),
           async (error, result) => {
             if (error) {
               Logger.error(
@@ -180,7 +175,7 @@ class SassCompiler {
    * the filesystem.
    */
   writeFile(result, destination) {
-    return new Promise(cb => {
+    return new Promise((cb) => {
       mkdirp(dirname(destination)).then((dirPath, error) => {
         if (error) {
           Logger.error(error);
@@ -189,7 +184,7 @@ class SassCompiler {
           writeFileSync(destination, result.css.toString());
 
           // Also write the map file if the development environment is active.
-          if (this.config.THEME_DEVMODE) {
+          if (this.environment.THEME_DEVMODE) {
             writeFileSync(`${destination}.map`, result.map.toString());
           }
 

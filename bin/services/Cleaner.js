@@ -1,15 +1,21 @@
 const rimraf = require('rimraf');
 const { existsSync } = require('fs');
 const { resolve } = require('path');
-const Logger = require('./common/Logger');
+
+const Logger = require('../common/Logger');
+const BaseService = require('./BaseService');
 
 /**
  * Clears the `THEME_DIST` directory.
  */
-class Cleaner {
-  init(config) {
-    if (config) {
-      this.path = resolve(config.THEME_DIST);
+class Cleaner extends BaseService {
+  constructor() {
+    super();
+  }
+
+  init(environment) {
+    if (environment) {
+      this.path = resolve(environment.THEME_DIST);
 
       if (existsSync(this.path)) {
         Logger.info(`Clearing directory: ${this.path}`);

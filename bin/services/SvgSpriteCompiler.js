@@ -1,33 +1,36 @@
 const { statSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const imagemin = require('imagemin');
-const imageminSvgo = require('imagemin-svgo');
 const mkdirp = require('mkdirp');
 const { basename, join, resolve } = require('path');
 const svgstore = require('svgstore');
-const Logger = require('./common/Logger');
 
-class SvgSpriteCompiler {
-  init(config) {
-    return new Promise(cb => {
-      this.config = config;
+const Logger = require('../common/Logger');
+const BaseService = require('./BaseService');
 
-      this.cwd = [
-        sync(`${this.config.THEME_SRC}/main/images/*/**.svg`).filter(file => statSync(file).size),
-      ];
+class SvgSpriteCompiler extends BaseService {
+  constructor() {
+    super();
+  }
 
-      const baseDirectories = Object.keys(this.cwd);
+  init(environment) {
+    return new Promise((cb) => {
+      this.environment = environment;
 
-      this.prefix = 'svg--';
+      if (!this.config.entry instanceof Object) {
+        cb();
+      }
 
       let queue = 0;
+      this.prefix = this.config.prefix || 'svg--';
 
-      baseDirectories.forEach(async directory => {
-        const cwd = this.cwd[directory];
+      const baseDirectories = Object.keys(this.config.entry);
+      baseDirectories.forEach(async (name) => {
+        const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
 
         if (cwd.length > 0) {
-          await this.prepareCwd(cwd);
-          await this.processCwd(cwd);
+          await this.prepareCwd(cwd, name);
+          await this.processCwd(cwd, name);
         }
 
         queue += 1;
@@ -39,28 +42,10 @@ class SvgSpriteCompiler {
     });
   }
 
-  async prepareCwd(cwd) {
-    Logger.info(`Preparing sprite...`);
+  async prepareCwd(cwd, name) {
+    Logger.info(`Preparing sprite ${name}...`);
 
-    this.optimizedCwd = await imagemin(cwd, {
-      use: [
-        imageminSvgo({
-          plugins: [
-            {
-              convertPathData: false,
-            },
-            {
-              removeViewBox: false,
-            },
-            {
-              removeAttrs: {
-                attrs: ['(fill|stroke|class|style)', 'svg:(width|height)'],
-              },
-            },
-          ],
-        }),
-      ],
-    });
+    this.optimizedCwd = await imagemin(cwd, this.config.options);
 
     Logger.success(`Done preparing sprite.`);
   }
@@ -69,19 +54,20 @@ class SvgSpriteCompiler {
    * Processes all Svg files within the defined directory.
    *
    * @param {Array} cwd The actual array to process.
+   * @param {string} filename The filename for the processed sprite.
    */
-  async processCwd(cwd) {
-    return new Promise(cb => {
+  async processCwd(cwd, filename) {
+    return new Promise((cb) => {
       if (!this.optimizedCwd) {
         return;
       }
 
       Logger.info(`Generating sprite.`);
 
-      const destination = cwd[0]
+      const destination = resolve(cwd[0])
         .replace(/images.*$/, 'images')
-        .replace(this.config.THEME_SRC, this.config.THEME_DIST);
-      const name = 'svgsprite.svg';
+        .replace(resolve(this.environment.THEME_SRC), resolve(this.environment.THEME_DIST));
+      const name = `${filename}.svg` || 'svgsprite.svg';
 
       const sprite = this.optimizedCwd.reduce(
         (store, entry, index) => {

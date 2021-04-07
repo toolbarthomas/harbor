@@ -19,14 +19,14 @@ class Environment {
     };
   }
 
-  get config() {
+  define() {
     const source = resolve(process.cwd(), '.env');
     const env = existsSync(source) ? config({ path: source }) : {};
 
     const parsed = env.parsed || {};
 
     // Inherit any missing option from the defaults Object.
-    Object.keys(this.defaults).forEach(defaultOption => {
+    Object.keys(this.defaults).forEach((defaultOption) => {
       if (!Object.prototype.hasOwnProperty.call(parsed, defaultOption)) {
         parsed[defaultOption] = this.defaults[defaultOption];
       }

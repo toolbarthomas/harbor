@@ -2,25 +2,30 @@ const { transform } = require('@babel/core');
 const { statSync, readFileSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const mkdirp = require('mkdirp');
-const { dirname } = require('path');
-const Logger = require('./common/Logger');
+const { dirname, join } = require('path');
 
-class JsCompiler {
-  init(config) {
-    return new Promise(cb => {
-      this.config = config;
+const Logger = require('../common/Logger');
 
-      this.cwd = {
-        main: sync(`${this.config.THEME_SRC}/main/javascripts/**/*.js`),
-        modules: sync(`${this.config.THEME_SRC}/modules/*/*/*.js`),
-      };
+const BaseService = require('./BaseService');
 
-      const baseDirectories = Object.keys(this.cwd);
+class JsCompiler extends BaseService {
+  constructor() {
+    super();
+  }
+
+  init(environment) {
+    return new Promise((cb) => {
+      this.environment = environment;
+
+      if (!this.config.entry instanceof Object) {
+        cb();
+      }
 
       let queue = 0;
 
-      baseDirectories.forEach(async directory => {
-        const cwd = this.cwd[directory];
+      const baseDirectories = Object.keys(this.config.entry);
+      baseDirectories.forEach(async (name) => {
+        const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
 
         if (cwd.length > 0) {
           await this.transpileCwd(cwd);
@@ -41,11 +46,11 @@ class JsCompiler {
    * @param {Array} cwd Array of javascript files to process.
    */
   transpileCwd(cwd) {
-    return new Promise(cb => {
+    return new Promise((cb) => {
       // Keep track of the actual processing queue.
       let queue = 0;
 
-      cwd.forEach(entry => {
+      cwd.forEach((entry) => {
         queue += 1;
 
         if (!statSync(entry).size) {
@@ -55,7 +60,10 @@ class JsCompiler {
 
           const source = readFileSync(entry);
           const transpiledSource = transform(source, { presets: ['@babel/env'] });
-          const destination = entry.replace(this.config.THEME_SRC, this.config.THEME_DIST);
+          const destination = entry.replace(
+            this.environment.THEME_SRC,
+            this.environment.THEME_DIST
+          );
 
           /**
            * Create the destination directory before writing the source to

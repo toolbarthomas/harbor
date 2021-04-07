@@ -1,10 +1,17 @@
 const { load } = require('module-config-loader');
+const { resolve } = require('path');
 
+/**
+ * The Configmanager exposes the given Harbor option from the default and
+ * custom configuration.
+ */
 class ConfigManager {
   static load(option) {
     if (!option) {
       return null;
     }
+
+    const defaultConfig = load(resolve(__dirname, '../../harbor.default.config.js'));
 
     /**
      * Check if the defined configuration key has already been defined within
@@ -17,7 +24,7 @@ class ConfigManager {
 
     const config = load('harbor.config.js');
 
-    if (config instanceof Object && config[option] instanceof Object) {
+    if (config instanceof Object && defaultConfig[option] instanceof Object) {
       /**
        * Cache the actual defined config within the Node process.
        */
@@ -25,10 +32,10 @@ class ConfigManager {
         process.env.harbor[option] = config[option];
       }
 
-      return config[option];
+      return Object.assign(defaultConfig[option], config[option]);
     }
 
-    return {};
+    return defaultConfig[option];
   }
 }
 

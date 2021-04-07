@@ -1,21 +1,26 @@
 const browserSync = require('browser-sync');
 const { existsSync } = require('fs');
 const { resolve } = require('path');
-const Logger = require('./common/Logger');
-const ConfigManager = require('./common/ConfigManager');
 
-class Server {
-  init(config) {
+const Logger = require('../common/Logger');
+const BaseService = require('./BaseService');
+
+class Server extends BaseService {
+  constructor() {
+    super();
+  }
+
+  init(environment) {
     this.instance = browserSync.create();
 
     Logger.info('Starting the Browsersync development server');
 
-    const serverDirectories = [resolve(config.THEME_DIST)];
+    const serverDirectories = [resolve(environment.THEME_DIST)];
 
-    const { sharedDirectories } = ConfigManager.load('server');
+    const { sharedDirectories } = this.config;
 
     if (sharedDirectories && Array.isArray(sharedDirectories)) {
-      sharedDirectories.forEach(directory => {
+      sharedDirectories.forEach((directory) => {
         if (existsSync(resolve(directory))) {
           serverDirectories.push(resolve(directory));
         }
@@ -24,10 +29,10 @@ class Server {
 
     this.instance.init({
       open: false,
-      port: config.THEME_PORT,
+      port: environment.THEME_PORT,
       server: serverDirectories,
       watch: true,
-      files: [`${resolve(config.THEME_DIST)}/**/*.css`],
+      files: [`${resolve(environment.THEME_DIST)}/**/*.css`],
     });
   }
 }

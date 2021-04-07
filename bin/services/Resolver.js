@@ -1,12 +1,18 @@
 const { existsSync, createReadStream, createWriteStream } = require('fs');
 const mkdirp = require('mkdirp');
 const { basename, dirname, join, resolve } = require('path');
-const Logger = require('./common/Logger');
-const ConfigManager = require('./common/ConfigManager');
 
-class Resolver {
-  init(config) {
-    const vendors = ConfigManager.load('resolve');
+const Logger = require('../common/Logger');
+
+const BaseService = require('./BaseService');
+
+class Resolver extends BaseService {
+  constructor() {
+    super();
+  }
+
+  init(environment) {
+    const vendors = this.config;
 
     // Throw an exception if vendors is not a valid Object.
     if (!vendors || !(vendors instanceof Object) || Array.isArray(vendors)) {
@@ -30,9 +36,9 @@ class Resolver {
      * callback after all modules has been resolved.
      */
     return new Promise((cb, reject) => {
-      Object.keys(vendors).forEach(name => {
+      Object.keys(vendors).forEach((name) => {
         const vendor = vendors[name];
-        const cwd = dirname((require.resolve(`${name}/package.json`)));
+        const cwd = dirname(require.resolve(`${name}/package.json`));
         const path = join(cwd, vendor);
 
         /**
@@ -48,7 +54,7 @@ class Resolver {
         }
 
         // Define the destination path for the current module.
-        const dest = resolve(config.THEME_DIST, 'main/vendors/', name, basename(path));
+        const dest = resolve(environment.THEME_DIST, 'main/vendors/', name, basename(path));
 
         mkdirp(dirname(dest)).then((dirPath, error) => {
           if (error) {
