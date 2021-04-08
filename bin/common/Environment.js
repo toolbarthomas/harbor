@@ -17,6 +17,8 @@ class Environment {
       THEME_PORT: 8080,
       THEME_ENVIRONMENT: 'development',
     };
+
+    this.config = {};
   }
 
   define() {
@@ -34,6 +36,8 @@ class Environment {
 
     // Enable DEVMODE flag if the current environment is set to 'development'.
     parsed.THEME_DEVMODE = parsed.THEME_ENVIRONMENT === 'development';
+
+    this.config = parsed;
 
     return parsed;
   }

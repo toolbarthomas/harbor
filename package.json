@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.11.0",
+  "version": "1.0.0",
   "description": "Boilerplate for Drupal Themes",
   "main": "./bin/Harbor.js",
   "scripts": {
@@ -53,6 +53,8 @@
     "eslint-config-prettier": "^8.1.0",
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-prettier": "^3.3.1",
+    "focus-trap": "^6.3.0",
+    "focus-within-polyfill": "^5.2.0",
     "imagemin": "^7.0.1",
     "imagemin-svgo": "^8.0.0",
     "log-symbols": "^4.1.0",
@@ -72,6 +74,7 @@
     "stylelint-config-recommended": "^4.0.0",
     "stylelint-config-recommended-scss": "^4.2.0",
     "stylelint-scss": "^3.19.0",
-    "svgstore": "^3.0.0-2"
+    "svgstore": "^3.0.0-2",
+    "svgxuse": "^1.2.6"
   }
 }
