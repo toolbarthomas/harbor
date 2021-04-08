@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "1.0.0",
+  "version": "0.12.1",
   "description": "Boilerplate for Drupal Themes",
   "main": "./bin/Harbor.js",
   "scripts": {
@@ -15,13 +15,14 @@
     "serve": "node ./index.js task=serve"
   },
   "files": [
-    "bin/",
     ".babelrc",
     ".browserlistrc",
     ".eslintignore",
     ".eslintrc",
     ".prettierrc",
-    ".stylelintrc"
+    ".stylelintrc",
+    "bin/",
+    "harbor.default.config.js"
   ],
   "repository": {
     "type": "git",
