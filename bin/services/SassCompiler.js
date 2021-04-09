@@ -139,7 +139,7 @@ class SassCompiler extends BaseService {
           .replace(resolve(this.environment.THEME_SRC), resolve(this.environment.THEME_DIST))
           .replace('.scss', '.css');
 
-        this.Console.info(`Compiling: ${entry}`);
+        this.Console.log(`Compiling: ${entry}`);
 
         render(
           Object.assign(this.config.options, {
@@ -185,7 +185,7 @@ class SassCompiler extends BaseService {
             writeFileSync(`${destination}.map`, result.map.toString());
           }
 
-          this.Console.success(`Done compiling: ${destination}`);
+          this.Console.log(`Done compiling: ${destination}`);
         }
 
         cb();

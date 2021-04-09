@@ -1,14 +1,7 @@
-/* eslint-disable class-methods-use-this */
-
-const { basename, extname } = require('path');
 const chalk = require('chalk');
 const symbols = require('log-symbols');
 
 class Logger {
-  constructor(name) {
-    this.namespace = name ? `[ ${name} ]` : '';
-  }
-
   /**
    * Prints out an error message & exit the current process.
    *
@@ -17,7 +10,7 @@ class Logger {
    * don't kill the process.
    */
   error(message, keepAlive) {
-    this.outputMessages(message, 'error', 'error');
+    this.outputMessages(message, 'error', '');
 
     if (!keepAlive) {
       process.exit(1);
@@ -52,23 +45,34 @@ class Logger {
   }
 
   /**
+   * Prints out a log message.
+   *
+   * @param {String|Array} message The message to display.
+   */
+  log(message) {
+    this.outputMessages(message, 'log');
+  }
+
+  /**
    * Check if the defined message has been split up in multiple lines.
    * Ouput a new console method for each message entry.
    *
    * @param {String|Array} message The actual message to output
    * @param {String} method Defines the method to use for the console Object.
    */
-  outputMessages(message, method) {
-    const styles = Logger.getMessageStyle(method);
+  outputMessages(message, method, type) {
+    const styles = Logger.getMessageStyle(type);
 
     if (message.constructor === Array && message instanceof Array) {
       message.forEach((m) => {
         // eslint-disable-next-line no-console
-        console[method](chalk[styles.color](symbols[styles.symbol], `${this.namespace} ${m}`));
+        console[method](chalk[styles.color](symbols[styles.symbol] && symbols[styles.symbol], m));
       });
     } else {
       // eslint-disable-next-line no-console
-      console[method](chalk[styles.color](symbols[styles.symbol], `${this.namespace} ${message}`));
+      console[method](
+        chalk[styles.color](symbols[styles.symbol] && symbols[styles.symbol], message)
+      );
     }
   }
 
@@ -79,25 +83,28 @@ class Logger {
    *
    * @return {Object} The styles object to return.
    */
-  static getMessageStyle(method) {
+  static getMessageStyle(type) {
     const styles = {};
 
-    switch (method) {
+    switch (type) {
       case 'error':
         styles.color = 'red';
         styles.symbol = 'error';
         break;
-      case 'warn':
+      case 'warning':
         styles.color = 'yellow';
         styles.symbol = 'warning';
         break;
-      case 'log':
+      case 'success':
         styles.color = 'green';
         styles.symbol = 'success';
         break;
-      default:
+      case 'info':
         styles.color = 'blue';
         styles.symbol = 'info';
+        break;
+      default:
+        styles.color = 'grey';
         break;
     }
 

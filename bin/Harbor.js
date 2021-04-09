@@ -56,13 +56,13 @@ class Harbor {
         (name) =>
           new Promise(async (cb) => {
             if (typeof this[name] === 'function') {
-              Console.info(`Running task: ${name}`);
+              Console.info(`Starting: ${name}`);
 
               await this[name](this.env);
 
               completed.push(name);
 
-              Console.success(`Done - ${name}`);
+              Console.info(`Finished: ${name}`);
             } else {
               Console.error(`Task '${name}' does not exists.`);
             }

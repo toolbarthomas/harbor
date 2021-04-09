@@ -97,7 +97,7 @@ class PostCssCompiler {
               // Write the actual css to the filesystem.
               writeFileSync(destination, result.css);
 
-              this.Console.success(`Done compiling: ${destination}`);
+              this.Console.log(`Done compiling: ${destination}`);
             }
 
             cb();

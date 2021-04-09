@@ -45,13 +45,13 @@ class SvgSpriteCompiler extends BaseService {
   }
 
   async prepareCwd(cwd, name) {
-    this.Console.info(`Preparing sprite ${name}...`);
+    this.Console.log(`Preparing sprite ${name}...`);
 
     return new Promise((done) => {
       imagemin(cwd, this.config.options).then((result) => {
         this.optimizedCwd = result;
 
-        this.Console.success(`Done preparing sprite.`);
+        this.Console.log(`Done preparing sprite.`);
 
         done();
       });
@@ -70,7 +70,7 @@ class SvgSpriteCompiler extends BaseService {
         return;
       }
 
-      this.Console.info(`Generating sprite.`);
+      this.Console.log(`Generating sprite.`);
 
       const basePath = join(
         this.environment.THEME_SRC,
@@ -103,7 +103,7 @@ class SvgSpriteCompiler extends BaseService {
 
           writeFileSync(resolve(destination, name), sprite.toString());
 
-          this.Console.success(`Done generating: ${join(destination, name)}`);
+          this.Console.log(`Done generating: ${join(destination, name)}`);
 
           cb();
         });

@@ -82,7 +82,7 @@ class StyleOptimizer extends BaseService {
     return new Promise((cb) => {
       const source = readFileSync(entry);
 
-      this.Console.info(`Optimizing: ${entry}`);
+      this.Console.log(`Optimizing: ${entry}`);
 
       postcss(this.postcssConfig)
         .process(source, {
@@ -116,7 +116,7 @@ class StyleOptimizer extends BaseService {
         // Write the actual css to the filesystem.
         writeFileSync(`${entry}`, result.css);
 
-        this.Console.success(`Successfully optimized: ${entry}`);
+        this.Console.log(`Successfully optimized: ${entry}`);
 
         cb();
       });

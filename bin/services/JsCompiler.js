@@ -52,7 +52,7 @@ class JsCompiler extends BaseService {
               if (!statSync(entry).size) {
                 this.Console.warning(`Skipping empty file: ${entry}`);
               } else {
-                this.Console.info(`Transpiling: ${entry}`);
+                this.Console.log(`Transpiling: ${entry}`);
 
                 const source = readFileSync(entry);
                 const transpiledSource = transform(source, { presets: ['@babel/env'] });
@@ -72,7 +72,7 @@ class JsCompiler extends BaseService {
 
                   writeFileSync(destination, transpiledSource.code);
 
-                  this.Console.success(`Successfully transpiled: ${destination}`);
+                  this.Console.log(`Successfully transpiled: ${destination}`);
 
                   cb();
                 });
