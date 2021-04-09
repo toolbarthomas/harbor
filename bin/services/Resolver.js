@@ -2,8 +2,6 @@ const { existsSync, createReadStream, createWriteStream } = require('fs');
 const mkdirp = require('mkdirp');
 const { basename, dirname, join, resolve } = require('path');
 
-const Logger = require('../common/Logger');
-
 const BaseService = require('./BaseService');
 
 class Resolver extends BaseService {
@@ -11,70 +9,57 @@ class Resolver extends BaseService {
     super();
   }
 
-  init(environment) {
-    const vendors = this.config;
-
-    // Throw an exception if vendors is not a valid Object.
-    if (!vendors || !(vendors instanceof Object) || Array.isArray(vendors)) {
-      Logger.error(`The 'resolve' key must be a valid Object.`);
+  async init(environment) {
+    if (!this.config.entry instanceof Object) {
+      return;
     }
 
-    /**
-     * Keep track of the amount of modules to resolve in order to call the
-     * actual callback.
-     */
-    this.entries = Object.keys(vendors).length;
+    const entries = Object.keys(this.config.entry);
 
-    /**
-     * Create a new queue in order to keep track if all modules has been
-     * resolved.
-     */
-    this.queue = 0;
+    if (!entries.length) {
+      return;
+    }
 
-    /**
-     * Resolve each module within a global Promise in order to initiate the
-     * callback after all modules has been resolved.
-     */
-    return new Promise((cb, reject) => {
-      Object.keys(vendors).forEach((name) => {
-        const vendor = vendors[name];
-        const cwd = dirname(require.resolve(`${name}/package.json`));
-        const path = join(cwd, vendor);
+    await Promise.all(
+      entries.map(
+        (name) =>
+          new Promise((cb) => {
+            const vendor = this.config.entry[name];
+            const cwd = dirname(require.resolve(`${name}/package.json`));
+            const path = join(cwd, vendor);
 
-        /**
-         * Decrease the entries values since the current dependency doesn't
-         * exists.
-         */
-        if (!existsSync(path)) {
-          Logger.warning(`Unable to find ${vendor} from vendor: ${name}. Skipping dependency...`);
+            /**
+             * Decrease the entries values since the current dependency doesn't
+             * exists.
+             */
+            if (!existsSync(path)) {
+              this.Console.warning(
+                `Unable to find ${vendor} from vendor: ${name}. Skipping dependency...`
+              );
 
-          this.entries -= 1;
+              cb();
+            }
 
-          return;
-        }
+            // Define the destination path for the current module.
+            const dest = resolve(environment.THEME_DIST, 'main/vendors/', name, basename(path));
 
-        // Define the destination path for the current module.
-        const dest = resolve(environment.THEME_DIST, 'main/vendors/', name, basename(path));
-
-        mkdirp(dirname(dest)).then((dirPath, error) => {
-          if (error) {
-            Logger.error(error);
-          }
-          // Stream the actual contents in order to resolve each module faster.
-          createReadStream(path).pipe(
-            createWriteStream(dest).on('close', () => {
-              Logger.success(`'${name}' has been resolved successfully!`);
-
-              this.queue += 1;
-
-              if (this.queue === this.entries) {
-                cb();
+            mkdirp(dirname(dest)).then((dirPath, error) => {
+              if (error) {
+                this.Console.error(error);
               }
-            })
-          );
-        });
-      });
-    });
+
+              // Stream the actual contents in order to resolve each module faster.
+              createReadStream(path).pipe(
+                createWriteStream(dest).on('close', () => {
+                  this.Console.success(`'${name}' has been resolved successfully!`);
+
+                  cb();
+                })
+              );
+            });
+          })
+      )
+    );
   }
 }
 

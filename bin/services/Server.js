@@ -2,7 +2,6 @@ const browserSync = require('browser-sync');
 const { existsSync } = require('fs');
 const { resolve } = require('path');
 
-const Logger = require('../common/Logger');
 const BaseService = require('./BaseService');
 
 class Server extends BaseService {
@@ -13,7 +12,7 @@ class Server extends BaseService {
   init(environment) {
     this.instance = browserSync.create();
 
-    Logger.info('Starting the Browsersync development server');
+    this.Console.info('Starting the Browsersync development server');
 
     const serverDirectories = [resolve(environment.THEME_DIST)];
 

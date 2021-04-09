@@ -1,9 +1,14 @@
 /* eslint-disable class-methods-use-this */
 
+const { basename, extname } = require('path');
 const chalk = require('chalk');
 const symbols = require('log-symbols');
 
 class Logger {
+  constructor(name) {
+    this.namespace = name ? `[ ${name} ]` : '';
+  }
+
   /**
    * Prints out an error message & exit the current process.
    *
@@ -12,7 +17,7 @@ class Logger {
    * don't kill the process.
    */
   error(message, keepAlive) {
-    Logger.outputMessages(message, 'error', 'error');
+    this.outputMessages(message, 'error', 'error');
 
     if (!keepAlive) {
       process.exit(1);
@@ -25,7 +30,7 @@ class Logger {
    * @param {String|Array} message The message to display.
    */
   warning(message) {
-    Logger.outputMessages(message, 'warn', 'warning');
+    this.outputMessages(message, 'warn', 'warning');
   }
 
   /**
@@ -34,7 +39,7 @@ class Logger {
    * @param {String|Array} message The message to display.
    */
   success(message) {
-    Logger.outputMessages(message, 'log', 'success');
+    this.outputMessages(message, 'log', 'success');
   }
 
   /**
@@ -43,7 +48,7 @@ class Logger {
    * @param {String|Array} message The message to display.
    */
   info(message) {
-    Logger.outputMessages(message, 'info', 'info');
+    this.outputMessages(message, 'info', 'info');
   }
 
   /**
@@ -53,17 +58,17 @@ class Logger {
    * @param {String|Array} message The actual message to output
    * @param {String} method Defines the method to use for the console Object.
    */
-  static outputMessages(message, method) {
+  outputMessages(message, method) {
     const styles = Logger.getMessageStyle(method);
 
     if (message.constructor === Array && message instanceof Array) {
-      message.forEach(m => {
+      message.forEach((m) => {
         // eslint-disable-next-line no-console
-        console[method](chalk[styles.color](symbols[styles.symbol], m));
+        console[method](chalk[styles.color](symbols[styles.symbol], `${this.namespace} ${m}`));
       });
     } else {
       // eslint-disable-next-line no-console
-      console[method](chalk[styles.color](symbols[styles.symbol], message));
+      console[method](chalk[styles.color](symbols[styles.symbol], `${this.namespace} ${message}`));
     }
   }
 
@@ -100,4 +105,4 @@ class Logger {
   }
 }
 
-module.exports = new Logger();
+module.exports = Logger;

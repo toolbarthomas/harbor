@@ -31,7 +31,9 @@ module.exports = {
     },
   },
   Resolver: {
-    svgxuse: 'svgxuse.min.js',
+    entry: {
+      svgxuse: 'svgxuse.min.js',
+    },
   },
   StyleOptimizer: {
     options: {

@@ -4,7 +4,6 @@ const mkdirp = require('mkdirp');
 const { load } = require('module-config-loader');
 const { dirname } = require('path');
 const postcss = require('postcss');
-const Logger = require('../common/Logger');
 
 class PostCssCompiler {
   constructor() {
@@ -13,13 +12,17 @@ class PostCssCompiler {
     this.styleLintError = false;
   }
 
-  init(config) {
+  init(environment) {
     return new Promise((cb) => {
-      this.environment = config;
+      this.environment = environment;
+
+      if (!this.config.entry instanceof Object) {
+        cb();
+      }
 
       let queue = 0;
 
-      const baseDirectories = Object.keys(this.environment.entry);
+      const baseDirectories = Object.keys(this.config.entry);
       baseDirectories.forEach(async (name) => {
         const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
 
@@ -48,7 +51,7 @@ class PostCssCompiler {
 
       cwd.forEach(async (entry) => {
         if (!statSync(entry).size) {
-          Logger.warning(`Skipping empty file: ${entry}`);
+          this.Console.warning(`Skipping empty file: ${entry}`);
         } else {
           await this.processFile(entry);
         }
@@ -76,7 +79,7 @@ class PostCssCompiler {
       const destination = entry.replace(this.environment.THEME_SRC, this.environment.THEME_DIST);
       const source = readFileSync(entry);
 
-      Logger.info(`Compiling: ${entry}`);
+      this.Console.info(`Compiling: ${entry}`);
 
       postcss(this.config.options.plugins)
         .process(source, {
@@ -84,17 +87,17 @@ class PostCssCompiler {
         })
         .then((result) => {
           result.warnings().forEach((warning) => {
-            Logger.warning(warning.toString());
+            this.Console.warning(warning.toString());
           });
 
           mkdirp(dirname(destination)).then((dirPath, error) => {
             if (error) {
-              Logger.error(error);
+              this.Console.error(error);
             } else {
               // Write the actual css to the filesystem.
               writeFileSync(destination, result.css);
 
-              Logger.success(`Done compiling: ${destination}`);
+              this.Console.success(`Done compiling: ${destination}`);
             }
 
             cb();

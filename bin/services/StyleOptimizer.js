@@ -7,7 +7,6 @@ const { dirname, join } = require('path');
 const postcss = require('postcss');
 const combineDuplicateSelectors = require('postcss-combine-duplicated-selectors');
 
-const Logger = require('../common/Logger');
 const BaseService = require('./BaseService');
 
 class StyleOptimizer extends BaseService {
@@ -15,41 +14,41 @@ class StyleOptimizer extends BaseService {
     super();
   }
 
-  init(environment) {
-    return new Promise((cb) => {
-      this.environment = environment;
+  async init(environment) {
+    this.environment = environment;
 
-      if (!this.config.entry instanceof Object) {
-        cb();
-      }
+    if (!this.config.entry instanceof Object) {
+      cb();
+    }
 
-      let queue = 0;
+    this.postcssConfig = this.config.options;
+    const entries = Object.keys(this.config.entry);
 
-      const baseDirectories = Object.keys(this.config.entry);
+    if (!entries.length) {
+      return;
+    }
 
-      this.postcssConfig = this.config.options;
+    if (!this.environment.THEME_DEVMODE) {
+      this.postTHEME_THEME_ssConfig.plugins.push(
+        combineDuplicateSelectors({ removeDuplicatedProperties: true })
+      );
+      this.postcssConfig.plugins.push(cssnano({ mergeLonghand: false }));
+    }
 
-      if (!this.environment.THEME_DEVMODE) {
-        this.postTHEME_THEME_ssConfig.plugins.push(
-          combineDuplicateSelectors({ removeDuplicatedProperties: true })
-        );
-        this.postcssConfig.plugins.push(cssnano({ mergeLonghand: false }));
-      }
+    await Promise.all(
+      entries.map(
+        (name) =>
+          new Promise((cb) => {
+            const cwd = sync(join(this.environment.THEME_DIST, this.config.entry[name]));
 
-      baseDirectories.forEach(async (name) => {
-        const cwd = sync(join(this.environment.THEME_DIST, this.config.entry[name]));
-
-        if (cwd.length > 0) {
-          await this.optimizeCwd(cwd);
-        }
-
-        queue += 1;
-
-        if (queue >= baseDirectories.length) {
-          cb();
-        }
-      });
-    });
+            if (cwd.length > 0) {
+              this.optimizeCwd(cwd).then(() => cb());
+            } else {
+              cb();
+            }
+          })
+      )
+    );
   }
 
   /**
@@ -58,25 +57,19 @@ class StyleOptimizer extends BaseService {
    * @param {Array} cwd The actual array to process.
    */
   optimizeCwd(cwd) {
-    return new Promise((cb) => {
-      // Keep track of the actual processing queue.
-      let queue = 0;
+    return new Promise((done) => {
+      Promise.all(
+        cwd.map(
+          (entry) =>
+            new Promise((cb) => {
+              if (!statSync(entry).size) {
+                return cb();
+              }
 
-      cwd.forEach(async (entry) => {
-        if (statSync(entry).size) {
-          await this.optimizeFile(entry);
-        }
-
-        queue += 1;
-
-        /**
-         * Only return the Promise Callback after each entry file has been
-         * processed.
-         */
-        if (queue >= cwd.length) {
-          cb();
-        }
-      });
+              this.optimizeFile(entry).then(() => cb());
+            })
+        )
+      ).then(() => done());
     });
   }
 
@@ -89,7 +82,7 @@ class StyleOptimizer extends BaseService {
     return new Promise((cb) => {
       const source = readFileSync(entry);
 
-      Logger.info(`Optimizing: ${entry}`);
+      this.Console.info(`Optimizing: ${entry}`);
 
       postcss(this.postcssConfig)
         .process(source, {
@@ -97,7 +90,7 @@ class StyleOptimizer extends BaseService {
         })
         .then(async (result) => {
           result.warnings().forEach((warning) => {
-            Logger.warning(warning.toString());
+            this.Console.warning(warning.toString());
           });
 
           await this.writeFile(entry, result);
@@ -117,13 +110,13 @@ class StyleOptimizer extends BaseService {
     return new Promise((cb) => {
       mkdirp(dirname(entry)).then((dirPath, error) => {
         if (error) {
-          Logger.error(error);
+          this.Console.error(error);
         }
 
         // Write the actual css to the filesystem.
         writeFileSync(`${entry}`, result.css);
 
-        Logger.success(`Successfully optimized: ${entry}`);
+        this.Console.success(`Successfully optimized: ${entry}`);
 
         cb();
       });

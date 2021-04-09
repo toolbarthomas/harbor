@@ -26,36 +26,62 @@ class Harbor {
     this.Server = new Server();
     this.StyleOptimizer = new StyleOptimizer();
     this.SvgSpriteCompiler = new SvgSpriteCompiler();
+
+    this.env = this.Environment.define();
   }
 
   /**
    * Init Harbor and run tasks specified from the Command Line Arguments.
    */
-  init() {
+  async init() {
     const { task } = this.Argv.args;
+    const Console = new Logger(this.constructor.name);
 
     if (!task) {
-      Logger.error('No task has been defined.');
+      Console.error('No task has been defined.');
     }
 
     const queue = task.split(',').map((t) => {
       return t.trim();
     });
 
-    const environment = this.Environment.define();
+    if (!queue.length) {
+      return;
+    }
 
-    // Run all defined tasks in a Synchronous order.
-    queue.forEach(async (name) => {
-      if (typeof this[name] === 'function') {
-        Logger.info(`Running task: ${name}`);
+    const completed = [];
 
-        await this[name](environment);
+    await Promise.all(
+      queue.map(
+        (name) =>
+          new Promise(async (cb) => {
+            if (typeof this[name] === 'function') {
+              Console.info(`Running task: ${name}`);
 
-        Logger.success(`Done - ${name}`);
-      } else {
-        Logger.error(`Task '${name}' does not exists.`);
-      }
-    });
+              await this[name](this.env);
+
+              completed.push(name);
+
+              Console.success(`Done - ${name}`);
+            } else {
+              Console.error(`Task '${name}' does not exists.`);
+            }
+
+            cb();
+          })
+      )
+    );
+
+    Console.success(`Completed ${completed.length} tasks`);
+  }
+
+  /**
+   * Returns the Harbor environment configuration.
+   *
+   * @returns the defined Harbor environment configuration.
+   */
+  getEnvironment() {
+    return this.env ? this.env : this.Environment.define();
   }
 
   /**
@@ -79,8 +105,8 @@ class Harbor {
   }
 
   /**
-   * Harbor tasks for resolving specific dependencies that are not defined within
-   * the src directory.
+   * Resolves the configured directories to the build directory, should be used
+   * on entries that are excluded from the defined source directory.
    *
    * @param {Object} config The Harbor environment configuration object.
    */

@@ -1,3 +1,5 @@
 const Harbor = require('./bin/Harbor');
 
-Harbor.init();
+const run = async () => await Harbor.init();
+
+run();

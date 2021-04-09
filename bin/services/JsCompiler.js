@@ -2,9 +2,7 @@ const { transform } = require('@babel/core');
 const { statSync, readFileSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const mkdirp = require('mkdirp');
-const { dirname, join } = require('path');
-
-const Logger = require('../common/Logger');
+const { dirname, join, resolve } = require('path');
 
 const BaseService = require('./BaseService');
 
@@ -13,31 +11,31 @@ class JsCompiler extends BaseService {
     super();
   }
 
-  init(environment) {
-    return new Promise((cb) => {
-      this.environment = environment;
+  async init(environment) {
+    this.environment = environment;
 
-      if (!this.config.entry instanceof Object) {
-        cb();
-      }
+    if (!this.config.entry instanceof Object) {
+      return;
+    }
 
-      let queue = 0;
+    const entries = Object.keys(this.config.entry);
 
-      const baseDirectories = Object.keys(this.config.entry);
-      baseDirectories.forEach(async (name) => {
-        const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
+    if (!entries.length) {
+      return;
+    }
 
-        if (cwd.length > 0) {
-          await this.transpileCwd(cwd);
-        }
+    await Promise.all(
+      entries.map(
+        (name) =>
+          new Promise((cb) => {
+            const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
 
-        queue += 1;
-
-        if (queue >= baseDirectories.length) {
-          cb();
-        }
-      });
-    });
+            this.transpileCwd(cwd).then(() => {
+              cb();
+            });
+          })
+      )
+    );
   }
 
   /**
@@ -46,48 +44,42 @@ class JsCompiler extends BaseService {
    * @param {Array} cwd Array of javascript files to process.
    */
   transpileCwd(cwd) {
-    return new Promise((cb) => {
-      // Keep track of the actual processing queue.
-      let queue = 0;
+    return new Promise(async (done) => {
+      Promise.all(
+        cwd.map(
+          (entry) =>
+            new Promise((cb) => {
+              if (!statSync(entry).size) {
+                this.Console.warning(`Skipping empty file: ${entry}`);
+              } else {
+                this.Console.info(`Transpiling: ${entry}`);
 
-      cwd.forEach((entry) => {
-        queue += 1;
+                const source = readFileSync(entry);
+                const transpiledSource = transform(source, { presets: ['@babel/env'] });
+                const destination = resolve(entry).replace(
+                  resolve(this.environment.THEME_SRC),
+                  resolve(this.environment.THEME_DIST)
+                );
 
-        if (!statSync(entry).size) {
-          Logger.warning(`Skipping empty file: ${entry}`);
-        } else {
-          Logger.info(`Transpiling: ${entry}`);
+                /**
+                 * Create the destination directory before writing the source to
+                 * the filesystem.
+                 */
+                mkdirp(dirname(destination)).then((dirPath, error) => {
+                  if (error) {
+                    this.Console.error(error);
+                  }
 
-          const source = readFileSync(entry);
-          const transpiledSource = transform(source, { presets: ['@babel/env'] });
-          const destination = entry.replace(
-            this.environment.THEME_SRC,
-            this.environment.THEME_DIST
-          );
+                  writeFileSync(destination, transpiledSource.code);
 
-          /**
-           * Create the destination directory before writing the source to
-           * the filesystem.
-           */
-          mkdirp(dirname(destination)).then((dirPath, error) => {
-            if (error) {
-              Logger.error(error);
-            }
+                  this.Console.success(`Successfully transpiled: ${destination}`);
 
-            writeFileSync(destination, transpiledSource.code);
-
-            Logger.success(`Successfully transpiled: ${destination}`);
-
-            /**
-             * Resolve the actual Promise if all files within the current cwd
-             * are transpiled.
-             */
-            if (queue >= cwd.length) {
-              cb();
-            }
-          });
-        }
-      });
+                  cb();
+                });
+              }
+            })
+        )
+      ).then(() => done());
     });
   }
 }

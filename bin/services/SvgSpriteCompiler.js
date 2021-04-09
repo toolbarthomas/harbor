@@ -2,10 +2,9 @@ const { statSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
 const imagemin = require('imagemin');
 const mkdirp = require('mkdirp');
-const { basename, join, resolve } = require('path');
+const { basename, dirname, join, resolve } = require('path');
 const svgstore = require('svgstore');
 
-const Logger = require('../common/Logger');
 const BaseService = require('./BaseService');
 
 class SvgSpriteCompiler extends BaseService {
@@ -13,41 +12,50 @@ class SvgSpriteCompiler extends BaseService {
     super();
   }
 
-  init(environment) {
-    return new Promise((cb) => {
-      this.environment = environment;
+  async init(environment) {
+    this.environment = environment;
 
-      if (!this.config.entry instanceof Object) {
-        cb();
-      }
+    if (!this.config.entry instanceof Object) {
+      cb();
+    }
 
-      let queue = 0;
-      this.prefix = this.config.prefix || 'svg--';
+    this.prefix = this.config.prefix || 'svg--';
 
-      const baseDirectories = Object.keys(this.config.entry);
-      baseDirectories.forEach(async (name) => {
-        const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
+    const entries = Object.keys(this.config.entry);
 
-        if (cwd.length > 0) {
-          await this.prepareCwd(cwd, name);
-          await this.processCwd(cwd, name);
-        }
+    if (!entries.length) {
+      return;
+    }
 
-        queue += 1;
+    await Promise.all(
+      entries.map(
+        (name) =>
+          new Promise(async (cb) => {
+            const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
 
-        if (queue >= baseDirectories.length) {
-          cb();
-        }
-      });
-    });
+            if (cwd.length > 0) {
+              await this.prepareCwd(cwd, name);
+              await this.processCwd(cwd, name);
+            }
+
+            cb();
+          })
+      )
+    );
   }
 
   async prepareCwd(cwd, name) {
-    Logger.info(`Preparing sprite ${name}...`);
+    this.Console.info(`Preparing sprite ${name}...`);
 
-    this.optimizedCwd = await imagemin(cwd, this.config.options);
+    return new Promise((done) => {
+      imagemin(cwd, this.config.options).then((result) => {
+        this.optimizedCwd = result;
 
-    Logger.success(`Done preparing sprite.`);
+        this.Console.success(`Done preparing sprite.`);
+
+        done();
+      });
+    });
   }
 
   /**
@@ -62,11 +70,17 @@ class SvgSpriteCompiler extends BaseService {
         return;
       }
 
-      Logger.info(`Generating sprite.`);
+      this.Console.info(`Generating sprite.`);
 
-      const destination = resolve(cwd[0])
-        .replace(/images.*$/, 'images')
-        .replace(resolve(this.environment.THEME_SRC), resolve(this.environment.THEME_DIST));
+      const basePath = join(
+        this.environment.THEME_SRC,
+        dirname(this.config.entry[filename].replace('/*', ''))
+      );
+
+      const destination = resolve(basePath).replace(
+        resolve(this.environment.THEME_SRC),
+        resolve(this.environment.THEME_DIST)
+      );
       const name = `${filename}.svg` || 'svgsprite.svg';
 
       const sprite = this.optimizedCwd.reduce(
@@ -84,15 +98,17 @@ class SvgSpriteCompiler extends BaseService {
       if (sprite) {
         mkdirp(destination).then((dirPath, error) => {
           if (error) {
-            Logger.error(error);
+            this.Console.error(error);
           }
 
           writeFileSync(resolve(destination, name), sprite.toString());
 
-          Logger.success(`Done generating: ${join(destination, name)}`);
+          this.Console.success(`Done generating: ${join(destination, name)}`);
 
           cb();
         });
+      } else {
+        cb();
       }
     });
   }

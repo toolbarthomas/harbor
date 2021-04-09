@@ -8,7 +8,6 @@ const postcss = require('postcss');
 const postcssScss = require('postcss-scss');
 const stylelint = require('stylelint');
 
-const Logger = require('../common/Logger');
 const ConfigManager = require('../common/ConfigManager');
 const BaseService = require('./BaseService');
 
@@ -29,29 +28,33 @@ class SassCompiler extends BaseService {
     this.commonData = '';
   }
 
-  init(environment) {
-    return new Promise((cb) => {
-      this.environment = environment;
+  async init(environment) {
+    this.environment = environment;
 
-      this.postcssConfig = ConfigManager.load('PostCssCompiler').options;
+    if (!this.config.entry instanceof Object) {
+      return;
+    }
 
-      let queue = 0;
+    this.postcssConfig = ConfigManager.load('PostCssCompiler').options;
 
-      const baseDirectories = Object.keys(this.config.entry);
-      baseDirectories.forEach(async (name) => {
-        const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
+    const entries = Object.keys(this.config.entry);
 
-        if (cwd.length > 0) {
-          await this.renderCwd(cwd);
-        }
+    if (!entries.length) {
+      return;
+    }
 
-        queue += 1;
+    await Promise.all(
+      entries.map(
+        (name) =>
+          new Promise((cb) => {
+            const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
 
-        if (queue >= baseDirectories.length) {
-          cb();
-        }
-      });
-    });
+            this.renderCwd(cwd).then(() => {
+              cb();
+            });
+          })
+      )
+    );
   }
 
   /**
@@ -60,30 +63,24 @@ class SassCompiler extends BaseService {
    * @param {Array} cwd The actual array to process.
    */
   renderCwd(cwd) {
-    return new Promise((cb) => {
-      // Keep track of the actual processing queue.
-      let queue = 0;
+    return new Promise((done) => {
+      Promise.all(
+        cwd.map(
+          (entry) =>
+            new Promise(async (cb) => {
+              if (String(basename(entry)).indexOf('_') !== 0) {
+                if (!statSync(entry).size) {
+                  this.Console.warning(`Skipping empty file: ${entry}`);
+                } else {
+                  await this.lintFile(entry);
+                  await this.renderFile(entry);
+                }
+              }
 
-      cwd.forEach(async (entry) => {
-        if (String(basename(entry)).indexOf('_') !== 0) {
-          if (!statSync(entry).size) {
-            Logger.warning(`Skipping empty file: ${entry}`);
-          } else {
-            await this.lintFile(entry);
-            await this.renderFile(entry);
-          }
-        }
-
-        queue += 1;
-
-        /**
-         * Only return the Promise Callback after each entry file has been
-         * processed.
-         */
-        if (queue >= cwd.length) {
-          cb();
-        }
-      });
+              cb();
+            })
+        )
+      ).then(() => done());
     });
   }
 
@@ -109,7 +106,7 @@ class SassCompiler extends BaseService {
           this.stylelintError = result.stylelint ? result.stylelint.stylelintError || false : false;
 
           if (this.stylelintError) {
-            Logger.warning(`Stylelint encountered some problems:`);
+            this.Console.warning(`Stylelint encountered some problems:`);
           }
 
           if (result.messages) {
@@ -135,14 +132,14 @@ class SassCompiler extends BaseService {
   renderFile(entry) {
     return new Promise((cb) => {
       if (this.stylelintError) {
-        Logger.info(`Ignoring file due to Stylelint errors: ${entry}`);
+        this.Console.info(`Ignoring file due to Stylelint errors: ${entry}`);
         cb();
       } else {
         const destination = resolve(entry)
           .replace(resolve(this.environment.THEME_SRC), resolve(this.environment.THEME_DIST))
           .replace('.scss', '.css');
 
-        Logger.info(`Compiling: ${entry}`);
+        this.Console.info(`Compiling: ${entry}`);
 
         render(
           Object.assign(this.config.options, {
@@ -154,11 +151,11 @@ class SassCompiler extends BaseService {
           }),
           async (error, result) => {
             if (error) {
-              Logger.error(
+              this.Console.error(
                 `Error at line: ${error.line}, column: ${error.column}. - ${error.file}`,
                 true
               );
-              Logger.error(error.message, true);
+              this.Console.error(error.message, true);
             } else {
               await this.writeFile(result, destination);
             }
@@ -178,7 +175,7 @@ class SassCompiler extends BaseService {
     return new Promise((cb) => {
       mkdirp(dirname(destination)).then((dirPath, error) => {
         if (error) {
-          Logger.error(error);
+          this.Console.error(error);
         } else {
           // Write the actual css to the filesystem.
           writeFileSync(destination, result.css.toString());
@@ -188,7 +185,7 @@ class SassCompiler extends BaseService {
             writeFileSync(`${destination}.map`, result.map.toString());
           }
 
-          Logger.success(`Done compiling: ${destination}`);
+          this.Console.success(`Done compiling: ${destination}`);
         }
 
         cb();

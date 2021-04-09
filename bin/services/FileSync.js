@@ -32,7 +32,7 @@ class FileSync extends BaseService {
     // Push the destination path
     this.patterns.push(this.dist);
 
-    Logger.info('Starting filesync...');
+    this.Console.info('Starting filesync...');
 
     // Sync the actual files.
     copyfiles(
@@ -42,7 +42,7 @@ class FileSync extends BaseService {
         up: 1,
       },
       () => {
-        Logger.success('FileSync finished.');
+        this.Console.success('FileSync finished.');
       }
     );
   }
