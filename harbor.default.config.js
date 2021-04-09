@@ -35,6 +35,15 @@ module.exports = {
       svgxuse: 'svgxuse.min.js',
     },
   },
+  StyleguideCompiler: {
+    entry: {
+      main: 'main/**/*.stories.@(js|mdx)',
+      modules: 'modules/**/*.stories.@(js|mdx)',
+    },
+    options: {
+      addons: ['@storybook/addon-essentials', '@storybook/addon-actions', '@storybook/addon-links'],
+    },
+  },
   StyleOptimizer: {
     options: {
       plugins: [autoprefixer()],

@@ -8,6 +8,7 @@ const JsCompiler = require('./services/JsCompiler');
 const Resolver = require('./services/Resolver');
 const SassCompiler = require('./services/SassCompiler');
 const Server = require('./services/Server');
+const StyleguideCompiler = require('./services/StyleguideCompiler');
 const StyleOptimizer = require('./services/StyleOptimizer');
 const SvgSpriteCompiler = require('./services/SvgSpriteCompiler');
 
@@ -24,6 +25,7 @@ class Harbor {
     this.Resolver = new Resolver();
     this.SassCompiler = new SassCompiler();
     this.Server = new Server();
+    this.StyleguideCompiler = new StyleguideCompiler();
     this.StyleOptimizer = new StyleOptimizer();
     this.SvgSpriteCompiler = new SvgSpriteCompiler();
 
@@ -115,6 +117,15 @@ class Harbor {
   }
 
   /**
+   * Compiles a standalone development styleguide.
+   *
+   * @param {Object} config The Harbor environment configuration object.
+   */
+  styleguide(environment) {
+    return this.StyleguideCompiler.init(environment);
+  }
+
+  /**
    * Harbor task to generate the source stylesheets (optional support for sass).
    *
    * @param {Object} config The Harbor environment configuration object.
@@ -152,4 +163,4 @@ class Harbor {
   }
 }
 
-module.exports = new Harbor();
+module.exports = Harbor;

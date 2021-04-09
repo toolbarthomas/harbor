@@ -1,5 +1,7 @@
 const Harbor = require('./Harbor');
 
-const run = async () => await Harbor.init();
+const instance = new Harbor();
+
+const run = async () => await instance.init();
 
 run();
