@@ -2,15 +2,40 @@ const glob = require('glob');
 const path = require('path');
 const mkdirp = require('mkdirp');
 const fs = require('fs');
+const { exec } = require('child_process');
 
 const BaseService = require('./BaseService');
+const { stdout } = require('process');
 
 class StyleguideCompiler extends BaseService {
   constructor() {
     super();
   }
 
-  init(environment) {
+  async init(environment) {
+    await new Promise((cb) => {
+      const shell = exec(
+        `start-storybook -s ${environment.THEME_DIST} -c ${path.resolve(
+          __dirname,
+          '../../.storybook'
+        )} -p ${environment.THEME_PORT}`
+      );
+
+      shell.stdout.on('data', (data) => {
+        process.stdout.write(data);
+      });
+
+      shell.stderr.on('data', (data) => {
+        this.Console.error(data, true);
+      });
+
+      shell.on('error', (data) => {
+        this.Console.error(data);
+      });
+    });
+  }
+
+  setup(environment) {
     if (!this.config.entry instanceof Object) {
       return;
     }

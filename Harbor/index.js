@@ -11,6 +11,7 @@ const Server = require('./services/Server');
 const StyleguideCompiler = require('./services/StyleguideCompiler');
 const StyleOptimizer = require('./services/StyleOptimizer');
 const SvgSpriteCompiler = require('./services/SvgSpriteCompiler');
+const Watcher = require('./services/Watcher');
 
 /**
  * Factory setup for Harbor.
@@ -28,6 +29,7 @@ class Harbor {
     this.StyleguideCompiler = new StyleguideCompiler();
     this.StyleOptimizer = new StyleOptimizer();
     this.SvgSpriteCompiler = new SvgSpriteCompiler();
+    this.Watcher = new Watcher();
 
     this.env = this.Environment.define();
   }
@@ -125,6 +127,10 @@ class Harbor {
     return this.StyleguideCompiler.init(environment);
   }
 
+  styleguideSetup(environment) {
+    return this.StyleguideCompiler.setup(environment);
+  }
+
   /**
    * Harbor task to generate the source stylesheets (optional support for sass).
    *
@@ -133,6 +139,10 @@ class Harbor {
   async stylesheets(environment) {
     await this.SassCompiler.init(environment);
     await this.StyleOptimizer.init(environment);
+  }
+
+  watch(environment) {
+    return this.Watcher.init(environment);
   }
 
   /**

@@ -7,10 +7,6 @@ const { resolve } = require('path');
  */
 class ConfigManager {
   static load(option) {
-    if (!option) {
-      return null;
-    }
-
     const defaultConfig = load(resolve(__dirname, '../../harbor.default.config.js'));
 
     /**
@@ -18,7 +14,7 @@ class ConfigManager {
      * the current Node instance in order to prevent the confiuration from
      * loading a second time.
      */
-    if (process.env.harbor && process.env.harbor[option]) {
+    if (option && process.env.harbor && process.env.harbor[option]) {
       return process.env.harbor[option];
     }
 
@@ -28,14 +24,14 @@ class ConfigManager {
       /**
        * Cache the actual defined config within the Node process.
        */
-      if (process.env.harbor instanceof Object) {
+      if (option && process.env.harbor instanceof Object) {
         process.env.harbor[option] = config[option];
       }
 
       return Object.assign(defaultConfig[option], config[option]);
     }
 
-    return defaultConfig[option];
+    return Object.assign(defaultConfig, config);
   }
 }
 

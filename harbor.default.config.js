@@ -79,7 +79,7 @@ module.exports = {
     },
   },
   FileSync: {
-    patterns: ['main/images'],
+    patterns: ['main/images', 'main/webfonts'],
   },
   Cleaner: {},
 };
