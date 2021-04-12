@@ -8,14 +8,12 @@ const svgstore = require('svgstore');
 const BaseService = require('./BaseService');
 
 class SvgSpriteCompiler extends BaseService {
-  constructor() {
-    super();
+  constructor(environment, Console) {
+    super(environment, Console);
   }
 
-  async init(environment) {
-    super.init(environment);
-
-    this.environment = environment;
+  async init() {
+    super.init();
 
     if (!this.config.entry instanceof Object) {
       cb();

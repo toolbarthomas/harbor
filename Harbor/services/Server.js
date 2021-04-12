@@ -5,12 +5,12 @@ const { resolve } = require('path');
 const BaseService = require('./BaseService');
 
 class Server extends BaseService {
-  constructor() {
-    super();
+  constructor(environment, Console) {
+    super(environment, Console);
   }
 
-  init(environment) {
-    super.init(environment);
+  init() {
+    super.init();
 
     this.instance = browserSync.create();
 
@@ -18,7 +18,7 @@ class Server extends BaseService {
 
     const serverDirectories = [resolve(environment.THEME_DIST)];
 
-    const { sharedDirectories } = this.config;
+    const { sharedDirectories } = this.config.options;
 
     if (sharedDirectories && Array.isArray(sharedDirectories)) {
       sharedDirectories.forEach((directory) => {
@@ -30,10 +30,10 @@ class Server extends BaseService {
 
     this.instance.init({
       open: false,
-      port: environment.THEME_PORT,
+      port: this.environment.THEME_PORT,
       server: serverDirectories,
       watch: true,
-      files: [`${resolve(environment.THEME_DIST)}/**/*.css`],
+      files: [`${resolve(this.environment.THEME_DIST)}/**/*.css`],
     });
   }
 }

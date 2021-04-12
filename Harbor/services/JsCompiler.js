@@ -8,16 +8,14 @@ const { dirname, join, resolve } = require('path');
 const BaseService = require('./BaseService');
 
 class JsCompiler extends BaseService {
-  constructor() {
-    super();
+  constructor(environment, Console) {
+    super(environment, Console);
 
     this.linter = new Linter();
   }
 
-  async init(environment) {
-    super.init(environment);
-
-    this.environment = environment;
+  async init() {
+    super.init();
 
     if (!this.config.entry instanceof Object) {
       return;

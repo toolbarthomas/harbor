@@ -8,12 +8,12 @@ const BaseService = require('./BaseService');
  * Clears the `THEME_DIST` directory.
  */
 class Cleaner extends BaseService {
-  constructor() {
-    super();
+  constructor(environment, Console) {
+    super(environment, Console);
   }
 
-  init(environment) {
-    super.init(environment);
+  init() {
+    super.init();
 
     if (environment) {
       this.path = resolve(environment.THEME_DIST);

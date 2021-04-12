@@ -11,7 +11,8 @@ const Server = require('./services/Server');
 const StyleguideCompiler = require('./services/StyleguideCompiler');
 const StyleOptimizer = require('./services/StyleOptimizer');
 const SvgSpriteCompiler = require('./services/SvgSpriteCompiler');
-const Watcher = require('./services/Watcher');
+
+const Watcher = require('./tooling/Watcher');
 
 /**
  * Factory setup for Harbor.
@@ -19,19 +20,21 @@ const Watcher = require('./services/Watcher');
 class Harbor {
   constructor() {
     this.Argv = new Argv();
-    this.Cleaner = new Cleaner();
     this.Environment = new Environment();
-    this.FileSync = new FileSync();
-    this.JsCompiler = new JsCompiler();
-    this.Resolver = new Resolver();
-    this.SassCompiler = new SassCompiler();
-    this.Server = new Server();
-    this.StyleguideCompiler = new StyleguideCompiler();
-    this.StyleOptimizer = new StyleOptimizer();
-    this.SvgSpriteCompiler = new SvgSpriteCompiler();
-    this.Watcher = new Watcher();
-
     this.env = this.Environment.define();
+    this.Console = new Logger(this.constructor.name, this.env);
+
+    this.services = {
+      Cleaner: new Cleaner(this.env, this.Console),
+      FileSync: new FileSync(this.env, this.Console),
+      JsCompiler: new JsCompiler(this.env, this.Console),
+      Resolver: new Resolver(this.env, this.Console),
+      SassCompiler: new SassCompiler(this.env, this.Console),
+      Server: new Server(this.env, this.Console),
+      StyleguideCompiler: new StyleguideCompiler(this.env, this.Console),
+      StyleOptimizer: new StyleOptimizer(this.env, this.Console),
+      SvgSpriteCompiler: new SvgSpriteCompiler(this.env, this.Console),
+    };
   }
 
   /**
@@ -39,36 +42,42 @@ class Harbor {
    */
   async init() {
     const { task } = this.Argv.args;
-    const Console = new Logger(this.constructor.name);
 
     if (!task) {
-      Console.error('No task has been defined.');
+      this.Console.error('No task has been defined.');
     }
 
     const queue = task.split(',').map((t) => {
       return t.trim();
     });
+    const jobs = queue.filter((t) => t != 'watch');
 
     if (!queue.length) {
       return;
     }
 
+    if (queue.includes('watch') && this.env.THEME_DEVMODE) {
+      this.Watcher = new Watcher(this.services);
+
+      this.watch();
+    }
+
     const completed = [];
 
     await Promise.all(
-      queue.map(
+      jobs.map(
         (name) =>
           new Promise(async (cb) => {
             if (typeof this[name] === 'function') {
-              Console.info(`Starting: ${name}`);
+              this.Console.info(`Starting: ${name}`);
 
-              await this[name](this.env);
+              await this[name]();
 
               completed.push(name);
 
-              Console.info(`Finished: ${name}`);
+              this.Console.info(`Finished: ${name}`);
             } else {
-              Console.error(`Task '${name}' does not exists.`);
+              this.Console.error(`Task '${name}' does not exists.`);
             }
 
             cb();
@@ -76,7 +85,9 @@ class Harbor {
       )
     );
 
-    Console.success(`Completed ${completed.length} tasks`);
+    if (jobs.length) {
+      this.Console.success(`Completed ${completed.length} tasks`);
+    }
   }
 
   /**
@@ -93,8 +104,8 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  clean(environment) {
-    this.Cleaner.init(environment);
+  clean() {
+    this.services.Cleaner.init(this.env, this.Console);
   }
 
   /**
@@ -104,8 +115,8 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  sync(environment) {
-    this.FileSync.init(environment);
+  sync() {
+    this.services.FileSync.init(this.env, this.Console);
   }
 
   /**
@@ -114,62 +125,52 @@ class Harbor {
    *
    * @param {Object} config The Harbor environment configuration object.
    */
-  async resolve(environment) {
-    await this.Resolver.init(environment);
+  async resolve() {
+    await this.services.Resolver.init(this.env, this.Console);
   }
 
   /**
    * Compiles a standalone development styleguide.
-   *
-   * @param {Object} config The Harbor environment configuration object.
    */
-  styleguide(environment) {
-    return this.StyleguideCompiler.init(environment);
+  styleguide() {
+    return this.services.StyleguideCompiler.init(this.env, this.Console);
   }
 
-  styleguideSetup(environment) {
-    return this.StyleguideCompiler.setup(environment);
+  styleguideSetup() {
+    return this.services.StyleguideCompiler.setup(this.env);
   }
 
   /**
    * Harbor task to generate the source stylesheets (optional support for sass).
-   *
-   * @param {Object} config The Harbor environment configuration object.
    */
-  async stylesheets(environment) {
-    await this.SassCompiler.init(environment);
-    await this.StyleOptimizer.init(environment);
+  async stylesheets() {
+    await this.services.SassCompiler.init(this.env, this.Console);
+    await this.services.StyleOptimizer.init(this.env, this.Console);
   }
 
-  watch(environment) {
-    return this.Watcher.init(environment);
+  watch() {
+    return this.Watcher.spawn(this.env, this.Console);
   }
 
   /**
    * Harbor task to transpile the source javascripts.
-   *
-   * @param {Object} config The Harbor environment configuration object.
    */
-  async javascripts(environment) {
-    await this.JsCompiler.init(environment);
+  async javascripts() {
+    await this.services.JsCompiler.init(this.env, this.Console);
   }
 
   /**
    * Harbor task to transform the source images like sprites.
-   *
-   * @param {Object} config The Harbor environment configuration object.
    */
-  async images(environment) {
-    await this.SvgSpriteCompiler.init(environment);
+  async images() {
+    await this.services.SvgSpriteCompiler.init(this.env, this.Console);
   }
 
   /**
    * Starts the Browsersync development server.
-   *
-   * @param {Object} config The Harbor environment configuration object.
    */
-  serve(environment) {
-    this.Server.init(environment);
+  serve() {
+    this.services.Server.init(this.env, this.Console);
   }
 }
 

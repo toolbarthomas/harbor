@@ -6,7 +6,9 @@ const stylelint = require('stylelint');
 
 module.exports = {
   Server: {
-    sharedDirectories: [],
+    options: {
+      sharedDirectories: [],
+    },
   },
   SassCompiler: {
     options: {
@@ -27,7 +29,7 @@ module.exports = {
       },
     },
     entry: {
-      main: 'main/stylesheets/*.scss',
+      main: 'main/stylesheets/**/**.scss',
     },
   },
   JsCompiler: {
@@ -80,7 +82,7 @@ module.exports = {
   SvgSpriteCompiler: {
     prefix: 'svg--',
     entry: {
-      svgsprite: '/main/images/*/**.svg',
+      svgsprite: 'main/images/*/**.svg',
     },
     options: {
       use: [
@@ -106,4 +108,32 @@ module.exports = {
     patterns: ['main/images', 'main/webfonts'],
   },
   Cleaner: {},
+  Watcher: {
+    options: {
+      delay: 200,
+      duration: 1000 * 60 * 15,
+    },
+    instances: {
+      stylesheets: {
+        event: 'change',
+        path: '**/stylesheets/**/**.scss',
+        services: ['SassCompiler'],
+      },
+      javascripts: {
+        event: 'change',
+        path: '**/javascripts/**/**.js',
+        services: ['JsCompiler'],
+      },
+      svgprites: {
+        event: 'all',
+        path: '**/images/**/**.svg',
+        services: ['SvgSpriteCompiler'],
+      },
+      sync: {
+        event: 'add',
+        path: ['main/webfonts', 'main/images'],
+        services: ['FileSync'],
+      },
+    },
+  },
 };

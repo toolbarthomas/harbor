@@ -12,8 +12,8 @@ const ConfigManager = require('../common/ConfigManager');
 const BaseService = require('./BaseService');
 
 class SassCompiler extends BaseService {
-  constructor() {
-    super();
+  constructor(environment, Console) {
+    super(environment, Console);
 
     /**
      * Flag to prevent files from being written to the Filesystem if the given
@@ -28,10 +28,8 @@ class SassCompiler extends BaseService {
     this.sassExceptions = [];
   }
 
-  async init(environment) {
-    super.init(environment);
-
-    this.environment = environment;
+  async init() {
+    super.init();
 
     if (!this.config.entry instanceof Object) {
       return;
@@ -47,7 +45,9 @@ class SassCompiler extends BaseService {
       entries.map(
         (name) =>
           new Promise((cb) => {
-            const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
+            const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name])).filter(
+              (entry) => basename(entry)[0] !== '_'
+            );
 
             this.renderCwd(cwd).then(() => {
               cb();

@@ -5,6 +5,7 @@
   "main": "./Harbor/index.js",
   "scripts": {
     "build": "node ./index.js task=stylesheets,javascripts,images",
+    "develop": "node ./index.js task=stylesheets,javascripts,images,watch,styleguide",
     "clean": "node ./index.js task=clean",
     "images": "node ./index.js task=images",
     "javascripts": "node ./index.js task=javascripts",

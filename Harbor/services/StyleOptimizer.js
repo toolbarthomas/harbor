@@ -8,14 +8,12 @@ const postcss = require('postcss');
 const BaseService = require('./BaseService');
 
 class StyleOptimizer extends BaseService {
-  constructor() {
-    super();
+  constructor(environment, Console) {
+    super(environment, Console);
   }
 
-  async init(environment) {
-    super.init(environment);
-
-    this.environment = environment;
+  async init() {
+    super.init();
 
     if (!this.config.entry instanceof Object) {
       cb();

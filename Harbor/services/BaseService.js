@@ -1,18 +1,22 @@
+const { join } = require('path');
+const { sync } = require('glob');
+
 const ConfigManager = require('../common/ConfigManager');
 
 const Logger = require('../common/Logger');
 
 class BaseService {
-  constructor(config) {
+  constructor(environment, Console) {
     this.name = this.constructor.name;
 
     this.config = ConfigManager.load(this.name);
 
-    this.Console = new Logger(this.name);
+    this.environment = environment;
+    this.Console = Console;
   }
 
-  init(environment) {
-    this.Console.setEnvironment(environment);
+  init() {
+    this.Console.log(`Task ${this.name}:`);
   }
 }
 

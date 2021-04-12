@@ -8,19 +8,19 @@ const BaseService = require('./BaseService');
 const { stdout } = require('process');
 
 class StyleguideCompiler extends BaseService {
-  constructor() {
-    super();
+  constructor(environment, Console) {
+    super(environment, Console);
   }
 
-  async init(environment) {
-    super.init(environment);
+  async init() {
+    super.init();
 
     await new Promise((cb) => {
       const shell = exec(
-        `start-storybook -s ${environment.THEME_DIST} -c ${path.resolve(
+        `start-storybook -s ${this.environment.THEME_DIST} -c ${path.resolve(
           __dirname,
           '../../.storybook'
-        )} -p ${environment.THEME_PORT}`
+        )} -p ${this.environment.THEME_PORT}`
       );
 
       shell.stdout.on('data', (data) => {

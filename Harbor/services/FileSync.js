@@ -9,18 +9,18 @@ const BaseService = require('./BaseService');
  * Copies all defined files to the `THEME_DIST` directory.
  */
 class FileSync extends BaseService {
-  constructor() {
-    super();
+  constructor(environment, Console) {
+    super(environment, Console);
 
     this.defaultPatterns = [];
     this.resourcePatterns = [];
   }
 
-  init(environment) {
-    super.init(environment);
+  init() {
+    super.init();
 
-    this.cwd = relative(process.cwd(), environment.THEME_SRC);
-    this.dist = relative(process.cwd(), environment.THEME_DIST);
+    this.cwd = relative(process.cwd(), this.environment.THEME_SRC);
+    this.dist = relative(process.cwd(), this.environment.THEME_DIST);
 
     // Get the optional defined resource paths to sync.
     this.defineResourcePatterns();
