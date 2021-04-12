@@ -30,8 +30,6 @@ class Watcher extends BaseService {
       const sources = Object.values(service).map((source) =>
         join(this.environment.THEME_SRC, source)
       );
-
-      console.log(sources);
     });
   }
 }

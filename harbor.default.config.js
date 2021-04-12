@@ -12,26 +12,22 @@ module.exports = {
     options: {
       outputStyle: 'compact',
     },
+    plugins: {
+      postcss: {
+        plugins: [
+          stylelint({
+            rules: {
+              'selector-max-compound-selectors': 3,
+              'no-duplicate-selectors': null,
+              'no-descending-specificity': null,
+            },
+          }),
+        ],
+        extends: ['stylelint-config-recommended', 'stylelint'],
+      },
+    },
     entry: {
       main: 'main/stylesheets/*.scss',
-    },
-  },
-  PostCssCompiler: {
-    options: {
-      plugins: [
-        stylelint({
-          rules: {
-            'selector-max-compound-selectors': 3,
-            'no-duplicate-selectors': null,
-            'no-descending-specificity': null,
-          },
-        }),
-      ],
-      extends: ['stylelint-config-recommended', 'stylelint'],
-    },
-    entry: {
-      main: 'main/stylesheets/**/*.css',
-      modules: 'modules/*/*/*.css',
     },
   },
   JsCompiler: {

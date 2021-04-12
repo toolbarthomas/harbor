@@ -19,7 +19,13 @@ class SassCompiler extends BaseService {
      * Flag to prevent files from being written to the Filesystem if the given
      * file has any Stylelint errors.
      */
-    this.stylelintError = false;
+    this.stylelintExceptions = [];
+
+    /**
+     * Flag to prevent files from being written to the Filesystem if the given
+     * file has any Sass errors.
+     */
+    this.sassExceptions = [];
 
     /**
      * Store commonly used Sass styles to interchange these without writing it
@@ -34,8 +40,6 @@ class SassCompiler extends BaseService {
     if (!this.config.entry instanceof Object) {
       return;
     }
-
-    this.postcssConfig = ConfigManager.load('PostCssCompiler').options;
 
     const entries = Object.keys(this.config.entry);
 
@@ -55,6 +59,16 @@ class SassCompiler extends BaseService {
           })
       )
     );
+
+    if (!this.environment.THEME_DEVMODE) {
+      if (this.stylelintExceptions.length || this.sassExceptions.length) {
+        this.Console.error(
+          `Sasscompiler encountered ${
+            this.stylelintExceptions.length + this.sassExceptions.length
+          } errors...`
+        );
+      }
+    }
   }
 
   /**
@@ -97,28 +111,28 @@ class SassCompiler extends BaseService {
 
       const source = readFileSync(entry);
 
-      console.log(postcss);
-
-      return postcss(this.postcssConfig)
+      return postcss(this.config.plugins.postcss.plugins || [])
         .process(source, {
           from: entry,
           syntax: postcssScss,
         })
         .then((result) => {
-          this.stylelintError = result.stylelint ? result.stylelint.stylelintError || false : false;
+          this.stylelintExceptions = result.stylelint
+            ? result.stylelint.stylelintError || false
+            : false;
 
-          if (this.stylelintError) {
+          if (this.stylelintExceptions) {
             this.Console.warning(`Stylelint encountered some problems:`);
-          }
 
-          if (result.messages) {
-            result.messages.forEach((message) => {
-              if (message.text) {
-                Logger[message.type || 'info'](
-                  `- ${message.text} | ${entry}:${message.line}:${message.column}`
-                );
-              }
-            });
+            if (result.messages) {
+              result.messages.forEach((message) => {
+                if (message.text) {
+                  this.Console[message.type || 'info'](
+                    `- ${message.text} | ${entry}:${message.line}:${message.column}`
+                  );
+                }
+              });
+            }
           }
 
           cb();
@@ -133,7 +147,7 @@ class SassCompiler extends BaseService {
    */
   renderFile(entry) {
     return new Promise((cb) => {
-      if (this.stylelintError) {
+      if (this.stylelintExceptions.length) {
         this.Console.info(`Ignoring file due to Stylelint errors: ${entry}`);
         cb();
       } else {
@@ -154,10 +168,14 @@ class SassCompiler extends BaseService {
           async (error, result) => {
             if (error) {
               this.Console.error(
-                `Error at line: ${error.line}, column: ${error.column}. - ${error.file}`,
+                [
+                  `Sass error encountered: ${error.file}:${error.line}:${error.column}`,
+                  error.message,
+                ],
                 true
               );
-              this.Console.error(error.message, true);
+
+              this.sassExceptions.push(error);
             } else {
               await this.writeFile(result, destination);
             }

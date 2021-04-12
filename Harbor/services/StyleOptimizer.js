@@ -37,8 +37,6 @@ class StyleOptimizer extends BaseService {
       if (this.config.plugins.combineDuplicateSelectors) {
         this.postcssConfig.plugins.push(this.config.plugins.combineDuplicateSelectors);
       }
-
-      this.postcssConfig.plugins.push();
     }
 
     await Promise.all(
@@ -90,7 +88,7 @@ class StyleOptimizer extends BaseService {
 
       this.Console.log(`Optimizing: ${entry}`);
 
-      postcss(this.postcssConfig)
+      postcss(this.postcssConfig.plugins)
         .process(source, {
           from: entry,
         })
