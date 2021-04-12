@@ -97,6 +97,8 @@ class SassCompiler extends BaseService {
 
       const source = readFileSync(entry);
 
+      console.log(postcss);
+
       return postcss(this.postcssConfig)
         .process(source, {
           from: entry,

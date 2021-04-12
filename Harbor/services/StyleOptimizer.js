@@ -1,11 +1,9 @@
-const autoprefixer = require('autoprefixer');
-const cssnano = require('cssnano');
+const { dirname, join } = require('path');
 const { readFileSync, statSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
+const autoprefixer = require('autoprefixer');
 const mkdirp = require('mkdirp');
-const { dirname, join } = require('path');
 const postcss = require('postcss');
-const combineDuplicateSelectors = require('postcss-combine-duplicated-selectors');
 
 const BaseService = require('./BaseService');
 
@@ -22,7 +20,7 @@ class StyleOptimizer extends BaseService {
     }
 
     this.postcssConfig = {
-      plugins: this.config.plugins || [],
+      plugins: [this.config.plugins.autoprefixer],
     };
 
     const entries = Object.keys(this.config.entry);
@@ -32,10 +30,15 @@ class StyleOptimizer extends BaseService {
     }
 
     if (!this.environment.THEME_DEVMODE) {
-      this.postcssConfig.plugins.push(
-        combineDuplicateSelectors({ removeDuplicatedProperties: true })
-      );
-      this.postcssConfig.plugins.push(cssnano({ mergeLonghand: false }));
+      if (this.config.plugins.cssnano) {
+        this.postcssConfig.plugins.push(this.config.plugins.cssnano);
+      }
+
+      if (this.config.plugins.combineDuplicateSelectors) {
+        this.postcssConfig.plugins.push(this.config.plugins.combineDuplicateSelectors);
+      }
+
+      this.postcssConfig.plugins.push();
     }
 
     await Promise.all(

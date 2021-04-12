@@ -1,6 +1,8 @@
 const autoprefixer = require('autoprefixer');
-const stylelint = require('stylelint');
+const combineDuplicateSelectors = require('postcss-combine-duplicated-selectors');
+const cssnano = require('cssnano');
 const imageminSvgo = require('imagemin-svgo');
+const stylelint = require('stylelint');
 
 module.exports = {
   Server: {
@@ -67,11 +69,13 @@ module.exports = {
     },
   },
   StyleOptimizer: {
-    plugins: [
-      autoprefixer({
+    plugins: {
+      autoprefixer: autoprefixer({
         overrideBrowserslist: ['> 2%', 'last 2 versions'],
       }),
-    ],
+      cssnano: cssnano({ mergeLonghand: false }),
+      combineDuplicateSelectors: combineDuplicateSelectors({ removeDuplicatedProperties: true }),
+    },
     entry: {
       main: 'main/stylesheets/*.css',
       modules: 'modules/*/*/*.css',
