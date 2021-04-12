@@ -1,5 +1,6 @@
 const { transform } = require('@babel/core');
 const { statSync, readFileSync, writeFileSync } = require('fs');
+const { Linter, SourceCode } = require('eslint');
 const { sync } = require('glob');
 const mkdirp = require('mkdirp');
 const { dirname, join, resolve } = require('path');
@@ -9,6 +10,8 @@ const BaseService = require('./BaseService');
 class JsCompiler extends BaseService {
   constructor() {
     super();
+
+    this.linter = new Linter();
   }
 
   async init(environment) {
@@ -55,7 +58,29 @@ class JsCompiler extends BaseService {
                 this.Console.log(`Transpiling: ${entry}`);
 
                 const source = readFileSync(entry);
-                const transpiledSource = transform(source, { presets: ['@babel/env'] });
+
+                if (this.config.plugins.eslint) {
+                  const linter = this.linter.verify(source.toString(), this.config.plugins.eslint);
+                  if (Array.isArray(linter)) {
+                    linter.forEach((f) => {
+                      if (f.fatal) {
+                        const m = [
+                          `Unable to compile: ${resolve(entry)}:${f.line}:${f.column}`,
+                          `'${f.message}`,
+                        ];
+
+                        if (this.environment.THEME_DEVMODE) {
+                          this.Console.warning(m);
+                          return cb();
+                        }
+
+                        this.Console.error(m);
+                      }
+                    });
+                  }
+                }
+
+                const transpiledSource = transform(source, this.config.plugins.transform);
                 const destination = resolve(entry).replace(
                   resolve(this.environment.THEME_SRC),
                   resolve(this.environment.THEME_DIST)

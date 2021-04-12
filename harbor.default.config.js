@@ -16,7 +16,15 @@ module.exports = {
   },
   PostCssCompiler: {
     options: {
-      plugins: [stylelint()],
+      plugins: [
+        stylelint({
+          rules: {
+            'selector-max-compound-selectors': 3,
+            'no-duplicate-selectors': null,
+            'no-descending-specificity': null,
+          },
+        }),
+      ],
       extends: ['stylelint-config-recommended', 'stylelint'],
     },
     entry: {
@@ -28,6 +36,20 @@ module.exports = {
     entry: {
       main: 'main/javascripts/**/*.js',
       modules: 'modules/*/*/*.js',
+    },
+    plugins: {
+      eslint: {
+        env: {
+          browser: true,
+        },
+        extends: ['eslint-config-airbnb-base'],
+        rules: {
+          'import/no-extraneous-dependencies': '0',
+        },
+      },
+      transform: {
+        presets: ['@babel/env'],
+      },
     },
   },
   Resolver: {
@@ -45,9 +67,11 @@ module.exports = {
     },
   },
   StyleOptimizer: {
-    options: {
-      plugins: [autoprefixer()],
-    },
+    plugins: [
+      autoprefixer({
+        overrideBrowserslist: ['> 2%', 'last 2 versions'],
+      }),
+    ],
     entry: {
       main: 'main/stylesheets/*.css',
       modules: 'modules/*/*/*.css',

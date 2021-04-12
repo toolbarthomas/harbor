@@ -21,7 +21,10 @@ class StyleOptimizer extends BaseService {
       cb();
     }
 
-    this.postcssConfig = this.config.options;
+    this.postcssConfig = {
+      plugins: this.config.plugins || [],
+    };
+
     const entries = Object.keys(this.config.entry);
 
     if (!entries.length) {
@@ -29,7 +32,7 @@ class StyleOptimizer extends BaseService {
     }
 
     if (!this.environment.THEME_DEVMODE) {
-      this.postTHEME_THEME_ssConfig.plugins.push(
+      this.postcssConfig.plugins.push(
         combineDuplicateSelectors({ removeDuplicatedProperties: true })
       );
       this.postcssConfig.plugins.push(cssnano({ mergeLonghand: false }));
