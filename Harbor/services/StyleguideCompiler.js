@@ -13,6 +13,8 @@ class StyleguideCompiler extends BaseService {
   }
 
   async init(environment) {
+    super.init(environment);
+
     await new Promise((cb) => {
       const shell = exec(
         `start-storybook -s ${environment.THEME_DIST} -c ${path.resolve(

@@ -10,6 +10,10 @@ class BaseService {
 
     this.Console = new Logger(this.name);
   }
+
+  init(environment) {
+    this.Console.setEnvironment(environment);
+  }
 }
 
 module.exports = BaseService;

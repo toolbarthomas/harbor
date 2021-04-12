@@ -10,6 +10,8 @@ class Server extends BaseService {
   }
 
   init(environment) {
+    super.init(environment);
+
     this.instance = browserSync.create();
 
     this.Console.info('Starting the Browsersync development server');

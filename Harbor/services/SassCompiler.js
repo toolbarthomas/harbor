@@ -26,15 +26,11 @@ class SassCompiler extends BaseService {
      * file has any Sass errors.
      */
     this.sassExceptions = [];
-
-    /**
-     * Store commonly used Sass styles to interchange these without writing it
-     * to the Filesystem.
-     */
-    this.commonData = '';
   }
 
   async init(environment) {
+    super.init(environment);
+
     this.environment = environment;
 
     if (!this.config.entry instanceof Object) {

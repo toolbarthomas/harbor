@@ -13,6 +13,8 @@ class Cleaner extends BaseService {
   }
 
   init(environment) {
+    super.init(environment);
+
     if (environment) {
       this.path = resolve(environment.THEME_DIST);
 

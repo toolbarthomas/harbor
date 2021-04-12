@@ -13,6 +13,8 @@ class Watcher extends BaseService {
   }
 
   init(environment) {
+    super.init(environment);
+
     this.environment = environment;
 
     const config = ConfigManager.load();

@@ -13,6 +13,8 @@ class SvgSpriteCompiler extends BaseService {
   }
 
   async init(environment) {
+    super.init(environment);
+
     this.environment = environment;
 
     if (!this.config.entry instanceof Object) {

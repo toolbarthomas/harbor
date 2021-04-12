@@ -17,6 +17,8 @@ class FileSync extends BaseService {
   }
 
   init(environment) {
+    super.init(environment);
+
     this.cwd = relative(process.cwd(), environment.THEME_SRC);
     this.dist = relative(process.cwd(), environment.THEME_DIST);
 

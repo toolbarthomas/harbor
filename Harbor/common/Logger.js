@@ -2,6 +2,11 @@ const chalk = require('chalk');
 const symbols = require('log-symbols');
 
 class Logger {
+  constructor(name, environment) {
+    this.name = name;
+    this.environment = environment;
+  }
+
   /**
    * Prints out an error message & exit the current process.
    *
@@ -50,6 +55,10 @@ class Logger {
    * @param {String|Array} message The message to display.
    */
   log(message) {
+    if (this.environment && !this.environment.THEME_DEVMODE) {
+      return;
+    }
+
     this.outputMessages(message, 'log');
   }
 
@@ -109,6 +118,22 @@ class Logger {
     }
 
     return styles;
+  }
+
+  /**
+   * Updates the environment object configuration for the current Logger
+   * instance.
+   *
+   * @param {Object} environment Updates the environment from the given object.
+   *
+   * @returns {void}
+   */
+  setEnvironment(environment) {
+    if (environment) {
+      return;
+    }
+
+    this.environment = environment;
   }
 }
 

@@ -10,6 +10,8 @@ class Resolver extends BaseService {
   }
 
   async init(environment) {
+    super.init(environment);
+
     if (!this.config.entry instanceof Object) {
       return;
     }
