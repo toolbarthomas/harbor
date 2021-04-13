@@ -5,27 +5,34 @@ const { resolve } = require('path');
 const BaseService = require('./BaseService');
 
 /**
- * Clears the `THEME_DIST` directory.
+ * Clears the defined environment destination directory.
  */
 class Cleaner extends BaseService {
-  constructor(environment, Console) {
-    super(environment, Console);
+  constructor(tooling) {
+    super(tooling);
   }
 
-  init() {
+  /**
+   * Clears the environment directory.
+   */
+  async init() {
     super.init();
 
-    if (environment) {
-      this.path = resolve(environment.THEME_DIST);
+    if (this.environment) {
+      this.path = resolve(this.environment.THEME_DIST);
 
       if (existsSync(this.path)) {
-        this.Console.info(`Clearing directory: ${this.path}`);
+        this.Console.info(`Cleaning directory: ${this.path}`);
 
         rimraf(this.path, () => {
-          this.Console.success(`Cleared directory: ${this.path}`);
+          this.Console.success(`Directory cleaned: ${this.path}`);
+
+          super.resolve();
         });
       } else {
         this.Console.warning(`${this.path} does not exist and will not be cleared.`);
+
+        super.resolve();
       }
     }
   }

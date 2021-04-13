@@ -6,11 +6,12 @@ const Logger = require('../common/Logger');
 const BaseService = require('./BaseService');
 
 /**
- * Copies all defined files to the `THEME_DIST` directory.
+ * Synchronizes the configured Filesync entries to the defined environment
+ * destination directory.
  */
 class FileSync extends BaseService {
-  constructor(environment, Console) {
-    super(environment, Console);
+  constructor(tooling) {
+    super(tooling);
 
     this.defaultPatterns = [];
     this.resourcePatterns = [];
@@ -44,7 +45,7 @@ class FileSync extends BaseService {
         up: 1,
       },
       () => {
-        this.Console.success('FileSync finished.');
+        super.resolve(this.name);
       }
     );
   }

@@ -6,12 +6,15 @@ class Argv {
     this.defaults = {};
   }
 
+  /**
+   * Returns the parsed Command Line Arguments.
+   */
   get args() {
     const argv = process.argv instanceof Object ? process.argv : [];
     const args = {};
 
     if (argv.length > 2) {
-      argv.slice(2).forEach(arg => {
+      argv.slice(2).forEach((arg) => {
         const key = String(arg.split('=')[0]);
         const value = String(arg.substring(arg.indexOf('=') + 1));
 

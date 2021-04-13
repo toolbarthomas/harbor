@@ -11,9 +11,12 @@ const stylelint = require('stylelint');
 const ConfigManager = require('../common/ConfigManager');
 const BaseService = require('./BaseService');
 
+/**
+ * Compiles the configured entries with Node Sass.
+ */
 class SassCompiler extends BaseService {
-  constructor(environment, Console) {
-    super(environment, Console);
+  constructor(tooling) {
+    super(tooling);
 
     /**
      * Flag to prevent files from being written to the Filesystem if the given
@@ -28,6 +31,11 @@ class SassCompiler extends BaseService {
     this.sassExceptions = [];
   }
 
+  /**
+   * Compiles the configured Sass entries.
+   *
+   * @param {Object} tooling the inherited instance tools.
+   */
   async init() {
     super.init();
 
@@ -65,6 +73,8 @@ class SassCompiler extends BaseService {
         );
       }
     }
+
+    super.resolve();
   }
 
   /**

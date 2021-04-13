@@ -11,7 +11,7 @@ const Server = require('./services/Server');
 const StyleguideCompiler = require('./services/StyleguideCompiler');
 const StyleOptimizer = require('./services/StyleOptimizer');
 const SvgSpriteCompiler = require('./services/SvgSpriteCompiler');
-
+const TaskManager = require('./tooling/TaskManager');
 const Watcher = require('./tooling/Watcher');
 
 /**
@@ -20,20 +20,26 @@ const Watcher = require('./tooling/Watcher');
 class Harbor {
   constructor() {
     this.Argv = new Argv();
-    this.Environment = new Environment();
-    this.env = this.Environment.define();
-    this.Console = new Logger(this.constructor.name, this.env);
+
+    const environment = new Environment();
+    this.env = environment.define();
+
+    this.Console = new Logger(this.env);
+
+    this.tooling = {
+      TaskManager: new TaskManager(),
+    };
 
     this.services = {
-      Cleaner: new Cleaner(this.env, this.Console),
-      FileSync: new FileSync(this.env, this.Console),
-      JsCompiler: new JsCompiler(this.env, this.Console),
-      Resolver: new Resolver(this.env, this.Console),
-      SassCompiler: new SassCompiler(this.env, this.Console),
-      Server: new Server(this.env, this.Console),
-      StyleguideCompiler: new StyleguideCompiler(this.env, this.Console),
-      StyleOptimizer: new StyleOptimizer(this.env, this.Console),
-      SvgSpriteCompiler: new SvgSpriteCompiler(this.env, this.Console),
+      Cleaner: new Cleaner(this.tooling),
+      FileSync: new FileSync(this.tooling),
+      JsCompiler: new JsCompiler(this.tooling),
+      Resolver: new Resolver(this.tooling),
+      SassCompiler: new SassCompiler(this.tooling),
+      Server: new Server(this.tooling),
+      StyleguideCompiler: new StyleguideCompiler(this.tooling),
+      StyleOptimizer: new StyleOptimizer(this.tooling),
+      SvgSpriteCompiler: new SvgSpriteCompiler(this.tooling),
     };
   }
 
@@ -43,51 +49,44 @@ class Harbor {
   async init() {
     const { task } = this.Argv.args;
 
-    if (!task) {
-      this.Console.error('No task has been defined.');
-    }
+    const Watch = new Watcher(this.tooling.TaskManager);
 
-    const queue = task.split(',').map((t) => {
-      return t.trim();
-    });
-    const jobs = queue.filter((t) => t != 'watch');
+    Watch.spawn(task);
 
-    if (!queue.length) {
-      return;
-    }
+    await this.tooling.TaskManager.publish(task);
 
-    if (queue.includes('watch') && this.env.THEME_DEVMODE) {
-      this.Watcher = new Watcher(this.services);
+    // if (queue.includes('watch') && this.env.THEME_DEVMODE) {
+    //   this.Watcher = new Watcher(this.services);
 
-      this.watch();
-    }
+    //   this.watch();
+    // }
 
-    const completed = [];
+    // const completed = [];
 
-    await Promise.all(
-      jobs.map(
-        (name) =>
-          new Promise(async (cb) => {
-            if (typeof this[name] === 'function') {
-              this.Console.info(`Starting: ${name}`);
+    // await Promise.all(
+    //   jobs.map(
+    //     (name) =>
+    //       new Promise(async (cb) => {
+    //         if (typeof this[name] === 'function') {
+    //           this.Console.info(`Starting: ${name}`);
 
-              await this[name]();
+    //           await this[name]();
 
-              completed.push(name);
+    //           completed.push(name);
 
-              this.Console.info(`Finished: ${name}`);
-            } else {
-              this.Console.error(`Task '${name}' does not exists.`);
-            }
+    //           this.Console.info(`Finished: ${name}`);
+    //         } else {
+    //           this.Console.error(`Task '${name}' does not exists.`);
+    //         }
 
-            cb();
-          })
-      )
-    );
+    //         cb();
+    //       })
+    //   )
+    // );
 
-    if (jobs.length) {
-      this.Console.success(`Completed ${completed.length} tasks`);
-    }
+    // if (jobs.length) {
+    //   this.Console.success(`Completed ${completed.length} tasks`);
+    // }
   }
 
   /**
@@ -105,7 +104,7 @@ class Harbor {
    * @param {Object} config The Harbor environment configuration object.
    */
   clean() {
-    this.services.Cleaner.init(this.env, this.Console);
+    this.services.Cleaner.init(this.Console);
   }
 
   /**
@@ -116,7 +115,7 @@ class Harbor {
    * @param {Object} config The Harbor environment configuration object.
    */
   sync() {
-    this.services.FileSync.init(this.env, this.Console);
+    this.services.FileSync.init(this.Console);
   }
 
   /**
@@ -126,14 +125,14 @@ class Harbor {
    * @param {Object} config The Harbor environment configuration object.
    */
   async resolve() {
-    await this.services.Resolver.init(this.env, this.Console);
+    await this.services.Resolver.init(this.Console);
   }
 
   /**
    * Compiles a standalone development styleguide.
    */
   styleguide() {
-    return this.services.StyleguideCompiler.init(this.env, this.Console);
+    return this.services.StyleguideCompiler.init(this.Console);
   }
 
   styleguideSetup() {
@@ -144,33 +143,33 @@ class Harbor {
    * Harbor task to generate the source stylesheets (optional support for sass).
    */
   async stylesheets() {
-    await this.services.SassCompiler.init(this.env, this.Console);
-    await this.services.StyleOptimizer.init(this.env, this.Console);
+    await this.services.SassCompiler.init(this.Console);
+    await this.services.StyleOptimizer.init(this.Console);
   }
 
   watch() {
-    return this.Watcher.spawn(this.env, this.Console);
+    return this.Watcher.spawn(this.Console);
   }
 
   /**
    * Harbor task to transpile the source javascripts.
    */
   async javascripts() {
-    await this.services.JsCompiler.init(this.env, this.Console);
+    await this.services.JsCompiler.init(this.Console);
   }
 
   /**
    * Harbor task to transform the source images like sprites.
    */
   async images() {
-    await this.services.SvgSpriteCompiler.init(this.env, this.Console);
+    await this.services.SvgSpriteCompiler.init(this.Console);
   }
 
   /**
    * Starts the Browsersync development server.
    */
   serve() {
-    this.services.Server.init(this.env, this.Console);
+    this.services.Server.init(this.Console);
   }
 }
 

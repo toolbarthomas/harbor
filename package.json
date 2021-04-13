@@ -1,12 +1,13 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.24.0",
+  "version": "0.30.0",
   "description": "Boilerplate for Drupal Themes",
   "main": "./Harbor/index.js",
   "scripts": {
+    "prebuild": "node ./index.js task=prepare",
     "build": "node ./index.js task=stylesheets,javascripts,images",
-    "develop": "node ./index.js task=stylesheets,javascripts,images,watch,styleguide",
-    "clean": "node ./index.js task=clean",
+    "predevelop": "npm run build",
+    "develop": "node ./index.js task=watch,styleguide",
     "images": "node ./index.js task=images",
     "javascripts": "node ./index.js task=javascripts",
     "resolve": "node ./index.js task=resolve",
@@ -14,7 +15,6 @@
     "styleguide": "node ./index.js task=styleguide",
     "stylesheets": "node ./index.js task=stylesheets",
     "watch": "node ./index.js task=watch",
-    "sync": "node ./index.js task=sync",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [
@@ -71,7 +71,6 @@
     "module-config-loader": "^0.3.3",
     "node-sass": "^5.0.0",
     "node-sass-glob-importer": "^5.3.2",
-    "npm-run-all": "^4.1.5",
     "postcss": "^8.2.10",
     "postcss-combine-duplicated-selectors": "^10.0.2",
     "postcss-nested": "^5.0.5",

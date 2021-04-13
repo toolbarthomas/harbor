@@ -5,10 +5,13 @@ const { resolve } = require('path');
 const BaseService = require('./BaseService');
 
 class Server extends BaseService {
-  constructor(environment, Console) {
-    super(environment, Console);
+  constructor(tooling) {
+    super(tooling);
   }
 
+  /**
+   * Creates a new BrowserSync instance.
+   */
   init() {
     super.init();
 
@@ -16,7 +19,7 @@ class Server extends BaseService {
 
     this.Console.info('Starting the Browsersync development server');
 
-    const serverDirectories = [resolve(environment.THEME_DIST)];
+    const serverDirectories = [resolve(this.environment.THEME_DIST)];
 
     const { sharedDirectories } = this.config.options;
 

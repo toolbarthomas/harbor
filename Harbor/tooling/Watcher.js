@@ -3,22 +3,49 @@ const { extname, join } = require('path');
 
 const ConfigManager = require('../common/ConfigManager');
 const { pathToFileURL } = require('url');
+const Environment = require('../common/Environment');
+const Logger = require('../common/Logger');
 
+/**
+ * Creates a Watcher instance for each defined instance key and will run the
+ * configured hook from the constructed TaskManager.
+ */
 class Watcher {
-  constructor(services) {
+  constructor(TaskManager) {
     this.name = this.constructor.name;
 
     this.config = ConfigManager.load(this.name);
 
-    this.services = services;
-
+    this.TaskManager = TaskManager;
     this.instances = {};
   }
 
-  async spawn(environment, Console) {
-    this.environment = environment;
+  /**
+   * Spawn a new Watcher instance that publishes the subscribed TaskManager hooks
+   * that are also confugured within the initial Watcher configuration.
+   *
+   * @param {string} hook Creates a new unique watcher from the given hook.
+   */
+  async spawn(hook) {
+    const environment = new Environment();
 
-    this.Console = Console;
+    this.environment = environment.define();
+
+    this.Console = new Logger(this.environment);
+
+    if (!hook) {
+      this.Console.log('Skipping Watcher');
+      return;
+    }
+
+    const list = hook.split(',').map((t) => {
+      return t.trim();
+    });
+
+    if (!list.length || !list.includes('watch')) {
+      this.Console.log('Skipping Watcher');
+      return;
+    }
 
     if (!this.config.instances instanceof Object) {
       return;
@@ -29,6 +56,8 @@ class Watcher {
     if (!instances.length) {
       return;
     }
+
+    this.Console.info('Starting service Watcher...');
 
     await new Promise((done) => {
       instances.forEach((name) => {
@@ -41,8 +70,9 @@ class Watcher {
           : [this.config.instances[name].path]
         ).map((p) => join(this.environment.THEME_SRC, p));
 
-        this.Console.info(`Creating ${name} watcher: ${query.join(', ')}`);
+        this.Console.log(`Creating Watcher instance: ${name} => ${query.join(', ')}`);
 
+        // Setup the actual Watcher.
         this.instances[name] = {
           watcher: null,
           instance: chokidar.watch(
@@ -55,19 +85,26 @@ class Watcher {
           running: false,
         };
 
+        // Create the Shutdown handler that will close the new Watcher after configured
+        // time has passed.
         this.instances[name].instance.on(this.config.instances[name].event || 'change', (path) => {
           this.config.instances[name].services.forEach((service) => {
+            this.Console.log('Resetting shutdown timer...');
             clearTimeout(this.instances[name].watcher);
 
             if (!this.instances[name].active) {
               this.instances[name].watcher = setTimeout(async () => {
                 this.instances[name].active = true;
 
-                if (this.config.instances[name].event === 'change') {
-                  this.Console.info(`File changed, starting ${service}`);
+                if (this.config.instances[name].event !== 'all') {
+                  this.Console.info(`File updated ${path}`);
                 }
 
-                await this.services[service].init();
+                if (this.TaskManager) {
+                  const { hook } = ConfigManager.load(service);
+
+                  this.TaskManager.publish(hook || service);
+                }
 
                 this.instances[name].active = false;
               }, this.config.options.delay || 500);
@@ -75,21 +112,22 @@ class Watcher {
           });
         });
 
+        // The actual shutdown handler that will close the current Watcher.
         this.instances[name].reset = setTimeout(() => {
           if (!this.instances[name].instance.close) {
             return;
           }
 
-          this.Console.log(`Closing watcher: ${name}`);
+          this.Console.log(`Closing watcher instance: ${name}`);
 
           this.instances[name].instance.close().then(() => {
-            this.Console.log(`Watcher closed: ${name}`);
+            this.Console.log(`Watcher instance closed: ${name}`);
 
             this.instances[name].running = null;
             clearTimeout(this.instances[name].running);
 
             if (!Object.values(this.instances).filter(({ running }) => running).length) {
-              this.Console.info('Finished Watcher');
+              this.Console.info('Closing service Watcher...');
 
               done();
             }

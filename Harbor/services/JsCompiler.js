@@ -7,13 +7,19 @@ const { dirname, join, resolve } = require('path');
 
 const BaseService = require('./BaseService');
 
+/**
+ * Compiles the configured entries with Babel.
+ */
 class JsCompiler extends BaseService {
-  constructor(environment, Console) {
-    super(environment, Console);
+  constructor(tooling) {
+    super(tooling);
 
     this.linter = new Linter();
   }
 
+  /**
+   * Compiles the configured compiler entries.
+   */
   async init() {
     super.init();
 
@@ -39,6 +45,8 @@ class JsCompiler extends BaseService {
           })
       )
     );
+
+    super.resolve();
   }
 
   /**
@@ -59,13 +67,25 @@ class JsCompiler extends BaseService {
 
                 const source = readFileSync(entry);
 
+                const transpiledSource = transform(source, this.config.plugins.transform);
+                const destination = resolve(entry).replace(
+                  resolve(this.environment.THEME_SRC),
+                  resolve(this.environment.THEME_DIST)
+                );
+
                 if (this.config.plugins.eslint) {
-                  const linter = this.linter.verify(source.toString(), this.config.plugins.eslint);
+                  const linter = this.linter.verify(
+                    transpiledSource.code,
+                    this.config.plugins.eslint,
+                    {
+                      filename: destination,
+                    }
+                  );
                   if (Array.isArray(linter)) {
                     linter.forEach((f) => {
                       if (f.fatal) {
                         const m = [
-                          `Unable to compile: ${resolve(entry)}:${f.line}:${f.column}`,
+                          `Unable to compile: ${resolve(destination)}:${f.line}:${f.column}`,
                           `'${f.message}`,
                         ];
 
@@ -79,12 +99,6 @@ class JsCompiler extends BaseService {
                     });
                   }
                 }
-
-                const transpiledSource = transform(source, this.config.plugins.transform);
-                const destination = resolve(entry).replace(
-                  resolve(this.environment.THEME_SRC),
-                  resolve(this.environment.THEME_DIST)
-                );
 
                 /**
                  * Create the destination directory before writing the source to

@@ -7,11 +7,18 @@ const { exec } = require('child_process');
 const BaseService = require('./BaseService');
 const { stdout } = require('process');
 
+/**
+ * Create a new Styleguide with the compiled assets from the destination
+ * directory.
+ */
 class StyleguideCompiler extends BaseService {
-  constructor(environment, Console) {
-    super(environment, Console);
+  constructor(tooling) {
+    super(tooling);
   }
 
+  /**
+   * Optimizes the compiled stylesheet entries.
+   */
   async init() {
     super.init();
 
@@ -33,11 +40,16 @@ class StyleguideCompiler extends BaseService {
 
       shell.on('error', (data) => {
         this.Console.error(data);
+
+        super.resolve();
       });
     });
   }
 
-  setup(environment) {
+  /**
+   * Creates the actual Styleguide configuration object.
+   */
+  setup() {
     if (!this.config.entry instanceof Object) {
       return;
     }
@@ -45,7 +57,7 @@ class StyleguideCompiler extends BaseService {
     const stories = [].concat.apply(
       [],
       Object.values(this.config.entry).map((entry) =>
-        glob.sync(path.join(environment.THEME_SRC, entry)).map((e) => path.resolve(e))
+        glob.sync(path.join(this.environment.THEME_SRC, entry)).map((e) => path.resolve(e))
       )
     );
 

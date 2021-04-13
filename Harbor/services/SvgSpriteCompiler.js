@@ -7,11 +7,17 @@ const svgstore = require('svgstore');
 
 const BaseService = require('./BaseService');
 
+/**
+ * Create SVG sprites from the configured entries.
+ */
 class SvgSpriteCompiler extends BaseService {
-  constructor(environment, Console) {
-    super(environment, Console);
+  constructor(tooling) {
+    super(tooling);
   }
 
+  /**
+   * Creates SVG sprites from the configured entries.
+   */
   async init() {
     super.init();
 
@@ -42,6 +48,8 @@ class SvgSpriteCompiler extends BaseService {
           })
       )
     );
+
+    super.resolve();
   }
 
   async prepareCwd(cwd, name) {

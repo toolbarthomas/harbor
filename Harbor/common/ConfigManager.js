@@ -9,11 +9,9 @@ class ConfigManager {
   static load(option) {
     const defaultConfig = load(resolve(__dirname, '../../harbor.default.config.js'));
 
-    /**
-     * Check if the defined configuration key has already been defined within
-     * the current Node instance in order to prevent the confiuration from
-     * loading a second time.
-     */
+    // Check if the defined configuration key has already been defined within
+    // the current Node instance in order to prevent the confiuration from
+    // loading a second time.
     if (option && process.env.harbor && process.env.harbor[option]) {
       return process.env.harbor[option];
     }
@@ -21,10 +19,8 @@ class ConfigManager {
     const config = load('harbor.config.js');
 
     if (config instanceof Object && defaultConfig[option] instanceof Object) {
-      /**
-       * Cache the actual defined config within the Node process.
-       */
       if (option && process.env.harbor instanceof Object) {
+        // Cache the actual defined config within the Node process.
         process.env.harbor[option] = config[option];
       }
 

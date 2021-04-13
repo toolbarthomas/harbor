@@ -4,13 +4,22 @@ const { basename, dirname, join, resolve } = require('path');
 
 const BaseService = require('./BaseService');
 
+/**
+ * Resolves the configured Resolver entries to the environment destination
+ * directory.
+ */
 class Resolver extends BaseService {
   constructor() {
     super();
   }
 
-  async init(environment, Console) {
-    super.init(environment, Console);
+  /**
+   * Resolves the configured Resolver entries.
+   *
+   * @param {Object} tooling the inherited instance tools.
+   */
+  async init(tooling) {
+    super.init(tooling);
 
     if (!this.config.entry instanceof Object) {
       return;
@@ -62,6 +71,8 @@ class Resolver extends BaseService {
           })
       )
     );
+
+    super.resolve();
   }
 }
 

@@ -4,7 +4,7 @@ const { resolve } = require('path');
 
 /**
  * Exposes the environment variables that have been defined
- * within the optional dotenv (.env) file.
+ * within the optional dotenv (.env) file within the running working directory.
  *
  * Harbor will define these environment variables and will fall back
  * to the default values when missing.
@@ -21,6 +21,9 @@ class Environment {
     this.config = {};
   }
 
+  /**
+   * Loads the environment configuration from the optional environment file.
+   */
   define() {
     const source = resolve(process.cwd(), '.env');
     const env = existsSync(source) ? config({ path: source }) : {};

@@ -8,8 +8,8 @@ const postcss = require('postcss');
 const BaseService = require('./BaseService');
 
 class StyleOptimizer extends BaseService {
-  constructor(environment, Console) {
-    super(environment, Console);
+  constructor(tooling) {
+    super(tooling);
   }
 
   async init() {
@@ -53,6 +53,8 @@ class StyleOptimizer extends BaseService {
           })
       )
     );
+
+    super.resolve();
   }
 
   /**

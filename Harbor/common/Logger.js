@@ -1,9 +1,11 @@
 const chalk = require('chalk');
 const symbols = require('log-symbols');
 
+/**
+ * Helper Class that writes messages to the stdout.
+ */
 class Logger {
-  constructor(name, environment) {
-    this.name = name;
+  constructor(environment) {
     this.environment = environment;
   }
 
@@ -11,8 +13,7 @@ class Logger {
    * Prints out an error message & exit the current process.
    *
    * @param {String|Array} message The message to display.
-   * @param {Boolean} keepAlive Onlu exit running Node process but
-   * don't kill the process.
+   * @param {Boolean} keepAlive Prevents an exit on the current process.
    */
   error(message, keepAlive) {
     this.outputMessages(message, 'error', '');
@@ -50,7 +51,8 @@ class Logger {
   }
 
   /**
-   * Prints out a log message.
+   * Prints out a log message that will only be visible if THEME_DEVMODE is TRUE
+   * within the current environment.
    *
    * @param {String|Array} message The message to display.
    */

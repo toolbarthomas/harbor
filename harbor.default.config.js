@@ -5,15 +5,40 @@ const imageminSvgo = require('imagemin-svgo');
 const stylelint = require('stylelint');
 
 module.exports = {
-  Server: {
-    options: {
-      sharedDirectories: [],
+  Cleaner: {
+    hook: 'prepare',
+  },
+  FileSync: {
+    hook: 'prepare',
+    patterns: ['main/images', 'main/webfonts'],
+  },
+  JsCompiler: {
+    entry: {
+      main: 'main/javascripts/**/*.js',
+      modules: 'modules/*/*/*.js',
+    },
+    hook: 'javascripts',
+    plugins: {
+      eslint: {
+        env: {
+          browser: true,
+        },
+        extends: ['eslint-config-airbnb-base', 'prettier'],
+        rules: {
+          'import/no-extraneous-dependencies': '0',
+          'prettier/prettier': 'error',
+        },
+      },
+      transform: {
+        presets: ['@babel/env'],
+      },
     },
   },
   SassCompiler: {
     options: {
       outputStyle: 'compact',
     },
+    hook: 'stylesheets',
     plugins: {
       postcss: {
         plugins: [
@@ -32,41 +57,13 @@ module.exports = {
       main: 'main/stylesheets/**/**.scss',
     },
   },
-  JsCompiler: {
-    entry: {
-      main: 'main/javascripts/**/*.js',
-      modules: 'modules/*/*/*.js',
-    },
-    plugins: {
-      eslint: {
-        env: {
-          browser: true,
-        },
-        extends: ['eslint-config-airbnb-base'],
-        rules: {
-          'import/no-extraneous-dependencies': '0',
-        },
-      },
-      transform: {
-        presets: ['@babel/env'],
-      },
-    },
-  },
-  Resolver: {
-    entry: {
-      svgxuse: 'svgxuse.min.js',
-    },
-  },
-  StyleguideCompiler: {
-    entry: {
-      main: 'main/**/*.stories.@(js|mdx)',
-      modules: 'modules/**/*.stories.@(js|mdx)',
-    },
+  Server: {
     options: {
-      addons: ['@storybook/addon-essentials', '@storybook/addon-actions', '@storybook/addon-links'],
+      sharedDirectories: [],
     },
   },
   StyleOptimizer: {
+    hook: 'stylesheets',
     plugins: {
       autoprefixer: autoprefixer({
         overrideBrowserslist: ['> 2%', 'last 2 versions'],
@@ -79,7 +76,18 @@ module.exports = {
       modules: 'modules/*/*/*.css',
     },
   },
+  StyleguideCompiler: {
+    hook: 'styleguide',
+    entry: {
+      main: 'main/**/*.stories.@(js|mdx)',
+      modules: 'modules/**/*.stories.@(js|mdx)',
+    },
+    options: {
+      addons: ['@storybook/addon-essentials', '@storybook/addon-actions', '@storybook/addon-links'],
+    },
+  },
   SvgSpriteCompiler: {
+    hook: 'images',
     prefix: 'svg--',
     entry: {
       svgsprite: 'main/images/*/**.svg',
@@ -104,10 +112,12 @@ module.exports = {
       ],
     },
   },
-  FileSync: {
-    patterns: ['main/images', 'main/webfonts'],
+  Resolver: {
+    hook: 'prepare',
+    entry: {
+      svgxuse: 'svgxuse.min.js',
+    },
   },
-  Cleaner: {},
   Watcher: {
     options: {
       delay: 200,
