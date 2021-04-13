@@ -54,39 +54,6 @@ class Harbor {
     Watch.spawn(task);
 
     await this.tooling.TaskManager.publish(task);
-
-    // if (queue.includes('watch') && this.env.THEME_DEVMODE) {
-    //   this.Watcher = new Watcher(this.services);
-
-    //   this.watch();
-    // }
-
-    // const completed = [];
-
-    // await Promise.all(
-    //   jobs.map(
-    //     (name) =>
-    //       new Promise(async (cb) => {
-    //         if (typeof this[name] === 'function') {
-    //           this.Console.info(`Starting: ${name}`);
-
-    //           await this[name]();
-
-    //           completed.push(name);
-
-    //           this.Console.info(`Finished: ${name}`);
-    //         } else {
-    //           this.Console.error(`Task '${name}' does not exists.`);
-    //         }
-
-    //         cb();
-    //       })
-    //   )
-    // );
-
-    // if (jobs.length) {
-    //   this.Console.success(`Completed ${completed.length} tasks`);
-    // }
   }
 
   /**
@@ -98,78 +65,8 @@ class Harbor {
     return this.env ? this.env : this.Environment.define();
   }
 
-  /**
-   * Harbor tasks for cleaning up the THEME_DIST directory.
-   *
-   * @param {Object} config The Harbor environment configuration object.
-   */
-  clean() {
-    this.services.Cleaner.init(this.Console);
-  }
-
-  /**
-   * Harbor tasks for syncing the defined files to the THEME_DIST directory.
-   * Additional directories can be defined within the optional environment file
-   * by asigning paths to the THEME_STATIC_DIRECTORIES variable.
-   *
-   * @param {Object} config The Harbor environment configuration object.
-   */
-  sync() {
-    this.services.FileSync.init(this.Console);
-  }
-
-  /**
-   * Resolves the configured directories to the build directory, should be used
-   * on entries that are excluded from the defined source directory.
-   *
-   * @param {Object} config The Harbor environment configuration object.
-   */
-  async resolve() {
-    await this.services.Resolver.init(this.Console);
-  }
-
-  /**
-   * Compiles a standalone development styleguide.
-   */
-  styleguide() {
-    return this.services.StyleguideCompiler.init(this.Console);
-  }
-
   styleguideSetup() {
     return this.services.StyleguideCompiler.setup(this.env);
-  }
-
-  /**
-   * Harbor task to generate the source stylesheets (optional support for sass).
-   */
-  async stylesheets() {
-    await this.services.SassCompiler.init(this.Console);
-    await this.services.StyleOptimizer.init(this.Console);
-  }
-
-  watch() {
-    return this.Watcher.spawn(this.Console);
-  }
-
-  /**
-   * Harbor task to transpile the source javascripts.
-   */
-  async javascripts() {
-    await this.services.JsCompiler.init(this.Console);
-  }
-
-  /**
-   * Harbor task to transform the source images like sprites.
-   */
-  async images() {
-    await this.services.SvgSpriteCompiler.init(this.Console);
-  }
-
-  /**
-   * Starts the Browsersync development server.
-   */
-  serve() {
-    this.services.Server.init(this.Console);
   }
 }
 
