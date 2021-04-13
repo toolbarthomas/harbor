@@ -58,6 +58,7 @@ module.exports = {
     },
   },
   Server: {
+    hook: 'serve',
     options: {
       sharedDirectories: [],
     },
