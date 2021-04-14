@@ -10,16 +10,16 @@ An optional Harbor environment can be defined by creating a [dotenv](https://www
 The default configuration values will be used when missing:
 
 ```shell
-  THEME_SRC=./src # Defines the assets working source directory.
+  THEME_SRC=./src # Defines the asset working source directory.
   THEME_DIST=./dist # Defines the asset destination directory.
-  THEME_PORT=8080 # Defines the server port for the served Styleguide.
-  THEME_ENVIRONMENT=production # Optmizes the flow for the current environment.
+  THEME_PORT=8080 # Defines the server port for the Styleguide server.
+  THEME_ENVIRONMENT=production # Optimizes the flow for the current environment.
 ```
 
 ## Default Configuration
 
-The Harbor services can be configured to point out the location of you assets. A default configuration has been defined within Harbor.
-A default configuration can be used by creating `harbor.config.js` within the working directory.
+The Harbor services can be configured to point out the location of your assets. A default configuration has been defined within Harbor,
+a custom configuration can be used by creating `harbor.config.js` within the working directory.
 
 For example:
 
@@ -138,7 +138,7 @@ The Watcher will shutdown automatically if no event occured during the defined d
 
 ## Setup
 
-Harbor can be included directly within your custom node script:
+Harbor can be included directly within a NodeJS script:
 
 ```js
 // index.js
@@ -153,7 +153,7 @@ You can run one or multiple tasks by defining the `task` parameter.
 Keep in mind that the hook should exist within your configuration:
 
 ```
-  $ node ./index.js task=sync
+  $ node ./index.js task=javascripts
 ```
 
 You can assign the following NPM script entries when using the default hook configuration:
@@ -175,8 +175,8 @@ You can assign the following NPM script entries when using the default hook conf
 ```
 
 The default hooks are: `prepare`, `javascripts`, `stylesheets`, `serve`, `styleguide`, `images`
-It is also possible to use the Service name directly:
+It is also possible to use the Service names directly:
 
 ```
-node ./index.js task=SassCompiler
+$ node ./index.js task=SassCompiler
 ```
