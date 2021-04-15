@@ -124,7 +124,7 @@ The Resolver will resolve the defined packages from the node_modules to the envi
 
 ### Watcher options
 
-The Watcher can be used during the development process and will run the configured hooks with the TaskManager.
+The Watcher can be started by defining the `watch` parameter to the CLI and will run the defined hooks from the TaskManager.
 The Watcher will shutdown automatically if no event occured during the defined duration.
 
 | Option               | type                   | Description                                                                             |
@@ -157,6 +157,11 @@ Keep in mind that the hook should exist within your configuration:
   $ node ./index.js task=javascripts
 ```
 
+```
+  $ node ./node_modules/@toolbarthomas/harbor/index.js
+```
+
+Keep in mind that you need to define a task in order to start Harbor.
 You can assign the following NPM script entries when using the default hook configuration:
 
 ```js
@@ -178,6 +183,13 @@ You can assign the following NPM script entries when using the default hook conf
 The default hooks are: `prepare`, `javascripts`, `stylesheets`, `serve`, `styleguide`, `images`
 It is also possible to use the Service names directly:
 
+## CLI
+
 ```
-$ node ./index.js task=SassCompiler
+$ node ./index.js
 ```
+
+| Option | Description                                                     |
+| ------ | --------------------------------------------------------------- |
+| task   | Comma separated list of service hooks that should be initiated. |
+| watch  | Starts the Watcher for the defined tasks.                       |
