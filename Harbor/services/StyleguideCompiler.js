@@ -35,11 +35,11 @@ class StyleguideCompiler extends BaseService {
       });
 
       shell.stderr.on('data', (data) => {
-        this.Console.log(data);
+        process.stdout.write(data);
       });
 
       shell.on('error', (data) => {
-        this.Console.error(data);
+        process.stdout.write(data);
 
         super.resolve(true);
       });
