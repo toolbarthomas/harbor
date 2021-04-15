@@ -4,17 +4,16 @@
   "description": "Boilerplate for Drupal Themes",
   "main": "./Harbor/index.js",
   "scripts": {
-    "prebuild": "node ./index.js task=prepare",
-    "build": "node ./index.js task=stylesheets,javascripts,images",
-    "predevelop": "npm run build",
-    "develop": "node ./index.js task=watch,styleguide",
+    "preproduction": "node ./index.js task=prepare",
+    "production": "node ./index.js task=stylesheets,javascripts,images",
+    "predevelopment": "npm run production",
+    "development": "node ./index.js watch task=styleguide",
     "images": "node ./index.js task=images",
     "javascripts": "node ./index.js task=javascripts",
     "resolve": "node ./index.js task=resolve",
     "serve": "node ./index.js task=serve",
     "styleguide": "node ./index.js task=styleguide",
     "stylesheets": "node ./index.js task=stylesheets",
-    "watch": "node ./index.js watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [

@@ -39,7 +39,7 @@ For example:
   ...
 ```
 
-### Cleaner Options
+### Cleaner configuration
 
 The Cleaner is a default Harbor service that will delete all files within the defined environment destination directory: `THEME_DIST`
 
@@ -47,7 +47,7 @@ The Cleaner is a default Harbor service that will delete all files within the de
 | ------ | ------ | --------------------------------------------------------------------- |
 | hook   | string | Runs the service if the given hook is subscribed to the Task Manager. |
 
-### FileSync Options
+### FileSync configuration
 
 The FileSync will synchronize the defined static entries to the configured environment destination directory.
 
@@ -56,7 +56,7 @@ The FileSync will synchronize the defined static entries to the configured envir
 | patterns | string[] | Copies the given patterns and it's folder structure to the environment destination directory. |
 | hook     | string   | Runs the service if the given hook is subscribed to the Task Manager.                         |
 
-### JsCompiler Options
+### JsCompiler configuration
 
 The JsCompiler transforms & lints the defined entries with Babel & Eslint.
 The result will be written relative to the configured environment destination directory.
@@ -69,7 +69,7 @@ The result will be written relative to the configured environment destination di
 | plugins.eslint    | Object                 | The optional Eslint plugin(configuration).                              |
 | plugins.transform | Object                 | The optional Babel transform(configuration).                            |
 
-### SassCompiler Options
+### SassCompiler configuration
 
 The SassCompiler renders & prepares the defined entries with Node Sass & Postcss.
 The result will be written relative to the configured environment destination directory.
@@ -91,7 +91,7 @@ The Server is the legacy Express server that should be used if you wan't to serv
 | options | Object | Optional configuration for the Express server.                        |
 | hook    | string | Runs the service if the given hook is subscribed to the Task Manager. |
 
-### StyleguideCompiler options
+### StyleguideCompiler configuration
 
 The Styleguide Compiler will generate a new Storybook instance that can be accesed on the configured environment port.
 
@@ -101,7 +101,7 @@ The Styleguide Compiler will generate a new Storybook instance that can be acces
 | options | Object                 | Optional configuration for the Storybook compiler.                    |
 | hook    | string                 | Runs the service if the given hook is subscribed to the Task Manager. |
 
-### SvgSpriteCompiler options
+### SvgSpriteCompiler configuration
 
 The SvgSpriteCompiler will compile the defined entries into inline SVG sprites.
 The result will be written relative to the configured environment destination directory.
@@ -113,7 +113,7 @@ The result will be written relative to the configured environment destination di
 | hook    | string                 | Runs the service if the given hook is subscribed to the Task Manager. |
 | prefix  | string                 | The ID prefix for each icon within the compiled sprite.               |
 
-### Resolver options
+### Resolver configuration
 
 The Resolver will resolve the defined packages from the node_modules to the environment destination.
 
@@ -122,7 +122,7 @@ The Resolver will resolve the defined packages from the node_modules to the envi
 | entry  | Object[string, string] | Resolves the given entry packages to the environment destination.     |
 | hook   | string                 | Runs the service if the given hook is subscribed to the Task Manager. |
 
-### Watcher options
+### Watcher configuration
 
 The Watcher can be started by defining the `watch` parameter to the CLI and will run the defined hooks from the TaskManager.
 The Watcher will shutdown automatically if no event occured during the defined duration.
@@ -142,7 +142,7 @@ The Watcher will shutdown automatically if no event occured during the defined d
 Harbor can be included directly within a NodeJS script:
 
 ```js
-// index.js
+// ./node_modules/@toolbarthomas/harbor/index.js
 
 const Harbor = require('@toolbarthomas/harbor');
 const instance = new Harbor();
@@ -153,43 +153,41 @@ instance.init();
 You can run one or multiple tasks by defining the `task` parameter.
 Keep in mind that the hook should exist within your configuration:
 
-```
-  $ node ./index.js task=javascripts
-```
-
-```
-  $ node ./node_modules/@toolbarthomas/harbor/index.js
-```
-
-Keep in mind that you need to define a task in order to start Harbor.
-You can assign the following NPM script entries when using the default hook configuration:
-
-```js
-  {
-    "prebuild": "node ./index.js task=prepare",
-    "build": "node ./index.js task=stylesheets,javascripts,images",
-    "predevelop": "npm run build",
-    "develop": "node ./index.js task=watch,styleguide",
-    "images": "node ./index.js task=images",
-    "javascripts": "node ./index.js task=javascripts",
-    "resolve": "node ./index.js task=resolve",
-    "serve": "node ./index.js task=serve",
-    "styleguide": "node ./index.js task=styleguide",
-    "stylesheets": "node ./index.js task=stylesheets",
-    "watch": "node ./index.js task=watch",
-  }
+```shell
+  $ node ./index.js
 ```
 
 The default hooks are: `prepare`, `javascripts`, `stylesheets`, `serve`, `styleguide`, `images`
-It is also possible to use the Service names directly:
 
 ## CLI
 
+Keep in mind that you need to define a task in order to start Harbor:
+
 ```
-$ node ./index.js
+$ node ./index.js task=stylesheets
 ```
 
 | Option | Description                                                     |
 | ------ | --------------------------------------------------------------- |
 | task   | Comma separated list of service hooks that should be initiated. |
 | watch  | Starts the Watcher for the defined tasks.                       |
+
+## Default scripts
+
+You can assign the following NPM script entries when using the default hook configuration:
+
+```js
+  {
+    "preproduction": "node ./index.js task=prepare",
+    "production": "node ./index.js task=stylesheets,javascripts,images",
+    "predevelopment": "npm run production",
+    "development": "node ./index.js watch task=styleguide",
+    "images": "node ./index.js task=images",
+    "javascripts": "node ./index.js task=javascripts",
+    "resolve": "node ./index.js task=resolve",
+    "serve": "node ./index.js task=serve",
+    "styleguide": "node ./index.js task=styleguide",
+    "stylesheets": "node ./index.js task=stylesheets",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+```
