@@ -37,11 +37,14 @@ class SvgSpriteCompiler extends BaseService {
       entries.map(
         (name) =>
           new Promise(async (cb) => {
-            const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
+            const p = join(this.environment.THEME_SRC, this.config.entry[name]);
+            const cwd = sync(p);
 
-            if (cwd.length > 0) {
+            if (cwd.length) {
               await this.prepareCwd(cwd, name);
               await this.processCwd(cwd, name);
+            } else {
+              this.Console.warning(`Unable to find entry from: ${p}`);
             }
 
             cb();
@@ -107,6 +110,8 @@ class SvgSpriteCompiler extends BaseService {
         mkdirp(destination).then((dirPath, error) => {
           if (error) {
             this.Console.error(error);
+
+            return super.resolve();
           }
 
           writeFileSync(resolve(destination, name), sprite.toString());

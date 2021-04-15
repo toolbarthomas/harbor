@@ -37,11 +37,18 @@ class JsCompiler extends BaseService {
       entries.map(
         (name) =>
           new Promise((cb) => {
-            const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name]));
+            const p = join(this.environment.THEME_SRC, this.config.entry[name]);
+            const cwd = sync(p);
 
-            this.transpileCwd(cwd).then(() => {
+            if (cwd.length) {
+              this.transpileCwd(cwd).then(() => {
+                cb();
+              });
+            } else {
+              this.Console.warning(`Unable to find entry from: ${p}`);
+
               cb();
-            });
+            }
           })
       )
     );

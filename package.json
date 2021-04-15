@@ -14,7 +14,7 @@
     "serve": "node ./index.js task=serve",
     "styleguide": "node ./index.js task=styleguide",
     "stylesheets": "node ./index.js task=stylesheets",
-    "watch": "node ./index.js task=watch",
+    "watch": "node ./index.js watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "files": [

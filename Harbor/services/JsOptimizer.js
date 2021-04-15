@@ -53,9 +53,15 @@ class JsOptimizer extends BaseService {
               .then((data) =>
                 this.optimizeFile(path, data)
                   .then(() => done())
-                  .catch((exception) => this.Console.error(exception))
+                  .catch((exception) => {
+                    this.Console.error(exception);
+                    super.resolve(true);
+                  })
               )
-              .catch((exception) => this.Console.error(exception));
+              .catch((exception) => {
+                this.Console.error(exception);
+                super.resolve(true);
+              });
           })
       )
     );
@@ -63,11 +69,13 @@ class JsOptimizer extends BaseService {
 
   optimizeFile(path, blob) {
     if (!path) {
-      return this.Console.error(`Unable to optimize script, no path has been defined.`);
+      this.Console.error(`Unable to optimize script, no path has been defined.`);
+      return super.resolve(true);
     }
 
     if (!blob) {
-      return this.Console.error(`Unable to optimize script, no data has been defined for ${path}.`);
+      this.Console.error(`Unable to optimize script, no data has been defined for ${path}.`);
+      return super.resolve(true);
     }
 
     return new Promise((cb) => {

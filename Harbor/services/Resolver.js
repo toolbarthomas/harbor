@@ -57,6 +57,8 @@ class Resolver extends BaseService {
             mkdirp(dirname(dest)).then((dirPath, error) => {
               if (error) {
                 this.Console.error(error);
+
+                super.resolve(true);
               }
 
               // Stream the actual contents in order to resolve each module faster.

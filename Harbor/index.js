@@ -44,7 +44,9 @@ class Harbor {
         acceptedEnvironments: 'development',
       }),
       StyleguideCompiler: new StyleguideCompiler(this.tooling),
-      StyleOptimizer: new StyleOptimizer(this.tooling),
+      StyleOptimizer: new StyleOptimizer(this.tooling, {
+        acceptedEnvironments: 'production',
+      }),
       SvgSpriteCompiler: new SvgSpriteCompiler(this.tooling),
     };
   }
@@ -53,13 +55,35 @@ class Harbor {
    * Init Harbor and run tasks specified from the Command Line Arguments.
    */
   async init() {
-    const { task } = this.Argv.args;
+    const { task, watch } = this.Argv.args;
 
-    const Watch = new Watcher(this.tooling.TaskManager);
+    if (watch) {
+      const Watch = new Watcher(this.tooling.TaskManager);
 
-    Watch.spawn(task);
+      Watch.spawn(task);
+    }
 
-    await this.tooling.TaskManager.publish(task);
+    const result = await this.tooling.TaskManager.publish(task);
+
+    if (result) {
+      if (result.exceptions && result.exceptions.length) {
+        if (this.env.THEME_ENVIRONMENT === 'production') {
+          throw Error(
+            `Not all tasks have been completed correctly: ${result.exceptions.join(', ')}`
+          );
+        }
+      }
+
+      if (result.completed && result.completed.length) {
+        if (result.exceptions && !result.exceptions.length) {
+          this.Console.success(`Successfully completed ${result.completed.length} tasks`);
+        }
+      } else if (result.exceptions && result.exceptions.length) {
+        this.Console.warning(
+          `The following tasks did not complete correctly: ${result.exceptions.join(', ')}`
+        );
+      }
+    }
   }
 
   /**

@@ -41,10 +41,6 @@ class Watcher {
       return t.trim();
     });
 
-    if (!list.length || !list.includes('watch')) {
-      return;
-    }
-
     if (!this.config.instances instanceof Object) {
       return;
     }
@@ -102,6 +98,8 @@ class Watcher {
                   const { hook } = ConfigManager.load(service);
 
                   this.TaskManager.publish(hook || service);
+
+                  this.Console.info(`Resuming watcher: ${name}`);
                 }
 
                 this.instances[name].active = false;

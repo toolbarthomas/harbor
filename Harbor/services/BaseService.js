@@ -48,8 +48,8 @@ class BaseService {
                 `${
                   this.name
                 } will not be launched since it is only accepted for the ${this.options.acceptedEnvironments.join(
-                  ', environment.'
-                )}`
+                  ', '
+                )} environments.`
               );
 
               return this.resolve();
@@ -68,13 +68,13 @@ class BaseService {
   /**
    * Resolves the subscribed Task Manager Service handler.
    */
-  resolve() {
+  resolve(exit) {
     const { TaskManager } = this.tooling;
 
     if (TaskManager && TaskManager.resolve) {
       this.Console.log(`Resolving service: ${this.name}`);
 
-      TaskManager.resolve(this.name);
+      TaskManager.resolve(this.name, exit);
     } else {
       this.Console.warning(`Unable to resolve ${this.name}, unable to find the Task Manager.`);
     }

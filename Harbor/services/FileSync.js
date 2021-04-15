@@ -45,7 +45,7 @@ class FileSync extends BaseService {
         up: 1,
       },
       () => {
-        super.resolve(this.name);
+        super.resolve();
       }
     );
   }

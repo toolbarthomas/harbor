@@ -82,7 +82,6 @@ module.exports = {
     },
     entry: {
       main: 'main/stylesheets/*.css',
-      modules: 'modules/*/*/*.css',
     },
   },
   StyleguideCompiler: {

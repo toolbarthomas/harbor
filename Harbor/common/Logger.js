@@ -15,12 +15,8 @@ class Logger {
    * @param {String|Array} message The message to display.
    * @param {Boolean} keepAlive Prevents an exit on the current process.
    */
-  error(message, keepAlive) {
-    if (!keepAlive) {
-      throw new Error(message);
-    } else {
-      this.outputMessages(message, 'error', 'error');
-    }
+  error(message) {
+    this.outputMessages(message, 'error', 'error');
   }
 
   /**

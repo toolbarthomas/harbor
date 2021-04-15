@@ -53,28 +53,29 @@ class SassCompiler extends BaseService {
       entries.map(
         (name) =>
           new Promise((cb) => {
-            const cwd = sync(join(this.environment.THEME_SRC, this.config.entry[name])).filter(
-              (entry) => basename(entry)[0] !== '_'
-            );
+            const p = join(this.environment.THEME_SRC, this.config.entry[name]);
 
-            this.renderCwd(cwd).then(() => {
+            const cwd = sync(p).filter((entry) => basename(entry)[0] !== '_');
+
+            if (cwd.length) {
+              this.renderCwd(cwd).then(() => {
+                cb();
+              });
+            } else {
+              this.Console.warning(`Unable to find entry from: ${p}`);
+
               cb();
-            });
+            }
           })
       )
     );
 
-    if (this.environment.THEME_ENVIRONMENT === 'production') {
-      const length = this.stylelintExceptions.length + this.sassExceptions.length;
+    const length = this.stylelintExceptions.length + this.sassExceptions.length;
 
-      if (length) {
-        this.Console.error(
-          `Sasscompiler encountered ${length} error${length !== 1 ? 's' : ''}...`,
-          true
-        );
+    if (length) {
+      this.Console.error(`Sasscompiler encountered ${length} error${length !== 1 ? 's' : ''}...`);
 
-        process.exit(1);
-      }
+      return super.resolve(true);
     }
 
     super.resolve();
@@ -176,14 +177,11 @@ class SassCompiler extends BaseService {
           }),
           async (error, result) => {
             if (error) {
-              this.Console.error(
-                [
-                  `Sass error encountered: ${error.file}:${error.line}:${error.column}`,
-                  error.message,
-                  `From: ${entry}`,
-                ],
-                true
-              );
+              this.Console.error([
+                `Sass error encountered: ${error.file}:${error.line}:${error.column}`,
+                error.message,
+                `From: ${entry}`,
+              ]);
 
               this.sassExceptions.push(error);
             } else {
@@ -206,6 +204,8 @@ class SassCompiler extends BaseService {
       mkdirp(dirname(destination)).then((dirPath, error) => {
         if (error) {
           this.Console.error(error);
+
+          super.resolve(true);
         } else {
           // Write the actual css to the filesystem.
           writeFileSync(destination, result.css.toString());

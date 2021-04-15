@@ -35,7 +35,7 @@ class TaskManager {
 
     const fn = () => {
       try {
-        return new Promise((resolve) => {
+        return new Promise((resolve, reject) => {
           this.tasks[name].resolve = resolve;
 
           return handler(args);
@@ -48,7 +48,7 @@ class TaskManager {
     this.tasks[name].fn = fn;
   }
 
-  resolve(name, ...args) {
+  resolve(name, exit) {
     if (!this.tasks[name]) {
       this.Console.warning(`Unable to resolve non existing task: ${name}`);
       return;
@@ -58,7 +58,7 @@ class TaskManager {
       this.Console.warning(`No resolve handler has been defined for: ${name}`);
     }
 
-    this.tasks[name].resolve(args);
+    this.tasks[name].resolve(exit);
   }
 
   /**
@@ -86,7 +86,6 @@ class TaskManager {
 
     const queue = list
       .filter((item, index) => list.indexOf(item) == index)
-      .filter((item) => item !== 'watch')
       .map((item) => {
         const tasks = Object.values(this.tasks).filter(
           (task) => Array.isArray(task.hook) && task.hook.includes(item)
@@ -104,18 +103,17 @@ class TaskManager {
       .filter((t) => t);
 
     if (!queue.length) {
-      if (!list.length) {
-        this.Console.warning(`No tasks have been defined to launch.`);
-      }
+      this.Console.error(`Unable to find tasks: ${list.join(', ')}`);
 
       return;
     }
 
     const jobs = [].concat.apply([], queue);
     const completed = [];
+    const exceptions = [];
 
     // Run each
-    await Promise.all(
+    const result = await Promise.all(
       jobs.map((job) =>
         new Promise(async (done) => {
           if (job.tasks && job.tasks.length) {
@@ -127,10 +125,16 @@ class TaskManager {
               this.Console.info(`Launching service: ${hook[0]}`);
 
               if (typeof fn === 'function') {
-                await fn().catch((exception) => this.Console.error(exception));
+                await fn()
+                  .then((exit) => {
+                    if (!exit) {
+                      completed.push(hook[0]);
+                    } else {
+                      exceptions.push(hook[0]);
+                    }
+                  })
+                  .catch((exception) => this.Console.error(exception));
                 this.Console.info(`Complete: ${hook[0]}`);
-
-                completed.push(hook[0]);
               } else {
                 this.Console.warning(`No handler has been defined for ${job.task}`);
               }
@@ -142,13 +146,10 @@ class TaskManager {
       )
     );
 
-    if (completed.length) {
-      this.Console.success(
-        `Successfully completed ${
-          completed.filter((item, index) => completed.indexOf(item) == index).length
-        } tasks`
-      );
-    }
+    return {
+      completed,
+      exceptions,
+    };
   }
 }
 

@@ -43,11 +43,13 @@ class StyleOptimizer extends BaseService {
       entries.map(
         (name) =>
           new Promise((cb) => {
-            const cwd = sync(join(this.environment.THEME_DIST, this.config.entry[name]));
+            const p = join(this.environment.THEME_DIST, this.config.entry[name]);
+            const cwd = sync(p);
 
-            if (cwd.length > 0) {
+            if (cwd.length) {
               this.optimizeCwd(cwd).then(() => cb());
             } else {
+              this.Console.warning(`Unable to find entry from: ${p}`);
               cb();
             }
           })
@@ -117,6 +119,7 @@ class StyleOptimizer extends BaseService {
       mkdirp(dirname(entry)).then((dirPath, error) => {
         if (error) {
           this.Console.error(error);
+          return super.resolve(true);
         }
 
         // Write the actual css to the filesystem.
