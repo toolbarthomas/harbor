@@ -15,6 +15,7 @@ class Environment {
       THEME_SRC: './src',
       THEME_DIST: './dist',
       THEME_PORT: 8080,
+      THEME_DEBUG: false,
       THEME_ENVIRONMENT: 'production',
     };
 
@@ -35,10 +36,21 @@ class Environment {
       if (!Object.prototype.hasOwnProperty.call(parsed, defaultOption)) {
         parsed[defaultOption] = this.defaults[defaultOption];
       }
-    });
 
-    // Enable DEVMODE flag if the current environment is set to 'development'.
-    parsed.THEME_DEVMODE = parsed.THEME_ENVIRONMENT === 'development';
+      if (
+        typeof parsed[defaultOption] === 'string' &&
+        parsed[defaultOption].toLowerCase() === 'false'
+      ) {
+        parsed[defaultOption] = false;
+      }
+
+      if (
+        typeof parsed[defaultOption] === 'string' &&
+        parsed[defaultOption].toLowerCase() === 'true'
+      ) {
+        parsed[defaultOption] = true;
+      }
+    });
 
     this.config = parsed;
 

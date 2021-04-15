@@ -64,13 +64,16 @@ class SassCompiler extends BaseService {
       )
     );
 
-    if (!this.environment.THEME_DEVMODE) {
-      if (this.stylelintExceptions.length || this.sassExceptions.length) {
+    if (this.environment.THEME_ENVIRONMENT === 'production') {
+      const length = this.stylelintExceptions.length + this.sassExceptions.length;
+
+      if (length) {
         this.Console.error(
-          `Sasscompiler encountered ${
-            this.stylelintExceptions.length + this.sassExceptions.length
-          } errors...`
+          `Sasscompiler encountered ${length} error${length !== 1 ? 's' : ''}...`,
+          true
         );
+
+        process.exit(1);
       }
     }
 
@@ -111,7 +114,7 @@ class SassCompiler extends BaseService {
    */
   lintFile(entry) {
     return new Promise((cb) => {
-      if (!this.environment.THEME_DEVMODE) {
+      if (!this.environment.THEME_DEBUG) {
         return cb();
       }
 
@@ -167,7 +170,7 @@ class SassCompiler extends BaseService {
           Object.assign(this.config.options, {
             file: entry,
             includePaths: [this.environment.THEME_SRC],
-            sourceMap: this.environment.THEME_DEVMODE,
+            sourceMap: this.environment.THEME_DEBUG,
             importer: globImporter(),
             outFile: destination,
           }),
@@ -177,6 +180,7 @@ class SassCompiler extends BaseService {
                 [
                   `Sass error encountered: ${error.file}:${error.line}:${error.column}`,
                   error.message,
+                  `From: ${entry}`,
                 ],
                 true
               );
@@ -207,11 +211,11 @@ class SassCompiler extends BaseService {
           writeFileSync(destination, result.css.toString());
 
           // Also write the map file if the development environment is active.
-          if (this.environment.THEME_DEVMODE) {
+          if (this.environment.THEME_DEBUG) {
             writeFileSync(`${destination}.map`, result.map.toString());
           }
 
-          this.Console.log(`Done compiling: ${destination}`);
+          this.Console.log(`Compiled: ${destination}`);
         }
 
         cb();

@@ -14,6 +14,7 @@ The default configuration values will be used when missing:
   THEME_DIST=./dist # Defines the asset destination directory.
   THEME_PORT=8080 # Defines the server port for the Styleguide server.
   THEME_ENVIRONMENT=production # Optimizes the flow for the current environment.
+  THEME_DEBUG=false # Optimizes
 ```
 
 ## Default Configuration

@@ -33,12 +33,17 @@ class TaskManager {
       hook,
     };
 
-    const fn = () =>
-      new Promise((resolve) => {
-        this.tasks[name].resolve = resolve;
+    const fn = () => {
+      try {
+        return new Promise((resolve) => {
+          this.tasks[name].resolve = resolve;
 
-        return handler(args);
-      }).catch((exception) => this.Console.error(exception));
+          return handler(args);
+        });
+      } catch (exception) {
+        this.Console.error(exception);
+      }
+    };
 
     this.tasks[name].fn = fn;
   }
@@ -75,7 +80,7 @@ class TaskManager {
       });
 
     if (!list.length) {
-      this.Console.warning('No tasks have been defined');
+      this.Console.warning('No task has been defined.');
       return;
     }
 
@@ -99,7 +104,10 @@ class TaskManager {
       .filter((t) => t);
 
     if (!queue.length) {
-      this.Console.warning(`No tasks have been defined to launch.`);
+      if (!list.length) {
+        this.Console.warning(`No tasks have been defined to launch.`);
+      }
+
       return;
     }
 
@@ -116,11 +124,11 @@ class TaskManager {
             for (let i = 0; i < job.tasks.length; i++) {
               const { hook, fn } = job.tasks[i];
 
-              this.Console.info(`Launching: ${hook[0]}`);
+              this.Console.info(`Launching service: ${hook[0]}`);
 
               if (typeof fn === 'function') {
-                await fn();
-                this.Console.info(`Done: ${hook[0]}`);
+                await fn().catch((exception) => this.Console.error(exception));
+                this.Console.info(`Complete: ${hook[0]}`);
 
                 completed.push(hook[0]);
               } else {
@@ -128,7 +136,7 @@ class TaskManager {
               }
             }
 
-            done(`Complete: ${job.hook}`);
+            done(`Done: ${job.hook}`);
           }
         }).then((message) => message && this.Console.success(message))
       )

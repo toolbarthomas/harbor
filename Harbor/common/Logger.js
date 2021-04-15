@@ -16,10 +16,10 @@ class Logger {
    * @param {Boolean} keepAlive Prevents an exit on the current process.
    */
   error(message, keepAlive) {
-    this.outputMessages(message, 'error', '');
-
     if (!keepAlive) {
-      process.exit(1);
+      throw new Error(message);
+    } else {
+      this.outputMessages(message, 'error', 'error');
     }
   }
 
@@ -51,13 +51,13 @@ class Logger {
   }
 
   /**
-   * Prints out a log message that will only be visible if THEME_DEVMODE is TRUE
+   * Prints out a log message that will only be visible if THEME_DEBUG is TRUE
    * within the current environment.
    *
    * @param {String|Array} message The message to display.
    */
   log(message) {
-    if (this.environment && !this.environment.THEME_DEVMODE) {
+    if (this.environment && !this.environment.THEME_DEBUG) {
       return;
     }
 

@@ -34,6 +34,14 @@ module.exports = {
       },
     },
   },
+  JsOptimizer: {
+    entry: {
+      main: 'main/javascripts/**/*.js',
+      modules: 'modules/*/*/*.js',
+    },
+    hook: 'javascripts',
+    options: {},
+  },
   SassCompiler: {
     options: {
       outputStyle: 'compact',

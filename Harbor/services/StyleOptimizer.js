@@ -8,8 +8,8 @@ const postcss = require('postcss');
 const BaseService = require('./BaseService');
 
 class StyleOptimizer extends BaseService {
-  constructor(tooling) {
-    super(tooling);
+  constructor(tooling, options) {
+    super(tooling, options);
   }
 
   async init() {
@@ -29,7 +29,7 @@ class StyleOptimizer extends BaseService {
       return;
     }
 
-    if (!this.environment.THEME_DEVMODE) {
+    if (!this.environment.THEME_DEBUG) {
       if (this.config.plugins.cssnano) {
         this.postcssConfig.plugins.push(this.config.plugins.cssnano);
       }

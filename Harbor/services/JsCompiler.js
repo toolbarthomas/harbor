@@ -11,8 +11,8 @@ const BaseService = require('./BaseService');
  * Compiles the configured entries with Babel.
  */
 class JsCompiler extends BaseService {
-  constructor(tooling) {
-    super(tooling);
+  constructor(tooling, options) {
+    super(tooling, options);
 
     this.linter = new Linter();
   }
@@ -89,12 +89,14 @@ class JsCompiler extends BaseService {
                           `'${f.message}`,
                         ];
 
-                        if (this.environment.THEME_DEVMODE) {
+                        if (this.environment.THEME_DEBUG) {
                           this.Console.warning(m);
                           return cb();
                         }
 
                         this.Console.error(m);
+
+                        process.exit(1);
                       }
                     });
                   }

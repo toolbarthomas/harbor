@@ -34,7 +34,6 @@ class Watcher {
     this.Console = new Logger(this.environment);
 
     if (!hook) {
-      this.Console.log('Skipping Watcher');
       return;
     }
 
@@ -43,7 +42,6 @@ class Watcher {
     });
 
     if (!list.length || !list.includes('watch')) {
-      this.Console.log('Skipping Watcher');
       return;
     }
 

@@ -5,6 +5,7 @@ const Logger = require('./common/Logger');
 const Cleaner = require('./services/Cleaner');
 const FileSync = require('./services/FileSync');
 const JsCompiler = require('./services/JsCompiler');
+const JsOptimizer = require('./services/JsOptimizer');
 const Resolver = require('./services/Resolver');
 const SassCompiler = require('./services/SassCompiler');
 const Server = require('./services/Server');
@@ -34,9 +35,14 @@ class Harbor {
       Cleaner: new Cleaner(this.tooling),
       FileSync: new FileSync(this.tooling),
       JsCompiler: new JsCompiler(this.tooling),
+      JsOptimizer: new JsOptimizer(this.tooling, {
+        acceptedEnvironments: 'production',
+      }),
       Resolver: new Resolver(this.tooling),
       SassCompiler: new SassCompiler(this.tooling),
-      Server: new Server(this.tooling),
+      Server: new Server(this.tooling, {
+        acceptedEnvironments: 'development',
+      }),
       StyleguideCompiler: new StyleguideCompiler(this.tooling),
       StyleOptimizer: new StyleOptimizer(this.tooling),
       SvgSpriteCompiler: new SvgSpriteCompiler(this.tooling),

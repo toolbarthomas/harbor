@@ -10,7 +10,7 @@ const Logger = require('../common/Logger');
  * Base class for creating new Services that should be used within tasks.
  */
 class BaseService {
-  constructor(tooling) {
+  constructor(tooling, options) {
     const environment = new Environment();
 
     this.name = this.constructor.name;
@@ -21,6 +21,8 @@ class BaseService {
     this.config = ConfigManager.load(this.name);
     this.tooling = {};
 
+    this.options = this.defineOptions(options);
+
     const hook =
       this.config.hook && this.config.hook !== this.name
         ? [this.name, this.config.hook]
@@ -28,7 +30,7 @@ class BaseService {
 
     if (tooling) {
       this.Console.log(
-        `Assining tools: ${Object.keys(tooling).join(', ')} => ${this.name} as ${hook.join(', ')}`
+        `Assigning tools: ${Object.keys(tooling).join(', ')} => ${this.name} as ${hook.join(', ')}`
       );
       this.tooling = Object.assign(this.tooling, tooling);
     }
@@ -36,7 +38,23 @@ class BaseService {
     const { TaskManager } = this.tooling;
 
     if (TaskManager) {
-      TaskManager.subscribe(this.name, hook, this.init.bind(this));
+      TaskManager.subscribe(
+        this.name,
+        hook,
+        this.initIfAccepted()
+          ? this.init.bind(this)
+          : () => {
+              this.Console.warning(
+                `${
+                  this.name
+                } will not be launched since it is only accepted for the ${this.options.acceptedEnvironments.join(
+                  ', environment.'
+                )}`
+              );
+
+              return this.resolve();
+            }
+      );
     }
   }
 
@@ -60,6 +78,63 @@ class BaseService {
     } else {
       this.Console.warning(`Unable to resolve ${this.name}, unable to find the Task Manager.`);
     }
+  }
+
+  defineOptions(options) {
+    return Object.assign(
+      {
+        acceptedEnvironments: [],
+      },
+      Object.assign(options || {}, {
+        acceptedEnvironments: this.defineAcceptedEnvironments(options),
+      })
+    );
+  }
+
+  defineAcceptedEnvironments(options) {
+    if (!options) {
+      return;
+    }
+
+    if (!options.acceptedEnvironments) {
+      return;
+    }
+
+    return Array.isArray(options.acceptedEnvironments)
+      ? options.acceptedEnvironments
+      : [options.acceptedEnvironments];
+  }
+
+  initIfAccepted() {
+    if (!this.options) {
+      return true;
+    }
+
+    if (!this.options.acceptedEnvironments || !this.options.acceptedEnvironments.length) {
+      return true;
+    }
+
+    if (this.options.acceptedEnvironments.includes(this.environment.THEME_ENVIRONMENT)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  isRestricted() {
+    if (!this.options) {
+      return;
+    }
+
+    if (!this.options.restricted || !this.options.restricted.length) {
+      return;
+    }
+
+    if (this.options.restricted.includes(this.environment.THEME_ENVIRONMENT)) {
+      return true;
+    }
+
+    return;
   }
 }
 
