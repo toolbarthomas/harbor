@@ -41,7 +41,7 @@ class StyleguideCompiler extends BaseService {
       shell.on('error', (data) => {
         process.stdout.write(data);
 
-        super.resolve(true);
+        super.reject();
       });
     });
   }

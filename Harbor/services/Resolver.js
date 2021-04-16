@@ -58,7 +58,7 @@ class Resolver extends BaseService {
               if (error) {
                 this.Console.error(error);
 
-                super.resolve(true);
+                super.reject();
               }
 
               // Stream the actual contents in order to resolve each module faster.

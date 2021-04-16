@@ -23,25 +23,16 @@ class JsCompiler extends BaseService {
   async init() {
     super.init();
 
-    if (!this.config.entry instanceof Object) {
-      return;
-    }
-
-    const entries = Object.keys(this.config.entry);
-
-    if (!entries.length) {
-      return;
+    if (!this.entry || !this.entry.length) {
+      return super.resolve();
     }
 
     await Promise.all(
-      entries.map(
-        (name) =>
+      this.entry.map(
+        (entry) =>
           new Promise((cb) => {
-            const p = join(this.environment.THEME_SRC, this.config.entry[name]);
-            const cwd = sync(p);
-
-            if (cwd.length) {
-              this.transpileCwd(cwd).then(() => {
+            if (entry.length) {
+              this.transpileCwd(entry).then(() => {
                 cb();
               });
             } else {

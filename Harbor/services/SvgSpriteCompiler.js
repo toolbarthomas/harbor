@@ -21,8 +21,8 @@ class SvgSpriteCompiler extends BaseService {
   async init() {
     super.init();
 
-    if (!this.config.entry instanceof Object) {
-      cb();
+    if (!this.entry || !this.entry.length) {
+      return super.resolve();
     }
 
     this.prefix = this.config.prefix || 'svg--';
@@ -30,19 +30,18 @@ class SvgSpriteCompiler extends BaseService {
     const entries = Object.keys(this.config.entry);
 
     if (!entries.length) {
-      return;
+      return super.resolve();
     }
 
     await Promise.all(
       entries.map(
-        (name) =>
+        (name, index) =>
           new Promise(async (cb) => {
-            const p = join(this.environment.THEME_SRC, this.config.entry[name]);
-            const cwd = sync(p);
+            const entry = this.entry[index];
 
-            if (cwd.length) {
-              await this.prepareCwd(cwd, name);
-              await this.processCwd(cwd, name);
+            if (entry.length) {
+              await this.prepareCwd(entry, name);
+              await this.processCwd(entry, name);
             } else {
               this.Console.warning(`Unable to find entry from: ${p}`);
             }

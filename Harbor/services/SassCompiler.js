@@ -39,23 +39,15 @@ class SassCompiler extends BaseService {
   async init() {
     super.init();
 
-    if (!this.config.entry instanceof Object) {
-      return;
-    }
-
-    const entries = Object.keys(this.config.entry);
-
-    if (!entries.length) {
-      return;
+    if (!this.entry || !this.entry.length) {
+      return super.resolve();
     }
 
     await Promise.all(
-      entries.map(
-        (name) =>
+      this.entry.map(
+        (entry) =>
           new Promise((cb) => {
-            const p = join(this.environment.THEME_SRC, this.config.entry[name]);
-
-            const cwd = sync(p).filter((entry) => basename(entry)[0] !== '_');
+            const cwd = entry.filter((e) => basename(e)[0] !== '_');
 
             if (cwd.length) {
               this.renderCwd(cwd).then(() => {
@@ -75,7 +67,7 @@ class SassCompiler extends BaseService {
     if (length) {
       this.Console.error(`Sasscompiler encountered ${length} error${length !== 1 ? 's' : ''}...`);
 
-      return super.resolve(true);
+      return super.reject();
     }
 
     super.resolve();
@@ -205,7 +197,7 @@ class SassCompiler extends BaseService {
         if (error) {
           this.Console.error(error);
 
-          super.resolve(true);
+          super.reject();
         } else {
           // Write the actual css to the filesystem.
           writeFileSync(destination, result.css.toString());

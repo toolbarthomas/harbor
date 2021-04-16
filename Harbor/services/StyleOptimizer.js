@@ -15,21 +15,17 @@ class StyleOptimizer extends BaseService {
   async init() {
     super.init();
 
-    if (!this.config.entry instanceof Object) {
-      cb();
+    super.defineEntry(true);
+
+    if (!this.entry || !this.entry.length) {
+      return super.resolve();
     }
 
     this.postcssConfig = {
       plugins: [this.config.plugins.autoprefixer],
     };
 
-    const entries = Object.keys(this.config.entry);
-
-    if (!entries.length) {
-      return;
-    }
-
-    if (!this.environment.THEME_DEBUG) {
+    if (this.environment.THEME_ENVIRONMENT === 'production') {
       if (this.config.plugins.cssnano) {
         this.postcssConfig.plugins.push(this.config.plugins.cssnano);
       }
@@ -40,14 +36,11 @@ class StyleOptimizer extends BaseService {
     }
 
     await Promise.all(
-      entries.map(
-        (name) =>
+      this.entry.map(
+        (entry) =>
           new Promise((cb) => {
-            const p = join(this.environment.THEME_DIST, this.config.entry[name]);
-            const cwd = sync(p);
-
-            if (cwd.length) {
-              this.optimizeCwd(cwd).then(() => cb());
+            if (entry.length) {
+              this.optimizeCwd(entry).then(() => cb());
             } else {
               this.Console.warning(`Unable to find entry from: ${p}`);
               cb();
@@ -119,7 +112,7 @@ class StyleOptimizer extends BaseService {
       mkdirp(dirname(entry)).then((dirPath, error) => {
         if (error) {
           this.Console.error(error);
-          return super.resolve(true);
+          return super.reject();
         }
 
         // Write the actual css to the filesystem.

@@ -1,4 +1,5 @@
-const { join } = require('path');
+const { join, resolve } = require('path');
+const { statSync } = require('fs');
 const { sync } = require('glob');
 
 const ConfigManager = require('../common/ConfigManager');
@@ -21,7 +22,7 @@ class BaseService {
     this.config = ConfigManager.load(this.name);
     this.tooling = {};
 
-    this.options = this.defineOptions(options);
+    this.defineOptions(options);
 
     const hook =
       this.config.hook && this.config.hook !== this.name
@@ -35,6 +36,46 @@ class BaseService {
       this.tooling = Object.assign(this.tooling, tooling);
     }
 
+    this.subscribe(hook);
+  }
+
+  /**
+   * The initial handler
+   */
+  init() {
+    this.Console.log(`Launching service: ${this.name}`);
+
+    this.defineEntry();
+  }
+
+  /**
+   * Resolves the subscribed Task Manager Service handler.
+   */
+  resolve(exit) {
+    const { TaskManager } = this.tooling;
+
+    if (TaskManager && TaskManager.resolve) {
+      this.Console.log(`Resolving service: ${this.name}`);
+
+      TaskManager.resolve(this.name, exit);
+    } else {
+      this.Console.warning(`Unable to resolve ${this.name}, unable to find the Task Manager.`);
+    }
+  }
+
+  /**
+   * Rejects the subscribed Task Manager Service handler.
+   */
+  reject() {
+    this.resolve(true);
+  }
+
+  /**
+   * Subscribes the init handler of the current Service to the Task Manager.
+   *
+   * @param {string[]} hook Defines the publish hooks to call to subscription.
+   */
+  subscribe(hook) {
     const { TaskManager } = this.tooling;
 
     if (TaskManager) {
@@ -59,29 +100,33 @@ class BaseService {
   }
 
   /**
-   * The initial handler
+   *
    */
-  init() {
-    this.Console.log(`Launching service: ${this.name}`);
-  }
-
-  /**
-   * Resolves the subscribed Task Manager Service handler.
-   */
-  resolve(exit) {
-    const { TaskManager } = this.tooling;
-
-    if (TaskManager && TaskManager.resolve) {
-      this.Console.log(`Resolving service: ${this.name}`);
-
-      TaskManager.resolve(this.name, exit);
-    } else {
-      this.Console.warning(`Unable to resolve ${this.name}, unable to find the Task Manager.`);
+  defineEntry(useDestination) {
+    if (!this.config.entry || !this.config.entry instanceof Object) {
+      return;
     }
+
+    const entries = Object.keys(this.config.entry);
+
+    if (!entries.length) {
+      return;
+    }
+
+    this.entry = entries
+      .map((name) => {
+        const p = join(
+          useDestination ? this.environment.THEME_DIST : this.environment.THEME_SRC,
+          this.config.entry[name]
+        );
+
+        return sync(p).filter((e) => statSync(e).size > 0);
+      })
+      .filter((entry) => entry.length);
   }
 
   defineOptions(options) {
-    return Object.assign(
+    this.options = Object.assign(
       {
         acceptedEnvironments: [],
       },
