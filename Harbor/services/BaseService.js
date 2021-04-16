@@ -43,8 +43,6 @@ class BaseService {
    * The initial handler
    */
   init() {
-    this.Console.log(`Launching service: ${this.name}`);
-
     this.defineEntry();
   }
 
