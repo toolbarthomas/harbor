@@ -1,8 +1,14 @@
+const { sync } = require('glob');
 const autoprefixer = require('autoprefixer');
 const combineDuplicateSelectors = require('postcss-combine-duplicated-selectors');
 const cssnano = require('cssnano');
 const imageminSvgo = require('imagemin-svgo');
 const stylelint = require('stylelint');
+
+const eslintConfig = sync('.eslintrc*').length;
+const styleLintConfig = sync('.stylelintrc*').length;
+const browserListConfig = sync('.browserlistrc*').length;
+const babelConfig = sync('.babelrc*').length;
 
 module.exports = {
   Cleaner: {
@@ -19,19 +25,23 @@ module.exports = {
     },
     hook: 'javascripts',
     plugins: {
-      eslint: {
-        env: {
-          browser: true,
-        },
-        extends: ['eslint-config-airbnb-base', 'prettier'],
-        rules: {
-          'import/no-extraneous-dependencies': '0',
-          'prettier/prettier': 'error',
-        },
-      },
-      transform: {
-        presets: ['@babel/env'],
-      },
+      eslint: eslintConfig
+        ? null
+        : {
+            env: {
+              browser: true,
+            },
+            extends: ['eslint-config-airbnb-base', 'prettier'],
+            rules: {
+              'import/no-extraneous-dependencies': '0',
+              'prettier/prettier': 'error',
+            },
+          },
+      transform: babelConfig
+        ? {}
+        : {
+            presets: ['@babel/env'],
+          },
     },
   },
   JsOptimizer: {
@@ -50,13 +60,17 @@ module.exports = {
     plugins: {
       postcss: {
         plugins: [
-          stylelint({
-            rules: {
-              'selector-max-compound-selectors': 3,
-              'no-duplicate-selectors': null,
-              'no-descending-specificity': null,
-            },
-          }),
+          stylelint(
+            styleLintConfig
+              ? {}
+              : {
+                  rules: {
+                    'selector-max-compound-selectors': 3,
+                    'no-duplicate-selectors': null,
+                    'no-descending-specificity': null,
+                  },
+                }
+          ),
         ],
         extends: ['stylelint-config-recommended', 'stylelint'],
       },
@@ -74,9 +88,13 @@ module.exports = {
   StyleOptimizer: {
     hook: 'stylesheets',
     plugins: {
-      autoprefixer: autoprefixer({
-        overrideBrowserslist: ['> 2%', 'last 2 versions'],
-      }),
+      autoprefixer: autoprefixer(
+        browserListConfig
+          ? {}
+          : {
+              overrideBrowserslist: [('> 2%', 'last 2 versions')],
+            }
+      ),
       cssnano: cssnano({ mergeLonghand: false }),
       combineDuplicateSelectors: combineDuplicateSelectors({ removeDuplicatedProperties: true }),
     },

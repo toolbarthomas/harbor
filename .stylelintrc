@@ -1,0 +1,7 @@
+{
+    "rules": {
+        selector-max-compound-selectors: 3,
+        "no-duplicate-selectors": null,
+        "no-descending-specificity": null
+    }
+}
