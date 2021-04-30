@@ -60,16 +60,7 @@ class StyleOptimizer extends BaseService {
   optimizeCwd(cwd) {
     return new Promise((done) => {
       Promise.all(
-        cwd.map(
-          (entry) =>
-            new Promise((cb) => {
-              if (!statSync(entry).size) {
-                return cb();
-              }
-
-              this.optimizeFile(entry).then(() => cb());
-            })
-        )
+        cwd.map((entry) => new Promise((cb) => this.optimizeFile(entry).then(() => cb())))
       ).then(() => done());
     });
   }

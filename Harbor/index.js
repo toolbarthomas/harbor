@@ -13,7 +13,6 @@ const StyleguideCompiler = require('./services/StyleguideCompiler');
 const StyleOptimizer = require('./services/StyleOptimizer');
 const SvgSpriteCompiler = require('./services/SvgSpriteCompiler');
 const TaskManager = require('./tooling/TaskManager');
-const Watcher = require('./tooling/Watcher');
 
 /**
  * Factory setup for Harbor.
@@ -96,7 +95,7 @@ class Harbor {
   }
 
   styleguideSetup() {
-    return this.services.StyleguideCompiler.setup(this.env);
+    return this.services.StyleguideCompiler.setup(this.getEnvironment());
   }
 }
 

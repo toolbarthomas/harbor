@@ -85,12 +85,8 @@ class SassCompiler extends BaseService {
           (entry) =>
             new Promise(async (cb) => {
               if (String(basename(entry)).indexOf('_') !== 0) {
-                if (!statSync(entry).size) {
-                  this.Console.warning(`Skipping empty file: ${entry}`);
-                } else {
-                  await this.lintFile(entry);
-                  await this.renderFile(entry);
-                }
+                await this.lintFile(entry);
+                await this.renderFile(entry);
               }
 
               cb();

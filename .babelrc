@@ -1,5 +1,25 @@
 {
-    "presets": [
-        "@babel/preset-env"
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "useBuiltIns": "entry",
+        "corejs": {
+          "version": 2
+        }
+      }
     ]
+  ],
+  "plugins": [
+    [
+      "module-resolver",
+      {
+        "alias": {
+          "@theme": [
+            "./"
+          ]
+        }
+      }
+    ]
+  ]
 }

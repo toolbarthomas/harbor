@@ -118,7 +118,13 @@ class BaseService {
           this.config.entry[name]
         );
 
-        return sync(p).filter((e) => statSync(e).size > 0);
+        return sync(p).filter((e) => {
+          if (!statSync(e).size) {
+            this.Console.log(`Skipping empty entry: ${e}`);
+          }
+
+          return statSync(e).size > 0 ? e : null;
+        });
       })
       .filter((entry) => entry.length);
   }

@@ -43,10 +43,6 @@ class JsOptimizer extends BaseService {
       cwd.map(
         (path) =>
           new Promise((done) => {
-            if (!existsSync(path) || !statSync(path).size) {
-              return done();
-            }
-
             this.Console.log(`Optimizing: ${path}`);
 
             minify(path, this.config.options || {})

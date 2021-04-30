@@ -38,9 +38,21 @@ module.exports = {
             },
           },
       transform: babelConfig
-        ? {}
+        ? null
         : {
+            // @TODO: Currently matches with the project babelrc.
+            // it should import that actual file.
             presets: ['@babel/env'],
+            plugins: [
+              [
+                'module-resolver',
+                {
+                  alias: {
+                    '@theme': __dirname,
+                  },
+                },
+              ],
+            ],
           },
     },
   },
@@ -109,7 +121,7 @@ module.exports = {
       modules: 'modules/**/*.stories.@(js|mdx)',
     },
     options: {
-      addons: ['@storybook/addon-essentials', '@storybook/addon-actions', '@storybook/addon-links'],
+      addons: ['@storybook/addon-essentials'],
     },
   },
   SvgSpriteCompiler: {

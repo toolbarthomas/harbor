@@ -1,4 +1,4 @@
-const { transform } = require('@babel/core');
+const { transformFileAsync } = require('@babel/core');
 const { statSync, readFileSync, writeFileSync } = require('fs');
 const { Linter, SourceCode } = require('eslint');
 const { sync } = require('glob');
@@ -58,27 +58,22 @@ class JsCompiler extends BaseService {
         cwd.map(
           (entry) =>
             new Promise((cb) => {
-              if (!statSync(entry).size) {
-                this.Console.warning(`Skipping empty file: ${entry}`);
-              } else {
-                this.Console.log(`Transpiling: ${entry}`);
+              transformFileAsync(entry, this.config.plugins.transform).then((result) => {
+                if (!result.code) {
+                  this.Console.info(`Skipping empty entry: ${entry}`);
+                  return cb();
+                }
 
-                const source = readFileSync(entry);
-
-                const transpiledSource = transform(source, this.config.plugins.transform);
                 const destination = resolve(entry).replace(
                   resolve(this.environment.THEME_SRC),
                   resolve(this.environment.THEME_DIST)
                 );
 
                 if (this.config.plugins.eslint) {
-                  const linter = this.linter.verify(
-                    transpiledSource.code,
-                    this.config.plugins.eslint,
-                    {
-                      filename: destination,
-                    }
-                  );
+                  const linter = this.linter.verify(result.code, this.config.plugins.eslint, {
+                    filename: destination,
+                  });
+
                   if (Array.isArray(linter)) {
                     linter.forEach((f) => {
                       if (f.fatal) {
@@ -109,13 +104,13 @@ class JsCompiler extends BaseService {
                     this.Console.error(error);
                   }
 
-                  writeFileSync(destination, transpiledSource.code);
+                  writeFileSync(destination, result.code);
 
                   this.Console.log(`Successfully transpiled: ${destination}`);
 
                   cb();
                 });
-              }
+              });
             })
         )
       ).then(() => done());
