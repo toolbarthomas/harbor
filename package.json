@@ -79,6 +79,7 @@
     "postcss-scss": "^3.0.5",
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
+    "stringify-object": "^3.3.0",
     "stylelint": "^13.12.0",
     "stylelint-config-recommended": "^4.0.0",
     "stylelint-config-recommended-scss": "^4.2.0",
@@ -86,6 +87,7 @@
     "svgstore": "^3.0.0-2",
     "twing": "2.3.7",
     "twing-loader": "2.0.2",
+    "type-name": "^2.0.2",
     "yaml": "^1.10.2"
   }
 }
