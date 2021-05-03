@@ -1,4 +1,5 @@
 const { sync } = require('glob');
+const { resolve } = require('path');
 const autoprefixer = require('autoprefixer');
 const combineDuplicateSelectors = require('postcss-combine-duplicated-selectors');
 const cssnano = require('cssnano');
@@ -122,6 +123,7 @@ module.exports = {
     },
     options: {
       addons: ['@storybook/addon-essentials'],
+      configDirectory: resolve(process.cwd(), '.storybook'),
     },
   },
   SvgSpriteCompiler: {
