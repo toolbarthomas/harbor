@@ -27,7 +27,7 @@ class TaskManager {
       return;
     }
 
-    this.Console.log(`Assigning task: ${name} => ${hook.join(', ')}`);
+    this.Console.log(`Assigning service: ${name} for task: ${hook.join(', ')}`);
 
     this.tasks[name] = {
       hook,

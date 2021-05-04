@@ -154,9 +154,7 @@ module.exports = {
   },
   Resolver: {
     hook: 'prepare',
-    entry: {
-      svgxuse: 'svgxuse.min.js',
-    },
+    cwd: 'main/vendors',
   },
   Watcher: {
     options: {

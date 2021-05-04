@@ -31,7 +31,9 @@ class BaseService {
 
     if (tooling) {
       this.Console.log(
-        `Assigning tools: ${Object.keys(tooling).join(', ')} => ${this.name} as ${hook.join(', ')}`
+        `Assigning tool: ${Object.keys(tooling).join(', ')} from service: ${
+          this.name
+        } as ${hook.join(', ')}`
       );
       this.tooling = Object.assign(this.tooling, tooling);
     }

@@ -12,7 +12,9 @@ const Server = require('./services/Server');
 const StyleguideCompiler = require('./services/StyleguideCompiler');
 const StyleOptimizer = require('./services/StyleOptimizer');
 const SvgSpriteCompiler = require('./services/SvgSpriteCompiler');
+
 const TaskManager = require('./tooling/TaskManager');
+const Watcher = require('./tooling/Watcher');
 
 /**
  * Factory setup for Harbor.
