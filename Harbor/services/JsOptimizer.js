@@ -11,6 +11,9 @@ class JsOptimizer extends BaseService {
     super(tooling, options);
   }
 
+  /**
+   * The initial handler that will be called by the Harbor TaskManager.
+   */
   async init() {
     super.init();
 
@@ -48,7 +51,7 @@ class JsOptimizer extends BaseService {
             minify(path, this.config.options || {})
               .then((data) =>
                 this.optimizeFile(path, data)
-                  .then(() => done())
+                  .then(done)
                   .catch((exception) => {
                     this.Console.error(exception);
                     super.reject();

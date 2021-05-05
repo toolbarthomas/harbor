@@ -4,13 +4,16 @@ const { resolve } = require('path');
 
 const BaseService = require('./BaseService');
 
+/**
+ * Creates a new BrowserSync instance.
+ */
 class Server extends BaseService {
   constructor(tooling) {
     super(tooling);
   }
 
   /**
-   * Creates a new BrowserSync instance.
+   * The initial handler that will be called by the Harbor TaskManager.
    */
   init() {
     super.init();

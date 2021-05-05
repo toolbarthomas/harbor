@@ -16,7 +16,7 @@ class SvgSpriteCompiler extends BaseService {
   }
 
   /**
-   * Creates SVG sprites from the configured entries.
+   * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
     super.init();
@@ -54,6 +54,13 @@ class SvgSpriteCompiler extends BaseService {
     super.resolve();
   }
 
+  /**
+   * Prepares the defined image entries so it can be used within an inline SVG
+   * sprite.
+   *
+   * @param {string[]} cwd The defined image entries that will be prepared.
+   * @param {string} name The name of the image entry collection.
+   */
   async prepareCwd(cwd, name) {
     this.Console.log(`Preparing sprite ${name}...`);
 
@@ -75,7 +82,7 @@ class SvgSpriteCompiler extends BaseService {
    * @param {string} filename The filename for the processed sprite.
    */
   async processCwd(cwd, filename) {
-    return new Promise((cb) => {
+    return new Promise((done) => {
       if (!this.optimizedCwd) {
         return;
       }
@@ -117,10 +124,10 @@ class SvgSpriteCompiler extends BaseService {
 
           this.Console.log(`Done generating: ${join(destination, name)}`);
 
-          cb();
+          done();
         });
       } else {
-        cb();
+        done();
       }
     });
   }

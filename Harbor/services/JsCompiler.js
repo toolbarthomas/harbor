@@ -18,7 +18,7 @@ class JsCompiler extends BaseService {
   }
 
   /**
-   * Compiles the configured compiler entries.
+   * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
     super.init();
@@ -32,9 +32,7 @@ class JsCompiler extends BaseService {
         (entry) =>
           new Promise((cb) => {
             if (entry.length) {
-              this.transpileCwd(entry).then(() => {
-                cb();
-              });
+              this.transpileCwd(entry).then(cb);
             } else {
               this.Console.warning(`Unable to find entry from: ${p}`);
 
@@ -113,7 +111,7 @@ class JsCompiler extends BaseService {
               });
             })
         )
-      ).then(() => done());
+      ).then(done);
     });
   }
 }

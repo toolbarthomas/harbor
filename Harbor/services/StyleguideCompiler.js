@@ -1,14 +1,11 @@
 const glob = require('glob');
 const path = require('path');
-const mkdirp = require('mkdirp');
 const fs = require('fs');
 const YAML = require('yaml');
 const { DefinePlugin } = require('webpack');
-const { exec, execFileSync } = require('child_process');
+const { exec } = require('child_process');
 
 const BaseService = require('./BaseService');
-const { stdout } = require('process');
-const { sync } = require('mkdirp');
 const FileSync = require('./FileSync');
 
 /**
@@ -21,7 +18,7 @@ class StyleguideCompiler extends BaseService {
   }
 
   /**
-   * Optimizes the compiled stylesheet entries.
+   * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
     super.init();
@@ -78,13 +75,15 @@ class StyleguideCompiler extends BaseService {
   }
 
   /**
-   * Creates the actual Styleguide configuration object.
+   * Creates the Storybook Webpack Configuration Object that is compatible
+   * with the Drupal template language.
    */
   setup() {
     if (!this.config.entry instanceof Object) {
       return;
     }
 
+    // Lookup any stories within the defined THEME_SRC environment variable.
     const stories = [].concat.apply(
       [],
       Object.values(this.config.entry).map((entry) =>
@@ -93,6 +92,7 @@ class StyleguideCompiler extends BaseService {
     );
 
     const webpackFinal = (config) => {
+      // Include the Twig loader to enable support from Drupal templates.
       config.module.rules.push({
         test: /\.twig$/,
         loader: 'twing-loader',
@@ -107,7 +107,14 @@ class StyleguideCompiler extends BaseService {
         }
       });
 
-      // Make the theme libraries available within the Twig Loader.
+      // Use the defined styleguide alias that should match with the template
+      // alias.
+      if (config.resolve && config.resolve.alias) {
+        config.resolve.alias = Object.assign(this.config.options.alias, config.resolve.alias);
+      }
+
+      // Include the Drupal library context within the Storybook instance that
+      // can be used for the Drupal related Twig extensions.
       const libraryPaths = glob.sync('*.libraries.yml');
       const libraries = {};
       if (libraryPaths.length) {

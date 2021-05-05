@@ -8,7 +8,15 @@ const Environment = require('../common/Environment');
 const Logger = require('../common/Logger');
 
 /**
- * Base class for creating new Services that should be used within tasks.
+ * Creates a new Harbor Service that will be registered to the TaskManager.
+ * The defined Service configuration & plugin specific options will be loaded
+ * during the construction of the instance.
+ *
+ * @param {Object} tooling Includes optional Harbor utilities for the current
+ * service.
+ *
+ * @param {Object} options Defines the Harbor specific options for the current
+ * service.
  */
 class BaseService {
   constructor(tooling, options) {
@@ -42,7 +50,7 @@ class BaseService {
   }
 
   /**
-   * The initial handler
+   * The initial handler that will subscribed to the Harbor TaskManager.
    */
   init() {
     this.defineEntry();
@@ -100,7 +108,11 @@ class BaseService {
   }
 
   /**
+   * Creates a collection of entry paths from the configured service entry
+   * configuration.
    *
+   * @param {boolean} useDestination Use the defined THEME_DIST as base path for
+   * the current entry, instead of the default THEME_SRC value.
    */
   defineEntry(useDestination) {
     if (!this.config.entry || !this.config.entry instanceof Object) {
@@ -131,6 +143,11 @@ class BaseService {
       .filter((entry) => entry.length);
   }
 
+  /**
+   * Defines the specific Harbor instance options.
+   *
+   * @param {Object} options The options that will be defined for the service.
+   */
   defineOptions(options) {
     this.options = Object.assign(
       {
@@ -142,6 +159,12 @@ class BaseService {
     );
   }
 
+  /**
+   * Defines the accepted environment option that blocks the service if the
+   * running environment is included within the defined option.
+   *
+   * @param {Object} options Defines the value from the given options.
+   */
   defineAcceptedEnvironments(options) {
     if (!options) {
       return;
@@ -156,6 +179,10 @@ class BaseService {
       : [options.acceptedEnvironments];
   }
 
+  /**
+   * Prevents the service execution if the current environment is not included
+   * within the acceptedEnvironments Harbor option.
+   */
   initIfAccepted() {
     if (!this.options) {
       return true;
@@ -170,22 +197,6 @@ class BaseService {
     }
 
     return false;
-  }
-
-  isRestricted() {
-    if (!this.options) {
-      return;
-    }
-
-    if (!this.options.restricted || !this.options.restricted.length) {
-      return;
-    }
-
-    if (this.options.restricted.includes(this.environment.THEME_ENVIRONMENT)) {
-      return true;
-    }
-
-    return;
   }
 }
 

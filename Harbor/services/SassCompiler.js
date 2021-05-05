@@ -32,9 +32,7 @@ class SassCompiler extends BaseService {
   }
 
   /**
-   * Compiles the configured Sass entries.
-   *
-   * @param {Object} tooling the inherited instance tools.
+   * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
     super.init();
@@ -50,9 +48,7 @@ class SassCompiler extends BaseService {
             const cwd = entry.filter((e) => basename(e)[0] !== '_');
 
             if (cwd.length) {
-              this.renderCwd(cwd).then(() => {
-                cb();
-              });
+              this.renderCwd(cwd).then(cb);
             } else {
               this.Console.warning(`Unable to find entry from: ${p}`);
 
@@ -92,7 +88,7 @@ class SassCompiler extends BaseService {
               cb();
             })
         )
-      ).then(() => done());
+      ).then(done);
     });
   }
 
@@ -102,9 +98,9 @@ class SassCompiler extends BaseService {
    * @param {String} entry Path to the source stylesheet to render.
    */
   lintFile(entry) {
-    return new Promise((cb) => {
+    return new Promise((done) => {
       if (!this.environment.THEME_DEBUG) {
-        return cb();
+        return done();
       }
 
       const source = readFileSync(entry);
@@ -133,7 +129,7 @@ class SassCompiler extends BaseService {
             }
           }
 
-          cb();
+          done();
         });
     });
   }
@@ -144,10 +140,10 @@ class SassCompiler extends BaseService {
    * @param {String} entry Path to the source stylesheet to render.
    */
   renderFile(entry) {
-    return new Promise((cb) => {
+    return new Promise((done) => {
       if (this.stylelintExceptions.length) {
         this.Console.info(`Ignoring file due to Stylelint errors: ${entry}`);
-        cb();
+        done();
       } else {
         const destination = resolve(entry)
           .replace(resolve(this.environment.THEME_SRC), resolve(this.environment.THEME_DIST))
@@ -176,7 +172,7 @@ class SassCompiler extends BaseService {
               await this.writeFile(result, destination);
             }
 
-            cb();
+            done();
           }
         );
       }
@@ -188,7 +184,7 @@ class SassCompiler extends BaseService {
    * the filesystem.
    */
   writeFile(result, destination) {
-    return new Promise((cb) => {
+    return new Promise((done) => {
       mkdirp(dirname(destination)).then((dirPath, error) => {
         if (error) {
           this.Console.error(error);
@@ -206,7 +202,7 @@ class SassCompiler extends BaseService {
           this.Console.log(`Compiled: ${destination}`);
         }
 
-        cb();
+        done();
       });
     });
   }

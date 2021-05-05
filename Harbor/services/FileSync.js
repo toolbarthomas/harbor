@@ -17,6 +17,9 @@ class FileSync extends BaseService {
     this.resourcePatterns = [];
   }
 
+  /**
+   * The initial handler that will be called by the Harbor TaskManager.
+   */
   init() {
     super.init();
 

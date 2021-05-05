@@ -7,11 +7,18 @@ const postcss = require('postcss');
 
 const BaseService = require('./BaseService');
 
+/**
+ * Optimizes the compiled stylesheet entries within the defined THEME_DIST
+ * directory.
+ */
 class StyleOptimizer extends BaseService {
   constructor(tooling, options) {
     super(tooling, options);
   }
 
+  /**
+   * The initial handler that will be called by the Harbor TaskManager.
+   */
   async init() {
     super.init();
 
@@ -40,7 +47,7 @@ class StyleOptimizer extends BaseService {
         (entry) =>
           new Promise((cb) => {
             if (entry.length) {
-              this.optimizeCwd(entry).then(() => cb());
+              this.optimizeCwd(entry).then(cb);
             } else {
               this.Console.warning(`Unable to find entry from: ${p}`);
               cb();
@@ -59,9 +66,9 @@ class StyleOptimizer extends BaseService {
    */
   optimizeCwd(cwd) {
     return new Promise((done) => {
-      Promise.all(
-        cwd.map((entry) => new Promise((cb) => this.optimizeFile(entry).then(() => cb())))
-      ).then(() => done());
+      Promise.all(cwd.map((entry) => new Promise((cb) => this.optimizeFile(entry).then(cb)))).then(
+        done
+      );
     });
   }
 
@@ -71,7 +78,7 @@ class StyleOptimizer extends BaseService {
    * @param {String} entry Path of the stylesheet to optimize.
    */
   optimizeFile(entry) {
-    return new Promise((cb) => {
+    return new Promise((done) => {
       const source = readFileSync(entry);
 
       this.Console.log(`Optimizing: ${entry}`);
@@ -87,7 +94,7 @@ class StyleOptimizer extends BaseService {
 
           await this.writeFile(entry, result);
 
-          cb();
+          done();
         });
     });
   }
@@ -99,7 +106,7 @@ class StyleOptimizer extends BaseService {
    * @param {Object} result The optimized code of the entry stylesheet.
    */
   writeFile(entry, result) {
-    return new Promise((cb) => {
+    return new Promise((done) => {
       mkdirp(dirname(entry)).then((dirPath, error) => {
         if (error) {
           this.Console.error(error);
@@ -111,7 +118,7 @@ class StyleOptimizer extends BaseService {
 
         this.Console.log(`Successfully optimized: ${entry}`);
 
-        cb();
+        done();
       });
     });
   }

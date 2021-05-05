@@ -13,7 +13,7 @@ class Cleaner extends BaseService {
   }
 
   /**
-   * Clears the environment directory.
+   * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
     super.init();

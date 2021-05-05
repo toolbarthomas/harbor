@@ -121,6 +121,9 @@ module.exports = {
       main: '**/*.stories.@(js|mdx)',
     },
     options: {
+      alias: {
+        '@theme': process.cwd(),
+      },
       addons: ['@storybook/addon-essentials'],
       configDirectory: resolve(process.cwd(), '.storybook'),
     },
