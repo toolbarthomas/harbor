@@ -21,7 +21,7 @@ module.exports = {
   },
   JsCompiler: {
     entry: {
-      main: 'main/javascripts/**/*.js',
+      main: '**/javascripts/**/*.js',
       modules: 'modules/*/*/*.js',
     },
     hook: 'javascripts',
@@ -59,7 +59,7 @@ module.exports = {
   },
   JsOptimizer: {
     entry: {
-      main: 'main/javascripts/**/*.js',
+      main: '**/javascripts/**/*.js',
       modules: 'modules/*/*/*.js',
     },
     hook: 'javascripts',
@@ -89,7 +89,7 @@ module.exports = {
       },
     },
     entry: {
-      main: 'main/stylesheets/**/**.scss',
+      main: '**/stylesheets/**/**.scss',
     },
   },
   Server: {
@@ -112,14 +112,13 @@ module.exports = {
       combineDuplicateSelectors: combineDuplicateSelectors({ removeDuplicatedProperties: true }),
     },
     entry: {
-      main: 'main/stylesheets/*.css',
+      main: '**/stylesheets/*.css',
     },
   },
   StyleguideCompiler: {
     hook: 'styleguide',
     entry: {
-      main: 'main/**/*.stories.@(js|mdx)',
-      modules: 'modules/**/*.stories.@(js|mdx)',
+      main: '**/*.stories.@(js|mdx)',
     },
     options: {
       addons: ['@storybook/addon-essentials'],
