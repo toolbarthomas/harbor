@@ -2,21 +2,19 @@ const { existsSync, createReadStream, createWriteStream } = require('fs');
 const mkdirp = require('mkdirp');
 const { basename, dirname, join, resolve } = require('path');
 
-const BaseService = require('./BaseService');
+const Worker = require('./Worker');
 
 /**
  * Resolves the configured Resolver entries to the environment destination
  * directory.
  */
-class Resolver extends BaseService {
-  constructor(tooling) {
-    super(tooling);
+class Resolver extends Worker {
+  constructor(services) {
+    super(services);
   }
 
   /**
    * Resolves the configured Resolver entries.
-   *
-   * @param {Object} tooling the inherited instance tools.
    */
   async init() {
     super.init();

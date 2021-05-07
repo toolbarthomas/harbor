@@ -5,24 +5,22 @@ const YAML = require('yaml');
 const { DefinePlugin } = require('webpack');
 const { exec } = require('child_process');
 
-const BaseService = require('./BaseService');
-const FileSync = require('./FileSync');
+const Plugin = require('./Plugin');
+const FileSync = require('../workers/FileSync');
 
 /**
  * Create a new Styleguide with the compiled assets from the destination
  * directory.
  */
-class StyleguideCompiler extends BaseService {
-  constructor(tooling) {
-    super(tooling);
+class StyleguideCompiler extends Plugin {
+  constructor(services, options) {
+    super(services, options);
   }
 
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    super.init();
-
     this.definePreviewHead();
 
     await new Promise((cb) => {

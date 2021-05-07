@@ -2,14 +2,14 @@ const rimraf = require('rimraf');
 const { existsSync } = require('fs');
 const { resolve } = require('path');
 
-const BaseService = require('./BaseService');
+const Worker = require('./Worker');
 
 /**
  * Clears the defined environment destination directory.
  */
-class Cleaner extends BaseService {
-  constructor(tooling) {
-    super(tooling);
+class Cleaner extends Worker {
+  constructor(services) {
+    super(services);
   }
 
   /**

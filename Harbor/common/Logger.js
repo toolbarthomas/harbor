@@ -1,5 +1,6 @@
 const chalk = require('chalk');
 const symbols = require('log-symbols');
+const Argv = require('./Argv');
 
 /**
  * Helper Class that writes messages to the stdout.
@@ -7,6 +8,10 @@ const symbols = require('log-symbols');
 class Logger {
   constructor(environment) {
     this.environment = environment;
+
+    const { args } = new Argv();
+
+    this.verbose = this.environment.THEME_DEBUG ? true : args.verbose;
   }
 
   /**
@@ -53,7 +58,7 @@ class Logger {
    * @param {String|Array} message The message to display.
    */
   log(message) {
-    if (this.environment && !this.environment.THEME_DEBUG) {
+    if (!this.verbose) {
       return;
     }
 

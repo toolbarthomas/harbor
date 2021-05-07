@@ -5,14 +5,14 @@ const { sync } = require('glob');
 const mkdirp = require('mkdirp');
 const { dirname, join, resolve } = require('path');
 
-const BaseService = require('./BaseService');
+const Worker = require('./Worker');
 
 /**
  * Compiles the configured entries with Babel.
  */
-class JsCompiler extends BaseService {
-  constructor(tooling, options) {
-    super(tooling, options);
+class JsCompiler extends Worker {
+  constructor(services, options) {
+    super(services, options);
 
     this.linter = new Linter();
   }

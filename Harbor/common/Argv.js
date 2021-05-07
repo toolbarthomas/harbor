@@ -3,7 +3,14 @@
  */
 class Argv {
   constructor() {
-    this.defaults = {};
+    this.defaults = {
+      task: false,
+      watch: false,
+      styleguide: false,
+      optimize: false,
+      serve: false,
+      verbose: false,
+    };
   }
 
   /**
@@ -15,8 +22,14 @@ class Argv {
 
     if (argv.length > 2) {
       argv.slice(2).forEach((arg) => {
-        const key = String(arg.split('=')[0]);
-        const value = String(arg.substring(arg.indexOf('=') + 1));
+        const key = String(arg.split('=')[0]).replace('--', '');
+        const value = String(arg.substring(arg.indexOf('=') + 1)).replace('--', '');
+
+        if (key === value) {
+          args[key] = !this.defaults[key];
+
+          return;
+        }
 
         switch (value.toLocaleLowerCase()) {
           case 'true':

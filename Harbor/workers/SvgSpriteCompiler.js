@@ -5,14 +5,14 @@ const mkdirp = require('mkdirp');
 const { basename, dirname, join, resolve } = require('path');
 const svgstore = require('svgstore');
 
-const BaseService = require('./BaseService');
+const Worker = require('./Worker');
 
 /**
  * Create SVG sprites from the configured entries.
  */
-class SvgSpriteCompiler extends BaseService {
-  constructor(tooling) {
-    super(tooling);
+class SvgSpriteCompiler extends Worker {
+  constructor(services) {
+    super(services);
   }
 
   /**

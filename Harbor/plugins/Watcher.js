@@ -2,21 +2,19 @@ const chokidar = require('chokidar');
 const { extname, join } = require('path');
 
 const ConfigManager = require('../common/ConfigManager');
-const { pathToFileURL } = require('url');
 const Environment = require('../common/Environment');
 const Logger = require('../common/Logger');
+
+const Plugin = require('./Plugin');
 
 /**
  * Creates a Watcher instance for each defined instance key and will run the
  * configured hook from the constructed TaskManager.
  */
-class Watcher {
-  constructor(TaskManager) {
-    this.name = this.constructor.name;
+class Watcher extends Plugin {
+  constructor(services, options) {
+    super(services, options);
 
-    this.config = ConfigManager.load(this.name);
-
-    this.TaskManager = TaskManager;
     this.instances = {};
   }
 
@@ -26,20 +24,8 @@ class Watcher {
    *
    * @param {string} hook Creates a new unique watcher from the given hook.
    */
-  async spawn(hook) {
-    const environment = new Environment();
-
-    this.environment = environment.define();
-
-    this.Console = new Logger(this.environment);
-
-    if (!hook) {
-      return;
-    }
-
-    const list = hook.split(',').map((t) => {
-      return t.trim();
-    });
+  async init() {
+    const { TaskManager } = this.services;
 
     if (!this.config.instances instanceof Object) {
       return;
@@ -50,8 +36,6 @@ class Watcher {
     if (!instances.length) {
       return;
     }
-
-    this.Console.info('Starting service Watcher...');
 
     await new Promise((done) => {
       instances.forEach((name) => {
@@ -82,7 +66,11 @@ class Watcher {
         // Create the Shutdown handler that will close the new Watcher after configured
         // time has passed.
         this.instances[name].instance.on(this.config.instances[name].event || 'change', (path) => {
-          this.config.instances[name].services.forEach((service) => {
+          if (!this.config.instances[name].services) {
+            return;
+          }
+
+          this.config.instances[name].services.forEach((worker) => {
             this.Console.log('Resetting shutdown timer...');
             clearTimeout(this.instances[name].watcher);
 
@@ -94,10 +82,10 @@ class Watcher {
                   this.Console.info(`File updated ${path}`);
                 }
 
-                if (this.TaskManager) {
-                  const { hook } = ConfigManager.load(service);
+                if (TaskManager) {
+                  const { hook } = ConfigManager.load(worker, 'workers');
 
-                  this.TaskManager.publish(hook || service);
+                  TaskManager.publish('workers', hook || worker);
 
                   this.Console.info(`Resuming watcher: ${name}`);
                 }
@@ -123,7 +111,7 @@ class Watcher {
             clearTimeout(this.instances[name].running);
 
             if (!Object.values(this.instances).filter(({ running }) => running).length) {
-              this.Console.info('Closing service Watcher...');
+              this.Console.info('Closing Watcher plugin...');
 
               done();
             }

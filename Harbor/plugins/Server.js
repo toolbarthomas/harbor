@@ -2,22 +2,20 @@ const browserSync = require('browser-sync');
 const { existsSync } = require('fs');
 const { resolve } = require('path');
 
-const BaseService = require('./BaseService');
+const Plugin = require('./Plugin');
 
 /**
  * Creates a new BrowserSync instance.
  */
-class Server extends BaseService {
-  constructor(tooling) {
-    super(tooling);
+class Server extends Plugin {
+  constructor(services) {
+    super(services);
   }
 
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
   init() {
-    super.init();
-
     this.instance = browserSync.create();
 
     this.Console.info('Starting the Browsersync development server');

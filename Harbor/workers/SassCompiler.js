@@ -1,22 +1,21 @@
+const { basename, dirname, join, resolve } = require('path');
+const { render } = require('node-sass');
 const { statSync, readFileSync, writeFileSync } = require('fs');
 const { sync } = require('glob');
-const { basename, dirname, join, resolve } = require('path');
-const mkdirp = require('mkdirp');
-const { render } = require('node-sass');
 const globImporter = require('node-sass-glob-importer');
+const mkdirp = require('mkdirp');
 const postcss = require('postcss');
 const postcssScss = require('postcss-scss');
 const stylelint = require('stylelint');
 
-const ConfigManager = require('../common/ConfigManager');
-const BaseService = require('./BaseService');
+const Worker = require('./Worker');
 
 /**
  * Compiles the configured entries with Node Sass.
  */
-class SassCompiler extends BaseService {
-  constructor(tooling) {
-    super(tooling);
+class SassCompiler extends Worker {
+  constructor(services) {
+    super(services);
 
     /**
      * Flag to prevent files from being written to the Filesystem if the given

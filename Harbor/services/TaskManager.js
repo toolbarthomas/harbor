@@ -3,10 +3,13 @@ const Logger = require('../common/Logger');
 
 class TaskManager {
   constructor() {
-    this.tasks = {};
+    this.instances = {
+      plugins: {},
+      workers: {},
+    };
 
-    const environment = new Environment();
-    this.environment = environment.define();
+    const Env = new Environment();
+    this.environment = Env.define();
 
     this.Console = new Logger(this.environment);
   }
@@ -21,22 +24,22 @@ class TaskManager {
    * publish.
    * @param  {...any} args Optional handler arguments.
    */
-  subscribe(name, hook, handler, ...args) {
-    if (this.tasks.name) {
+  subscribe(type, name, hook, handler, ...args) {
+    if (this.instances[type][name]) {
       this.Console.warning(`${name} is already registerd as task`);
       return;
     }
 
-    this.Console.log(`Assigning service: ${name} for task: ${hook.join(', ')}`);
+    this.Console.log(`Subscribing ${name} within ${type} with hook: ${hook.join(', ')}`);
 
-    this.tasks[name] = {
+    this.instances[type][name] = {
       hook,
     };
 
     const fn = () => {
       try {
         return new Promise((resolve, reject) => {
-          this.tasks[name].resolve = resolve;
+          this.instances[type][name].resolve = resolve;
 
           return handler(args);
         });
@@ -45,20 +48,23 @@ class TaskManager {
       }
     };
 
-    this.tasks[name].fn = fn;
+    this.instances[type][name].fn = fn;
   }
 
-  resolve(name, exit) {
-    if (!this.tasks[name]) {
+  /**
+   *
+   */
+  resolve(type, name, exit) {
+    if (!this.instances[type][name]) {
       this.Console.warning(`Unable to resolve non existing task: ${name}`);
       return;
     }
 
-    if (!this.tasks[name].resolve) {
+    if (!this.instances[type][name].resolve) {
       this.Console.warning(`No resolve handler has been defined for: ${name}`);
     }
 
-    this.tasks[name].resolve(exit);
+    this.instances[type][name].resolve(exit);
   }
 
   /**
@@ -67,7 +73,7 @@ class TaskManager {
    *
    * @param {string[]} hook Initialtes the subscribed handlers from the given hooks.
    */
-  async publish(hook) {
+  async publish(type, hook) {
     if (!hook) {
       this.Console.warning('No task have been defined...');
       return;
@@ -87,7 +93,7 @@ class TaskManager {
     const queue = list
       .filter((item, index) => list.indexOf(item) == index)
       .map((item) => {
-        const tasks = Object.values(this.tasks).filter(
+        const tasks = Object.values(this.instances[type]).filter(
           (task) => Array.isArray(task.hook) && task.hook.includes(item)
         );
 
@@ -103,7 +109,7 @@ class TaskManager {
       .filter((t) => t);
 
     if (!queue.length) {
-      this.Console.error(`Unable to find tasks: ${list.join(', ')}`);
+      this.Console.error(`Unable to find ${type}: ${list.join(', ')}`);
 
       return;
     }
@@ -112,12 +118,11 @@ class TaskManager {
     const completed = [];
     const exceptions = [];
 
-    // Run each
     const result = await Promise.all(
       jobs.map((job) =>
         new Promise(async (done) => {
           if (job.tasks && job.tasks.length) {
-            this.Console.info(`Starting task: ${job.hook}`);
+            this.Console.info(`Starting ${type} task: ${job.hook}`);
 
             for (let i = 0; i < job.tasks.length; i++) {
               const { hook, fn } = job.tasks[i];
@@ -150,6 +155,29 @@ class TaskManager {
       completed,
       exceptions,
     };
+  }
+
+  /**
+   * Prevents the execution if the current environment is not included
+   * within the acceptedEnvironments option.
+   */
+  initIfAccepted(options) {
+    const environment = new Environment();
+    const env = environment.define();
+
+    if (!options) {
+      return true;
+    }
+
+    if (!options.acceptedEnvironments || !options.acceptedEnvironments.length) {
+      return true;
+    }
+
+    if (options.acceptedEnvironments.includes(env.THEME_ENVIRONMENT)) {
+      return true;
+    }
+
+    return false;
   }
 }
 

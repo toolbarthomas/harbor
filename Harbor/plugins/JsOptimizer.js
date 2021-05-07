@@ -3,20 +3,17 @@ const minify = require('minify');
 const { sync } = require('glob');
 const { writeFile, write, existsSync, statSync } = require('fs');
 
-const BaseService = require('./BaseService');
-const { exception } = require('console');
+const Plugin = require('./Plugin');
 
-class JsOptimizer extends BaseService {
-  constructor(tooling, options) {
-    super(tooling, options);
+class JsOptimizer extends Plugin {
+  constructor(services, options) {
+    super(services, options);
   }
 
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    super.init();
-
     if (!this.config.entry instanceof Object) {
       return;
     }

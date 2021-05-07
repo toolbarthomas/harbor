@@ -5,23 +5,21 @@ const autoprefixer = require('autoprefixer');
 const mkdirp = require('mkdirp');
 const postcss = require('postcss');
 
-const BaseService = require('./BaseService');
+const Plugin = require('./Plugin');
 
 /**
  * Optimizes the compiled stylesheet entries within the defined THEME_DIST
  * directory.
  */
-class StyleOptimizer extends BaseService {
-  constructor(tooling, options) {
-    super(tooling, options);
+class StyleOptimizer extends Plugin {
+  constructor(services, options) {
+    super(services, options);
   }
 
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    super.init();
-
     super.defineEntry(true);
 
     if (!this.entry || !this.entry.length) {

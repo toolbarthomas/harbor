@@ -3,15 +3,15 @@ const { existsSync, statSync } = require('fs');
 const { join, relative } = require('path');
 
 const Logger = require('../common/Logger');
-const BaseService = require('./BaseService');
+const Worker = require('./Worker');
 
 /**
  * Synchronizes the configured Filesync entries to the defined environment
  * destination directory.
  */
-class FileSync extends BaseService {
-  constructor(tooling) {
-    super(tooling);
+class FileSync extends Worker {
+  constructor(services) {
+    super(services);
 
     this.defaultPatterns = [];
     this.resourcePatterns = [];
