@@ -1,21 +1,107 @@
 # Harbor
 
-Harbor is an Asset Builder that will help you to develop [Drupal](http://drupal.org/) compliant front-end resources that is based on the Twig templating Engine.
+Harbor is an asset builder that fits within the theme architecture of [Drupal](https://drupal.org/) 8+ setups.
+It can be used to easily create a [Drupal](https://drupal.org/) compatible theme without the need to install the actual CMS.
+With the help of [Storybook](https://storybookjs.org/) it can generate the Twig templates that Drupal uses for it's templating system.
 
-Each twig template should work within your configured Drupal Environment and you should use this tool directly within your custom theme. Harbor has also the option to view these templates directly within [Storybook](https://storybook.js.org/) so you can also develop your theme outside Drupal.
+The assets are processed on a very basic level, sass files can be compiled with the included `Sasscompiler` and Babel will transform the defined javascript files to enable JS compatibility for older browsers. It does not care about any frameworks and you can include additional plugins for the configured workers.
+
+## Setup
+
+You can install Harbor via NPM (we assume you have installed [Nodejs](https://nodejs.org):
+
+```
+$ npm install @toolbarthomas/harbor
+```
+
+Then you can start Harbor by simply running:
+
+```
+$ node node_modules/@toolbarthomas/harbor/index.js
+```
+
+Additional CLI arguments can be defined to customize the build process:
+
+| Argument   | Description                                                  |
+| ---------- | ------------------------------------------------------------ |
+| task       | Starts one or more worker tasks to compile the theme assets. |
+| styleguide | Starts the Storybook builder.                                |
+| watch      | Observes for file changes for the running tasks.             |
+| minify     | Minifies the processed assets.                               |
+| serve      | Starts the legacy browsersync server.                        |
+
+You can run one or multiple tasks by defining the `task` parameter.
+Keep in mind that the hook should exist within your configuration:
+The default hooks are: `prepare`, `javascripts`, `stylesheets`, `serve`, `styleguide`, `images`
+
+## Workers
+
+The tasks (a.k.a. workers) are assigned to the `task` CLI argument, by defining this argument you can run one or multiple tasks, this can come in handy during the development stage.
+All of the configured workers will be initiated if the task argument has not been defined, one or multiple tasks can be started from the CLI:
+
+```shell
+# Starts the workers that have the stylesheets hook from the configuration.
+$ node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets
+```
+
+This example will start the workers that are defined with the `stylesheets` hook, by default it will process the configured sass entry files (or it will try to use the default configured entries).
+Multiple tasks can be started within a single command by adding the required hooks with comma separations:
+
+```shell
+# Will process the stylesheets & javascript services in a paralell order.
+$ node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets,javascripts
+```
+
+The following workers are configured within the default configuration:
+
+| Worker           | Description                                                                     | Hook(s)                 |
+| ---------------- | ------------------------------------------------------------------------------- | ----------------------- |
+| Cleaner          | Cleans the defined THEME_DIST environment directory.                            | Cleaner, prepare        |
+| FileSync         | Synchronizes the defined entry files to the THEME_DIST environment directory.   | FilSync, prepare        |
+| JsCompiler       | Transforms the defined entry javascript files with Babel.                       | JSCompiler, javascripts |
+| Resolver         | Resolves NPM installed vendor pacakges to the THEME_DIST environment directory. | Resolver, prepare       |
+| SassCompiler     | Compiles the defined entry Sass files with Node Sass.                           | styleguide              |
+| SVSpriteCompiler | Creates one or more inline SVG sprites based from the configured entries.       | images                  |
+
+## Plugins
+
+Plugins are used to run post-process tasks like starting the storybook development server, optimizing the assets or include a file watcher.
+These can be defined by adding the given CLI argument hooks within your command:
+
+```shell
+$ node node_modules/@toolbarthomas/harbor/index.js --task=javascripts --minify
+```
+
+More plugins can be included within a single command, the following plugins are available within the default configuration, the result of certain plugins can vary between environments:
+
+| Plugin             | Environment        | Description                                                                                 | Hook       |
+| ------------------ | ------------------ | ------------------------------------------------------------------------------------------- | ---------- |
+| JSOptimizer        | production `only`  | Minifies the defined js entries within the THEME_DIST directory                             | minify     |
+| StyleOptimizer     | production `only`  | Minifies the defined css entries within the THEME_DIST directory                            | minify     |
+| Server             | development `only` | Starts the legacy development server                                                        | serve      |
+| StyleguideCompiler | production         | Creates a static storybook styleguide.                                                      | styleguide |
+| StyleguideCompiler | development        | Starts the storybook development server.                                                    | styleguide |
+| Watcher            | development `only` | Watches the configured instance entries and runs the assigned workers during a file change. | watch      |
+
+This will only generate the actual assets that should be compatible for the Drupal environment.
+Keep in mind that this command will only run the configured Harbor workers, the actual development tools can be included with extra CLI arguments:
+
+```shell
+$ node node_modules/@toolbarthomas/harbor/index.js --task=javascripts --minify --watch
+```
 
 ## Environment
 
 An optional Harbor environment can be defined by creating a [dotenv](https://www.npmjs.com/package/dotenv) file within the root of your theme directory.
-The default configuration values will be used when missing:
+The following configuration can be adjusted, the default values will be used for any missing environment variable.
 
-```shell
-  THEME_SRC=./src # Defines the asset working source directory.
-  THEME_DIST=./dist # Defines the asset destination directory.
-  THEME_PORT=8080 # Defines the server port for the Styleguide server.
-  THEME_ENVIRONMENT=production # Optimizes the flow for the current environment.
-  THEME_DEBUG=false # Writes extra Logger information to the command line.
-```
+| Environment variable | Default value | Description                                                                             |
+| -------------------- | ------------- | --------------------------------------------------------------------------------------- |
+| THEME_SRC            | ./src         | Defines the working source directory for all Worker entries.                            |
+| THEME_DIST           | ./dist        | Defines the build directory for all Worker entries & the styleguide development server. |
+| THEME_PORT           | 8080          | Defines the server port for the styleguide development server.                          |
+| THEME_ENVIRONMENT    | production    | Defines the server port for the styleguide development server.                          |
+| THEME_DEBUG          | false         | Includes sourcemaps if the defined entries support it.                                  |
 
 ## Default Configuration
 
@@ -28,16 +114,20 @@ For example:
   // harbor.config.js
 
   ...
-  SassCompiler: {
-    options: ...,
-    hook: 'stylesheets',
-    plugins: ...,
-    entry: {
-      main: [...]
+  workers: {
+    SassCompiler: {
+      options: ...,
+      hook: 'stylesheets',
+      plugins: ...,
+      entry: {
+        main: [...]
+      },
     },
-  },
+  }
   ...
 ```
+
+## Default Worker Configuration
 
 ### Cleaner configuration
 
@@ -82,25 +172,6 @@ The result will be written relative to the configured environment destination di
 | plugins.postcss | Object                 | The optional Postcss plugin(configuration).                           |
 | entry           | Object[string, string] | Renders & lints the given entries with Node Sass & Postcss.           |
 
-### Server Options
-
-The Server is the legacy Express server that should be used if you wan't to serve the result of the destination directory. The should be ignored if Storybook is the chosen styleguide.
-
-| Option  | type   | Description                                                           |
-| ------- | ------ | --------------------------------------------------------------------- |
-| options | Object | Optional configuration for the Express server.                        |
-| hook    | string | Runs the service if the given hook is subscribed to the Task Manager. |
-
-### StyleguideCompiler configuration
-
-The Styleguide Compiler will generate a new Storybook instance that can be accesed on the configured environment port.
-
-| Option  | type                   | Description                                                           |
-| ------- | ---------------------- | --------------------------------------------------------------------- |
-| entry   | Object[string, string] | Compiles the given entries with Storybook.                            |
-| options | Object                 | Optional configuration for the Storybook compiler.                    |
-| hook    | string                 | Runs the service if the given hook is subscribed to the Task Manager. |
-
 ### SvgSpriteCompiler configuration
 
 The SvgSpriteCompiler will compile the defined entries into inline SVG sprites.
@@ -122,6 +193,27 @@ The Resolver will resolve the defined packages from the node_modules to the envi
 | entry  | Object[string, string] | Resolves the given entry packages to the environment destination.     |
 | hook   | string                 | Runs the service if the given hook is subscribed to the Task Manager. |
 
+## Default Plugin Configuration
+
+### Server Options
+
+The Server is the legacy Express server that should be used if you wan't to serve the result of the destination directory. The should be ignored if Storybook is the chosen styleguide.
+
+| Option  | type   | Description                                                           |
+| ------- | ------ | --------------------------------------------------------------------- |
+| options | Object | Optional configuration for the Express server.                        |
+| hook    | string | Runs the service if the given hook is subscribed to the Task Manager. |
+
+### StyleguideCompiler configuration
+
+The Styleguide Compiler will generate a new Storybook instance that can be accesed on the configured environment port.
+
+| Option  | type                   | Description                                                           |
+| ------- | ---------------------- | --------------------------------------------------------------------- |
+| entry   | Object[string, string] | Compiles the given entries with Storybook.                            |
+| options | Object                 | Optional configuration for the Storybook compiler.                    |
+| hook    | string                 | Runs the service if the given hook is subscribed to the Task Manager. |
+
 ### Watcher configuration
 
 The Watcher can be started by defining the `watch` parameter to the CLI and will run the defined hooks from the TaskManager.
@@ -137,57 +229,22 @@ The Watcher will shutdown automatically if no event occured during the defined d
 | instances[].path     | string/string[]        | Watches the given paths for the spawned Watcher.                                        |
 | instances[].services | string[]               | Will publish the defined Harbor services in order.                                      |
 
-## Setup
-
-Harbor can be included directly within a NodeJS script:
-
-```js
-// ./node_modules/@toolbarthomas/harbor/index.js
-
-const Harbor = require('@toolbarthomas/harbor');
-const instance = new Harbor();
-
-instance.init();
-```
-
-You can run one or multiple tasks by defining the `task` parameter.
-Keep in mind that the hook should exist within your configuration:
-
-```shell
-  $ node ./index.js
-```
-
-The default hooks are: `prepare`, `javascripts`, `stylesheets`, `serve`, `styleguide`, `images`
-
-## CLI
-
-Keep in mind that you need to define a task in order to start Harbor:
-
-```
-$ node ./index.js task=stylesheets
-```
-
-| Option | Description                                                     |
-| ------ | --------------------------------------------------------------- |
-| task   | Comma separated list of service hooks that should be initiated. |
-| watch  | Starts the Watcher for the defined tasks.                       |
-
-## Default scripts
+## Example NPM script setup
 
 You can assign the following NPM script entries when using the default hook configuration:
 
 ```js
   {
-    "preproduction": "node ./index.js task=prepare",
-    "production": "node ./index.js task=stylesheets,javascripts,images",
+    "preproduction": "node node_modules/@toolbarthomas/harbor/index.js --task=prepare",
+    "production": "node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets,javascripts,images",
     "predevelopment": "npm run production",
-    "development": "node ./index.js watch task=styleguide",
-    "images": "node ./index.js task=images",
-    "javascripts": "node ./index.js task=javascripts",
-    "resolve": "node ./index.js task=resolve",
-    "serve": "node ./index.js task=serve",
-    "styleguide": "node ./index.js task=styleguide",
-    "stylesheets": "node ./index.js task=stylesheets",
+    "development": "node node_modules/@toolbarthomas/harbor/index.js watch --task=styleguide",
+    "images": "node node_modules/@toolbarthomas/harbor/index.js --task=images",
+    "javascripts": "node node_modules/@toolbarthomas/harbor/index.js --task=javascripts",
+    "resolve": "node node_modules/@toolbarthomas/harbor/index.js --task=resolve",
+    "serve": "node node_modules/@toolbarthomas/harbor/index.js --task=serve",
+    "styleguide": "node node_modules/@toolbarthomas/harbor/index.js --task=styleguide",
+    "stylesheets": "node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets",
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 ```
