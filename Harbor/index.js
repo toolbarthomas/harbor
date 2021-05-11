@@ -94,16 +94,28 @@ class Harbor {
 
     if (args) {
       // Use the configured plugins instead of all the leftover arguments
-      const plugins = Object.keys(args)
-        .filter(
-          (arg) =>
-            args[arg] &&
-            Object.values(this.config['plugins']).filter(({ hook }) => hook === arg).length
-        )
-        .join(',');
+      const plugins = Object.keys(args).filter(
+        (arg) =>
+          args[arg] &&
+          Object.values(this.config['plugins']).filter(({ hook }) => {
+            const h = hook ? (Array.isArray(hook) ? hook : [String(hook)]) : [];
+
+            if (!h.includes(arg)) {
+              return;
+            }
+
+            return true;
+          }).length
+      );
 
       if (plugins.length) {
-        const pluginResult = await this.services.TaskManager.publish('plugins', plugins);
+        this.Console.log(
+          `Using ${plugins.length} ${plugins.length === 1 ? 'plugin' : 'plugins'} for ${
+            this.env.THEME_ENVIRONMENT
+          }...`
+        );
+
+        const pluginResult = await this.services.TaskManager.publish('plugins', plugins.join(','));
       }
     }
   }
@@ -112,7 +124,7 @@ class Harbor {
    * Defines the configuration Object for the Storybook instance.
    */
   styleguideSetup() {
-    return this.plugins.StyleguideCompiler.setup(this.getEnvironment());
+    return this.plugins.StyleguideCompiler.setupTwing(this.env);
   }
 }
 

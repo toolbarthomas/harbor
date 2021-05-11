@@ -25,7 +25,7 @@ class StyleguideCompiler extends Plugin {
 
     await new Promise((cb) => {
       const shell = exec(
-        `start-storybook -s ${this.environment.THEME_DIST} -c ${path.resolve(
+        `node node_modules/.bin/start-storybook -s ${this.environment.THEME_DIST} -c ${path.resolve(
           __dirname,
           '../../.storybook'
         )} -p ${this.environment.THEME_PORT}`
@@ -76,7 +76,7 @@ class StyleguideCompiler extends Plugin {
    * Creates the Storybook Webpack Configuration Object that is compatible
    * with the Drupal template language.
    */
-  setup() {
+  setupTwing() {
     if (!this.config.entry instanceof Object) {
       return;
     }

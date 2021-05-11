@@ -14,10 +14,13 @@ class Core {
     this.services = Object.assign(this.services || {}, services || {});
 
     // Defines the initiation hook that will be used by the TaskManager Service.
-    const hook =
-      this.config.hook && this.config.hook !== this.name
-        ? [this.name, this.config.hook]
-        : [this.name];
+    const h = this.config.hook
+      ? Array.isArray(this.config.hook)
+        ? this.config.hook
+        : [String(this.config.hook)]
+      : [this.name];
+
+    const hook = [this.name, ...h.filter((hh) => hh !== this.name)];
 
     if (services) {
       this.Console.log(`Mounting services for ${this.name}: ${Object.keys(services).join(', ')}`);

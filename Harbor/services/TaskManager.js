@@ -122,7 +122,7 @@ class TaskManager {
       jobs.map((job) =>
         new Promise(async (done) => {
           if (job.tasks && job.tasks.length) {
-            this.Console.info(`Starting ${type} task: ${job.hook}`);
+            this.Console.info(`Starting: ${job.hook}`);
 
             for (let i = 0; i < job.tasks.length; i++) {
               const { hook, fn } = job.tasks[i];

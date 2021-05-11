@@ -11,7 +11,7 @@ class Logger {
 
     const { args } = new Argv();
 
-    this.verbose = this.environment.THEME_DEBUG ? true : args.verbose;
+    this.verbose = args.verbose;
   }
 
   /**

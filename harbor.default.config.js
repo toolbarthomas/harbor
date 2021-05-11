@@ -14,10 +14,10 @@ const babelConfig = sync('.babelrc*').length;
 module.exports = {
   workers: {
     Cleaner: {
-      hook: 'prepare',
+      hook: ['clean', 'prepare'],
     },
     FileSync: {
-      hook: 'prepare',
+      hook: ['sync', 'prepare'],
       patterns: ['main/images', 'main/webfonts'],
     },
     JsCompiler: {
@@ -25,7 +25,7 @@ module.exports = {
         main: '**/javascripts/**/*.js',
         modules: 'modules/*/*/*.js',
       },
-      hook: 'javascripts',
+      hook: ['js', 'javascripts'],
       plugins: {
         eslint: eslintConfig
           ? null
@@ -62,7 +62,7 @@ module.exports = {
       options: {
         outputStyle: 'compact',
       },
-      hook: 'stylesheets',
+      hook: ['sass', 'stylesheets'],
       plugins: {
         postcss: {
           plugins: [
@@ -86,7 +86,7 @@ module.exports = {
       },
     },
     SvgSpriteCompiler: {
-      hook: 'images',
+      hook: ['svg', 'images'],
       prefix: 'svg--',
       entry: {
         svgsprite: 'main/images/*/**.svg',
@@ -112,7 +112,7 @@ module.exports = {
       },
     },
     Resolver: {
-      hook: 'prepare',
+      hook: ['resolve', 'prepare'],
       cwd: 'main/vendors',
       entry: {
         svgxuse: 'svgxuse.min.js',
@@ -125,7 +125,7 @@ module.exports = {
         main: '**/javascripts/**/*.js',
         modules: 'modules/*/*/*.js',
       },
-      hook: 'optimize',
+      hook: ['minify:css', 'minify'],
       options: {},
     },
     Server: {
@@ -135,7 +135,7 @@ module.exports = {
       },
     },
     StyleOptimizer: {
-      hook: 'optimize',
+      hook: ['minify:js', 'minify'],
       plugins: {
         autoprefixer: autoprefixer(
           browserListConfig
@@ -152,7 +152,7 @@ module.exports = {
       },
     },
     StyleguideCompiler: {
-      hook: 'styleguide',
+      hook: ['storybook', 'styleguide'],
       entry: {
         main: '**/*.stories.@(js|mdx)',
       },
@@ -160,7 +160,13 @@ module.exports = {
         alias: {
           '@theme': process.cwd(),
         },
-        addons: ['@storybook/addon-essentials'],
+        addons: [
+          '@storybook/addon-actions',
+          '@storybook/addon-essentials',
+          '@storybook/addon-knobs',
+          '@storybook/addon-links',
+          '@storybook/addon-viewport',
+        ],
         configDirectory: resolve(process.cwd(), '.storybook'),
       },
     },
