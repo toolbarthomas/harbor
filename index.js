@@ -1,5 +1,3 @@
 const Harbor = require('./Harbor');
 
-const instance = new Harbor();
-
-instance.init();
+new Harbor().init();

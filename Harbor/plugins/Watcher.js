@@ -25,6 +25,8 @@ class Watcher extends Plugin {
    * @param {string} hook Creates a new unique watcher from the given hook.
    */
   async init() {
+    super.init();
+
     const { TaskManager } = this.services;
 
     if (!this.config.instances instanceof Object) {

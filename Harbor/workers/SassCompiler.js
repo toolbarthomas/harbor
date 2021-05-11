@@ -194,7 +194,7 @@ class SassCompiler extends Worker {
           writeFileSync(destination, result.css.toString());
 
           // Also write the map file if the development environment is active.
-          if (this.environment.THEME_DEBUG) {
+          if (this.environment.THEME_DEBUG && result.map) {
             writeFileSync(`${destination}.map`, result.map.toString());
           }
 

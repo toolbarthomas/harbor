@@ -20,7 +20,7 @@ class StyleOptimizer extends Plugin {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    super.defineEntry(true);
+    super.init();
 
     if (!this.entry || !this.entry.length) {
       return super.resolve();

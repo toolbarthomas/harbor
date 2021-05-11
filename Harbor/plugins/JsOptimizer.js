@@ -1,10 +1,10 @@
-const { join } = require('path');
 const minify = require('minify');
-const { sync } = require('glob');
-const { writeFile, write, existsSync, statSync } = require('fs');
 
 const Plugin = require('./Plugin');
 
+/**
+ * Minifies the defined js entries within the THEME_DIST directory
+ */
 class JsOptimizer extends Plugin {
   constructor(services, options) {
     super(services, options);
@@ -14,25 +14,14 @@ class JsOptimizer extends Plugin {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    if (!this.config.entry instanceof Object) {
-      return;
-    }
+    super.init();
 
-    const entries = Object.keys(this.config.entry);
-
-    if (!entries.length) {
-      return;
+    if (!this.entry || !this.entry.length) {
+      return super.resolve();
     }
 
     await Promise.all(
-      entries.map(
-        (name) =>
-          new Promise((cb) => {
-            const cwd = sync(join(this.environment.THEME_DIST, this.config.entry[name]));
-
-            this.optimizeCwd(cwd).then((data) => cb());
-          })
-      )
+      this.entry.map((name) => new Promise((cb) => this.optimizeCwd(name).then((data) => cb())))
     );
 
     super.resolve();

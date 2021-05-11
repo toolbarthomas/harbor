@@ -1,4 +1,4 @@
-const { transformFileAsync } = require('@babel/core');
+const { transformFileAsync, transformFromAstSync } = require('@babel/core');
 const { statSync, readFileSync, writeFileSync } = require('fs');
 const { Linter, SourceCode } = require('eslint');
 const { sync } = require('glob');
@@ -56,8 +56,19 @@ class JsCompiler extends Worker {
         cwd.map(
           (entry) =>
             new Promise((cb) => {
-              transformFileAsync(entry, this.config.plugins.transform).then((result) => {
-                if (!result.code) {
+              transformFileAsync(
+                entry,
+                Object.assign(
+                  {
+                    ast: true,
+                    code: false,
+                  },
+                  this.config.plugins.transform
+                )
+              ).then((result) => {
+                const { code, map } = transformFromAstSync(result.ast, readFileSync(entry));
+
+                if (!code) {
                   this.Console.info(`Skipping empty entry: ${entry}`);
                   return cb();
                 }
@@ -68,7 +79,7 @@ class JsCompiler extends Worker {
                 );
 
                 if (this.config.plugins.eslint) {
-                  const linter = this.linter.verify(result.code, this.config.plugins.eslint, {
+                  const linter = this.linter.verify(code, this.config.plugins.eslint, {
                     filename: destination,
                   });
 
@@ -102,7 +113,11 @@ class JsCompiler extends Worker {
                     this.Console.error(error);
                   }
 
-                  writeFileSync(destination, result.code);
+                  writeFileSync(destination, code);
+
+                  if (this.environment.THEME_DEBUG && map) {
+                    writeFileSync(`${destination}.map`, map);
+                  }
 
                   this.Console.log(`Successfully transpiled: ${destination}`);
 

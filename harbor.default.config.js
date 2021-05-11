@@ -114,9 +114,7 @@ module.exports = {
     Resolver: {
       hook: ['resolve', 'prepare'],
       cwd: 'main/vendors',
-      entry: {
-        svgxuse: 'svgxuse.min.js',
-      },
+      entry: {},
     },
   },
   plugins: {
@@ -125,17 +123,11 @@ module.exports = {
         main: '**/javascripts/**/*.js',
         modules: 'modules/*/*/*.js',
       },
-      hook: ['minify:css', 'minify'],
+      hook: ['minify:js', 'minify'],
       options: {},
     },
-    Server: {
-      hook: 'serve',
-      options: {
-        sharedDirectories: [],
-      },
-    },
     StyleOptimizer: {
-      hook: ['minify:js', 'minify'],
+      hook: ['minify:css', 'minify'],
       plugins: {
         autoprefixer: autoprefixer(
           browserListConfig

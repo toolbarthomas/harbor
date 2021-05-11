@@ -1,7 +1,19 @@
+const { join } = require('path');
+const { statSync } = require('fs');
+const { sync } = require('glob');
+
 const ConfigManager = require('../common/ConfigManager');
 const Environment = require('./Environment');
 const Logger = require('../common/Logger');
 
+/**
+ * Base Framework for defining Workers & Plugins.
+ *
+ * @param {object} services Harbor services for the current Harbor instance.
+ * @param {object} options Defines the specific Harbor instance configuration that
+ * should not be customized.
+ * @param {string} type Defines the new instance as Worker or Plugin.
+ */
 class Core {
   constructor(services, options, type) {
     this.name = this.constructor.name;
@@ -79,6 +91,42 @@ class Core {
     const Env = new Environment();
 
     return this.environment instanceof Object ? this.environment : Env.define();
+  }
+
+  /**
+   * Creates a collection of destination paths from the configured service entry
+   * configuration.
+   *
+   * @param {boolean} useDestination Defines the paths from the THEME_DIST
+   * environment variable.
+   */
+  defineEntry(useDestination) {
+    if (!this.config.entry || !this.config.entry instanceof Object) {
+      return;
+    }
+
+    const entries = Object.keys(this.config.entry);
+
+    if (!entries.length) {
+      return;
+    }
+
+    this.entry = entries
+      .map((name) => {
+        const p = join(
+          useDestination ? this.environment.THEME_DIST : this.environment.THEME_SRC,
+          this.config.entry[name]
+        );
+
+        return sync(p).filter((e) => {
+          if (!statSync(e).size) {
+            this.Console.log(`Skipping empty entry: ${e}`);
+          }
+
+          return statSync(e).size > 0 ? e : null;
+        });
+      })
+      .filter((entry) => entry.length);
   }
 
   /**

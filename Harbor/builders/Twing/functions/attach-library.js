@@ -52,7 +52,9 @@ module.exports = function (name) {
 
     if (js) {
       Object.keys(js).forEach((file) => {
-        jsSnippets.push(`<script type="text/javascript" src="${file}"></script>`);
+        jsSnippets.push(
+          `<script type="text/javascript" src="${file.replace(THEME_DIST, '')}"></script>`
+        );
       });
     }
   };
