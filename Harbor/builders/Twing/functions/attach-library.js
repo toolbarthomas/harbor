@@ -41,10 +41,12 @@ module.exports = function (name) {
     if (css) {
       Object.keys(css).forEach((section) => {
         Object.keys(css[section]).forEach((file) => {
-          const { media } = css[section][file] || 'all';
+          const { media } = css[section][file];
 
           cssSnippets.push(
-            `<link rel="stylesheet" href="${file.replace(THEME_DIST, '')}" media="${media}" />`
+            `<link rel="stylesheet" href="${file.replace(THEME_DIST, '')}" media="${
+              typeof media === 'string' ? media : 'all'
+            }" />`
           );
         });
       });

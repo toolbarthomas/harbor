@@ -34,6 +34,11 @@ module.exports = {
                 browser: true,
               },
               extends: ['eslint-config-airbnb-base', 'prettier'],
+              globals: {
+                Drupal: 'writable',
+                drupalSettings: 'readonly',
+              },
+              plugins: ['prettier'],
               rules: {
                 'import/no-extraneous-dependencies': '0',
                 'prettier/prettier': 'error',

@@ -21,8 +21,6 @@ class StyleguideCompiler extends Plugin {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    this.definePreviewHead();
-
     await new Promise((cb) => {
       const shell = exec(
         `node node_modules/.bin/start-storybook -s ${this.environment.THEME_DIST} -c ${path.resolve(
@@ -45,31 +43,6 @@ class StyleguideCompiler extends Plugin {
         super.reject();
       });
     });
-  }
-
-  /**
-   * Copies the initial styleguide project configuration within the installed
-   * Harbor instance.
-   */
-  definePreviewHead() {
-    const source = path.resolve(this.config.options.configDirectory, 'preview-head.html');
-    const base = path.resolve(__dirname, '../../.storybook/preview-head.html');
-
-    if (fs.existsSync(source)) {
-      // Ensure the previous entry file is removed before duplicating.
-      if (fs.existsSync(base)) {
-        fs.unlinkSync(base);
-      }
-
-      this.Console.log(`Initial styleguide configuration has been removed: ${base}`);
-    }
-
-    if (fs.existsSync(source) && source !== base && fs.statSync(source).size > 0) {
-      // Duplicate the actual file.
-      fs.copyFileSync(source, base);
-
-      this.Console.info(`Custom stylguide configuration has been installed at: ${base}`);
-    }
   }
 
   /**
