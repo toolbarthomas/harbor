@@ -68,54 +68,70 @@ class Harbor {
   async init() {
     const { task, ...args } = this.Argv.args;
 
-    if (task && task.length) {
-      const workerResult = await this.services.TaskManager.publish('workers', task);
+    try {
+      if (task && task.length) {
+        const workerResult = await this.services.TaskManager.publish('workers', task);
 
-      if (workerResult) {
-        if (workerResult.exceptions && workerResult.exceptions.length) {
-          if (this.env.THEME_ENVIRONMENT === 'production') {
-            throw Error(
-              `Not all tasks have been completed correctly: ${result.exceptions.join(', ')}`
+        // Output the result of the initial build and throw an exception for the
+        // production environment.
+        if (workerResult) {
+          if (workerResult.exceptions && workerResult.exceptions.length) {
+            if (this.env.THEME_ENVIRONMENT === 'production') {
+              this.Console.error(
+                `Not all workers have been completed correctly: ${workerResult.exceptions.join(
+                  ', '
+                )}`
+              );
+              throw Error();
+            }
+          }
+
+          if (workerResult.completed && workerResult.completed.length) {
+            if (workerResult.exceptions && !workerResult.exceptions.length) {
+              this.Console.success(`Successfully completed ${workerResult.completed.length} tasks`);
+            }
+          } else if (workerResult.exceptions && workerResult.exceptions.length) {
+            this.Console.warning(
+              `The following workers did not complete correctly: ${workerResult.exceptions.join(
+                ', '
+              )}`
             );
           }
         }
+      }
 
-        if (workerResult.completed && workerResult.completed.length) {
-          if (workerResult.exceptions && !workerResult.exceptions.length) {
-            this.Console.success(`Successfully completed ${workerResult.completed.length} tasks`);
-          }
-        } else if (workerResult.exceptions && workerResult.exceptions.length) {
-          this.Console.warning(
-            `The following tasks did not complete correctly: ${workerResult.exceptions.join(', ')}`
+      if (args) {
+        // Only use the configured plugins for the defined plugin arguments.
+        const plugins = Object.keys(args).filter(
+          (arg) =>
+            args[arg] &&
+            Object.values(this.config['plugins']).filter(({ hook }) => {
+              const h = hook ? (Array.isArray(hook) ? hook : [String(hook)]) : [];
+
+              if (!h.includes(arg)) {
+                return;
+              }
+
+              return true;
+            }).length
+        );
+
+        if (plugins.length) {
+          this.Console.log(
+            `Using ${plugins.length} ${plugins.length === 1 ? 'plugin' : 'plugins'} for ${
+              this.env.THEME_ENVIRONMENT
+            }...`
+          );
+
+          const pluginResult = await this.services.TaskManager.publish(
+            'plugins',
+            plugins.join(',')
           );
         }
       }
-    }
-
-    if (args) {
-      // Use the configured plugins instead of all the leftover arguments
-      const plugins = Object.keys(args).filter(
-        (arg) =>
-          args[arg] &&
-          Object.values(this.config['plugins']).filter(({ hook }) => {
-            const h = hook ? (Array.isArray(hook) ? hook : [String(hook)]) : [];
-
-            if (!h.includes(arg)) {
-              return;
-            }
-
-            return true;
-          }).length
-      );
-
-      if (plugins.length) {
-        this.Console.log(
-          `Using ${plugins.length} ${plugins.length === 1 ? 'plugin' : 'plugins'} for ${
-            this.env.THEME_ENVIRONMENT
-          }...`
-        );
-
-        const pluginResult = await this.services.TaskManager.publish('plugins', plugins.join(','));
+    } catch (exception) {
+      if (exception) {
+        throw new Error(exception);
       }
     }
   }

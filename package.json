@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.52.0",
+  "version": "0.60.0",
   "description": "Boilerplate for Drupal Themes",
   "main": "./Harbor/index.js",
   "scripts": {

@@ -22,6 +22,7 @@ class Core {
     this.Console = new Logger(this.environment);
 
     this.config = ConfigManager.load(this.name, type);
+
     this.type = type;
     this.services = Object.assign(this.services || {}, services || {});
 

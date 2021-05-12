@@ -64,7 +64,7 @@ class Resolver extends Worker {
                 })
               );
             } catch (exception) {
-              this.Console.error(exception);
+              this.Console.error(`Resolver encountered an error for ${name}: ${exception}`);
 
               this.reject();
             }
