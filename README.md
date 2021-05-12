@@ -54,14 +54,14 @@ $ node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets,javascript
 
 The following workers are configured within the default configuration:
 
-| Worker           | Description                                                                     | Hook(s)                 |
-| ---------------- | ------------------------------------------------------------------------------- | ----------------------- |
-| Cleaner          | Cleans the defined THEME_DIST environment directory.                            | Cleaner, prepare        |
-| FileSync         | Synchronizes the defined entry files to the THEME_DIST environment directory.   | FilSync, prepare        |
-| JsCompiler       | Transforms the defined entry javascript files with Babel.                       | JSCompiler, javascripts |
-| Resolver         | Resolves NPM installed vendor pacakges to the THEME_DIST environment directory. | Resolver, prepare       |
-| SassCompiler     | Compiles the defined entry Sass files with Node Sass.                           | styleguide              |
-| SVSpriteCompiler | Creates one or more inline SVG sprites based from the configured entries.       | images                  |
+| Worker           | Description                                                                     | Hook(s)                         |
+| ---------------- | ------------------------------------------------------------------------------- | ------------------------------- |
+| Cleaner          | Cleans the defined THEME_DIST environment directory.                            | Cleaner, clean, prepare         |
+| FileSync         | Synchronizes the defined entry files to the THEME_DIST environment directory.   | FilSync, sync, prepare          |
+| JsCompiler       | Transforms the defined entry javascript files with Babel.                       | JSCompiler, js, javascripts     |
+| Resolver         | Resolves NPM installed vendor pacakges to the THEME_DIST environment directory. | Resolver, resolve, prepare      |
+| SassCompiler     | Compiles the defined entry Sass files with Node Sass.                           | SassCompiler, sass, stylesheets |
+| SVSpriteCompiler | Creates one or more inline SVG sprites based from the configured entries.       | SVGSpriteCompiler, svg, images  |
 
 ## Plugins
 
@@ -74,14 +74,14 @@ $ node node_modules/@toolbarthomas/harbor/index.js --task=javascripts --minify
 
 More plugins can be included within a single command, the following plugins are available within the default configuration, the result of certain plugins can vary between environments:
 
-| Plugin             | Environment        | Description                                                                                 | Hook       |
-| ------------------ | ------------------ | ------------------------------------------------------------------------------------------- | ---------- |
-| JSOptimizer        | production `only`  | Minifies the defined js entries within the THEME_DIST directory                             | minify     |
-| StyleOptimizer     | production `only`  | Minifies the defined css entries within the THEME_DIST directory                            | minify     |
-| Server             | development `only` | Starts the legacy development server                                                        | serve      |
-| StyleguideCompiler | production         | Creates a static storybook styleguide.                                                      | styleguide |
-| StyleguideCompiler | development        | Starts the storybook development server.                                                    | styleguide |
-| Watcher            | development `only` | Watches the configured instance entries and runs the assigned workers during a file change. | watch      |
+| Plugin             | Environment        | Description                                                                                 | Hook(s)               |
+| ------------------ | ------------------ | ------------------------------------------------------------------------------------------- | --------------------- |
+| JSOptimizer        | production `only`  | Minifies the defined js entries within the THEME_DIST directory                             | minify                |
+| StyleOptimizer     | production `only`  | Minifies the defined css entries within the THEME_DIST directory                            | minify                |
+| Server             | development `only` | Starts the legacy development server                                                        | serve                 |
+| StyleguideCompiler | production         | Creates a static storybook styleguide.                                                      | storybook, styleguide |
+| StyleguideCompiler | development        | Starts the storybook development server.                                                    | storybook, styleguide |
+| Watcher            | development `only` | Watches the configured instance entries and runs the assigned workers during a file change. | watch                 |
 
 This will only generate the actual assets that should be compatible for the Drupal environment.
 Keep in mind that this command will only run the configured Harbor workers, the actual development tools can be included with extra CLI arguments:
@@ -249,8 +249,6 @@ You can assign the following NPM script entries when using the default hook conf
   }
 ```
 
-## Creating a theme
-
 ### Asset management
 
 Harbor (currently) uses an internal Storybook instance where the `preview-head.html` is reserved to ensure the compatibilty with Drupal.
@@ -278,11 +276,11 @@ The defined assets will be included within the template that use the `attach_lib
 ```
 
 You can also import the actual assets within each storybook story to enable Hot Module Reload during a file change.
-Keep in mind that you need to define the required libraries within Drupal if you don't include assets within the templates with the `attach_library` function.
+Keep in mind that you still need to define the required libraries within Drupal if you don't include assets with the `attach_library` function.
 
 ### Suggested javascript structure.
 
-Using the functionality of the Drupal.behaviors object you can run the defined javascript during the (initial) (re)load within Drupal and Storybook.
+Using the functionality of the Drupal.behaviors object, you can run the defined javascript during the (initial) (re)load within Drupal and Storybook.
 Storybook calls the attach handler within the Drupal behaviors, this object is used within Drupal sites and is also available for the styleguide.
 
 The actual javascript can be created like the following and should be compliant with the Drupal javascript structure:
