@@ -64,7 +64,9 @@ class Resolver extends Worker {
                 })
               );
             } catch (exception) {
-              throw new Error(exception);
+              this.Console.error(exception);
+
+              this.reject();
             }
           })
       )

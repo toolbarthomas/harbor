@@ -318,8 +318,8 @@ You can use any entry key of the SVGSpriteCompiler configuration to use that spe
       SvgSpriteCompiler: {
         ...
         entry: {
-          common: 'main/images/*/**.svg',
-          icons: 'main/images/*/**.svg',
+          common: 'main/images/common/*/**.svg',
+          icons: 'main/images/icons/*/**.svg',
         },
         ...
     ...
@@ -330,7 +330,7 @@ You can use any entry key of the SVGSpriteCompiler configuration to use that spe
 {{ add_svg('chevron--down', 'icons') }}
 ```
 
-This will output `dist/main/images/icons.svg#chevron--down`.
+This will output `dist/main/images/icons/icons.svg#chevron--down`.
 
 It is also posible to output the basis SVG element if the second or third argument has been defined as `TRUE`:
 

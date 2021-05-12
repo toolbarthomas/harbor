@@ -16,31 +16,35 @@ class ConfigManager {
       return process.env.harbor[option];
     }
 
-    const config = load('harbor.config.js');
+    const customConfig = load('harbor.config.js');
 
-    if (
-      config instanceof Object &&
-      config[type] instanceof Object &&
-      defaultConfig[type] instanceof Object &&
-      defaultConfig[type][option] instanceof Object
-    ) {
-      if (option && process.env.harbor instanceof Object) {
-        // Cache the actual defined config within the Node process.
-        process.env.harbor[type][option] = config[type][option];
+    const merge = (state, commit) => {
+      const proposal = {};
+
+      if (state && commit && commit instanceof Object && state instanceof Object) {
+        Object.keys(commit).forEach((key) => {
+          const val = commit[key];
+
+          if (val instanceof Object && state[key] instanceof Object) {
+            proposal[key] = merge(state[key], val);
+          } else {
+            proposal[key] = val;
+          }
+        });
       }
 
-      return Object.assign(defaultConfig[type][option], config[type][option]);
-    }
+      return Object.assign(state, proposal);
+    };
 
-    if (!config[type] && defaultConfig[type] && defaultConfig[type][option]) {
-      return defaultConfig[type][option];
-    }
+    const config = merge(defaultConfig, customConfig);
 
-    if (!config[type] && defaultConfig[type]) {
-      return defaultConfig[type];
+    if (type && option) {
+      return config[type][option];
+    } else if (type) {
+      return config[type];
+    } else {
+      return config;
     }
-
-    return Object.assign(defaultConfig, config);
   }
 }
 

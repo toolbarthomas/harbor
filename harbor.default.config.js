@@ -118,6 +118,9 @@ module.exports = {
       hook: ['minify:js', 'minify'],
       options: {},
     },
+    Server: {
+      options: {},
+    },
     StyleOptimizer: {
       hook: ['minify:css', 'minify'],
       plugins: {
