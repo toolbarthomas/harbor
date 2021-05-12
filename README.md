@@ -301,7 +301,7 @@ The actual javascript can be created like the following and should be compliant 
 
 Harbor compiles the defined SVG images with the SVGSpriteCompiler and these can be used within the Twig templates. The sprites are available as a Storybook Global that can be accessed within the styleguide.
 
-You can easily include these paths with the `add_svg` Twig function. This will output the path of an inline SVG sprite that has been created by the SVGSpriteCompiler. The function accepts 3 arguments to output the path of your selection:
+You can easily include these paths with the `add_svg` Twig function. This will output the path of an inline SVG sprite that has been created by the SVGSpriteCompiler. This function accepts 3 arguments to output the path of your selection:
 
 ```twig
 {{ add_svg('chevron--down') }}
