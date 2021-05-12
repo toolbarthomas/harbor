@@ -12,8 +12,16 @@ const Core = require('../common/Core');
  * service.
  */
 class Plugin extends Core {
-  constructor(services, options) {
-    super(services, options, 'plugins');
+  constructor(services, options, workers) {
+    super(services, options, 'plugins', workers);
+
+    if (workers && workers instanceof Object) {
+      Object.keys(workers).forEach((worker) =>
+        this.Console.log(`Assigning worker: ${worker} for ${this.name}`)
+      );
+
+      this.workers = workers;
+    }
   }
 
   /**

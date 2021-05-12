@@ -36,11 +36,20 @@ class Harbor {
       TaskManager: new TaskManager(),
     };
 
+    this.workers = {
+      Cleaner: new Cleaner(this.services),
+      FileSync: new FileSync(this.services),
+      JsCompiler: new JsCompiler(this.services),
+      Resolver: new Resolver(this.services),
+      SassCompiler: new SassCompiler(this.services),
+      SvgSpriteCompiler: new SvgSpriteCompiler(this.services),
+    };
+
     this.plugins = {
       JsOptimizer: new JsOptimizer(this.services, {
         acceptedEnvironments: 'production',
       }),
-      StyleguideCompiler: new StyleguideCompiler(this.services),
+      StyleguideCompiler: new StyleguideCompiler(this.services, {}, this.workers),
       Server: new Server(this.services, {
         acceptedEnvironments: 'development',
       }),
@@ -50,15 +59,6 @@ class Harbor {
       Watcher: new Watcher(this.services, {
         acceptedEnvironments: 'development',
       }),
-    };
-
-    this.workers = {
-      Cleaner: new Cleaner(this.services),
-      FileSync: new FileSync(this.services),
-      JsCompiler: new JsCompiler(this.services),
-      Resolver: new Resolver(this.services),
-      SassCompiler: new SassCompiler(this.services),
-      SvgSpriteCompiler: new SvgSpriteCompiler(this.services),
     };
   }
 

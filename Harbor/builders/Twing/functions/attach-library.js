@@ -44,7 +44,7 @@ module.exports = function (name) {
           const { media } = css[section][file];
 
           cssSnippets.push(
-            `<link rel="stylesheet" href="${file.replace(THEME_DIST, '')}" media="${
+            `<link rel="stylesheet" href="${file}" media="${
               typeof media === 'string' ? media : 'all'
             }" />`
           );
@@ -54,9 +54,7 @@ module.exports = function (name) {
 
     if (js) {
       Object.keys(js).forEach((file) => {
-        jsSnippets.push(
-          `<script type="text/javascript" src="${file.replace(THEME_DIST, '')}"></script>`
-        );
+        jsSnippets.push(`<script type="text/javascript" src="${file}"></script>`);
       });
     }
   };

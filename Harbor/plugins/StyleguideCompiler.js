@@ -7,14 +7,15 @@ const { exec } = require('child_process');
 
 const Plugin = require('./Plugin');
 const FileSync = require('../workers/FileSync');
+const { workers } = require('../../harbor.default.config');
 
 /**
  * Create a new Styleguide with the compiled assets from the destination
  * directory.
  */
 class StyleguideCompiler extends Plugin {
-  constructor(services, options) {
-    super(services, options);
+  constructor(services, options, workers) {
+    super(services, options, workers);
   }
 
   /**
@@ -23,7 +24,7 @@ class StyleguideCompiler extends Plugin {
   async init() {
     await new Promise((cb) => {
       const shell = exec(
-        `node node_modules/.bin/start-storybook -s ${this.environment.THEME_DIST} -c ${path.resolve(
+        `node node_modules/.bin/start-storybook -s ${process.cwd()} -c ${path.resolve(
           __dirname,
           '../../.storybook'
         )} -p ${this.environment.THEME_PORT}`
@@ -103,10 +104,32 @@ class StyleguideCompiler extends Plugin {
           }
         });
 
+        // Enable the sprite paths within the Styleguide as global context.
+        const sprites = {};
+        if (this.workers && this.workers.SvgSpriteCompiler) {
+          try {
+            const { entry } = this.workers.SvgSpriteCompiler.config;
+
+            Object.keys(entry).forEach((n) => {
+              let p = path.normalize(path.dirname(entry[n])).replace('*', '');
+              p = path.join(this.environment.THEME_DIST, p, `${n}.svg`);
+
+              if (fs.existsSync(path.resolve(p))) {
+                this.Console.info(`Inline SVG sprite assigned to Storybook: ${p}`);
+
+                sprites[n] = p;
+              }
+            });
+          } catch (exception) {
+            this.Console.warning(`Unable to expose compiled inline SVG sprites: ${exception}`);
+          }
+        }
+
         config.plugins.push(
           new DefinePlugin({
             THEME_LIBRARIES: JSON.stringify(libraries),
             THEME_DIST: `"${path.normalize(this.environment.THEME_DIST)}/"`,
+            THEME_SPRITES: JSON.stringify(sprites),
           })
         );
       }

@@ -36,6 +36,7 @@ if (typeof environment.addFilter === 'function') {
 }
 
 if (typeof environment.addFunction === 'function') {
+  environment.addFunction(new TwingFunction('add_svg', functions.addSVG));
   environment.addFunction(new TwingFunction('attach_library', functions.attachLibrary));
 
   environment.addFunction(new TwingFunction('dump', functions.dump));

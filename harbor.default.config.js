@@ -1,15 +1,16 @@
 const { sync } = require('glob');
 const { resolve } = require('path');
+const { readFileSync } = require('fs');
 const autoprefixer = require('autoprefixer');
 const combineDuplicateSelectors = require('postcss-combine-duplicated-selectors');
 const cssnano = require('cssnano');
 const imageminSvgo = require('imagemin-svgo');
 const stylelint = require('stylelint');
 
-const eslintConfig = sync('.eslintrc*').length;
-const styleLintConfig = sync('.stylelintrc*').length;
-const browserListConfig = sync('.browserlistrc*').length;
-const babelConfig = sync('.babelrc*').length;
+const eslintConfig = sync('.eslintrc*');
+const styleLintConfig = sync('.stylelintrc*');
+const browserListConfig = sync('.browserlistrc*');
+const babelConfig = sync('.babelrc*');
 
 module.exports = {
   workers: {
@@ -27,7 +28,7 @@ module.exports = {
       },
       hook: ['js', 'javascripts'],
       plugins: {
-        eslint: eslintConfig
+        eslint: eslintConfig.length
           ? null
           : {
               env: {
@@ -44,23 +45,9 @@ module.exports = {
                 'prettier/prettier': 'error',
               },
             },
-        transform: babelConfig
+        transform: babelConfig.length
           ? null
-          : {
-              // @TODO: Currently matches with the project babelrc.
-              // it should import that actual file.
-              presets: ['@babel/env'],
-              plugins: [
-                [
-                  'module-resolver',
-                  {
-                    alias: {
-                      '@theme': __dirname,
-                    },
-                  },
-                ],
-              ],
-            },
+          : JSON.parse(readFileSync(resolve(__dirname, '.babelrc'))),
       },
     },
     SassCompiler: {
@@ -72,7 +59,7 @@ module.exports = {
         postcss: {
           plugins: [
             stylelint(
-              styleLintConfig
+              styleLintConfig.length
                 ? {}
                 : {
                     rules: {
@@ -135,7 +122,7 @@ module.exports = {
       hook: ['minify:css', 'minify'],
       plugins: {
         autoprefixer: autoprefixer(
-          browserListConfig
+          browserListConfig.length
             ? {}
             : {
                 overrideBrowserslist: [('> 2%', 'last 2 versions')],

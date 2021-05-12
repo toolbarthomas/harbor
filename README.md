@@ -248,3 +248,102 @@ You can assign the following NPM script entries when using the default hook conf
     "test": "echo \"Error: no test specified\" && exit 1"
   }
 ```
+
+## Creating a theme
+
+### Asset management
+
+Harbor (currently) uses an internal Storybook instance where the `preview-head.html` is reserved to ensure the compatibilty with Drupal.
+Assets can be included by using the [attach_library](https://www.drupal.org/docs/theming-drupal/adding-stylesheets-css-and-javascript-js-to-a-drupal-theme) Twig function within your Twig templates, the assets.
+
+You need a valid Drupal theme library configuration file within your theme with the defined resources:
+
+```yml
+# example.libraries.yml
+base:
+  version: 1.x
+  css:
+    theme:
+      dist/main/stylesheets/index.css: {}
+  js:
+    dist/main/javascripts/base.js: {}
+```
+
+The defined assets will be included within the template that use the `attach_library` Twig function:
+
+```twig
+
+{{ attach_library('example/base') }}
+
+```
+
+You can also import the actual assets within each storybook story to enable Hot Module Reload during a file change.
+Keep in mind that you need to define the required libraries within Drupal if you don't include assets within the templates with the `attach_library` function.
+
+### Suggested javascript structure.
+
+Using the functionality of the Drupal.behaviors object you can run the defined javascript during the (initial) (re)load within Drupal and Storybook.
+Storybook calls the attach handler within the Drupal behaviors, this object is used within Drupal sites and is also available for the styleguide.
+
+The actual javascript can be created like the following and should be compliant with the Drupal javascript structure:
+
+```js
+  (function example(Drupal) {
+    Drupal.behaviors.example = {
+      attach: (context, settings) => {
+        ...
+      }
+    }
+  })(Drupal, drupalSettings);
+```
+
+### Usage of SVG Inline Sprites
+
+Harbor compiles the defined SVG images with the SVGSpriteCompiler and these can be used within the Twig templates. The sprites are available as a Storybook Global that can be accessed within the styleguide.
+
+You can easily include these paths with the `add_svg` Twig function. This will output the path of an inline SVG sprite that has been created by the SVGSpriteCompiler. The function accepts 3 arguments to output the path of your selection:
+
+```twig
+{{ add_svg('chevron--down') }}
+```
+
+This will include the path of the SVG sprite based from the first inline svg that has been stored within the `THEME_SPRITES` storybook global.
+This would output `dist/main/images/svgsprite.svg#chevron--down` if the entry key would be defined as `svgsprite`...
+
+You can use any entry key of the SVGSpriteCompiler configuration to use that specific sprite path instead:
+
+```js
+  // harbor.config.js
+
+  workers: {
+    ...
+      SvgSpriteCompiler: {
+        ...
+        entry: {
+          common: 'main/images/*/**.svg',
+          icons: 'main/images/*/**.svg',
+        },
+        ...
+    ...
+  }
+```
+
+```twig
+{{ add_svg('chevron--down', 'icons') }}
+```
+
+This will output `dist/main/images/icons.svg#chevron--down`.
+
+It is also posible to output the basis SVG element if the second or third argument has been defined as `TRUE`:
+
+```twig
+{{ add_svg('chevron--down', true) }}
+```
+
+Would output:
+
+```html
+<svg aria-hidden="true" aria-focusable="false">
+  <use xlink:href="dist/main/images/icons.svg#chevron--down"></use>
+</svg>
+```
