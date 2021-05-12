@@ -28,7 +28,7 @@ class StyleguideCompiler extends Plugin {
 
       const script = fs.existsSync(path.resolve(`node_modules/.bin/${bin}`))
         ? path.resolve(`node_modules/.bin/${bin}`)
-        : path.resolve(`../../node_modules/.bin/${bin}`);
+        : path.resolve(`../../.bin/${bin}`);
 
       const config = path.resolve(__dirname, '../../.storybook');
 
