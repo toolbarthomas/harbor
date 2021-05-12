@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.60.0",
+  "version": "0.60.3",
   "description": "Boilerplate for Drupal Themes",
   "main": "./Harbor/index.js",
   "scripts": {
@@ -23,6 +23,7 @@
     ".eslintrc",
     ".prettierrc",
     ".stylelintrc",
+    "index.js",
     "Harbor/",
     "harbor.default.config.js",
     ".storybook"

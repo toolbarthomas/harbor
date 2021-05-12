@@ -23,12 +23,29 @@ class StyleguideCompiler extends Plugin {
    */
   async init() {
     await new Promise((cb) => {
-      const shell = exec(
-        `node node_modules/.bin/start-storybook -s ${process.cwd()} -c ${path.resolve(
-          __dirname,
-          '../../.storybook'
-        )} -p ${this.environment.THEME_PORT}`
-      );
+      const bin =
+        this.environment.THEME_ENVIRONMENT === 'production' ? 'build-storybook' : 'start-storybook';
+
+      const script = fs.existsSync(path.resolve(`node_modules/.bin/${bin}`))
+        ? path.resolve(`node_modules/.bin/${bin}`)
+        : path.resolve(`../../node_modules/.bin/${bin}`);
+
+      const config = path.resolve(__dirname, '../../.storybook');
+
+      let command;
+
+      if (this.environment.THEME_ENVIRONMENT === 'production') {
+        command = `node ${script} -c ${config} -o ${path.join(
+          this.environment.THEME_DIST,
+          'storybook-static'
+        )}`;
+      } else {
+        command = `node ${script} -s ${process.cwd()} -c ${config} -p ${
+          this.environment.THEME_PORT
+        }`;
+      }
+
+      const shell = exec(command);
 
       shell.stdout.on('data', (data) => {
         process.stdout.write(data);
@@ -103,26 +120,26 @@ class StyleguideCompiler extends Plugin {
             }
           }
         });
+      }
 
-        // Enable the sprite paths within the Styleguide as global context.
-        const sprites = {};
-        if (this.workers && this.workers.SvgSpriteCompiler) {
-          try {
-            const { entry } = this.workers.SvgSpriteCompiler.config;
+      // Enable the sprite paths within the Styleguide as global context.
+      const sprites = {};
+      if (this.workers && this.workers.SvgSpriteCompiler) {
+        try {
+          const { entry } = this.workers.SvgSpriteCompiler.config;
 
-            Object.keys(entry).forEach((n) => {
-              let p = path.normalize(path.dirname(entry[n])).replace('*', '');
-              p = path.join(this.environment.THEME_DIST, p, `${n}.svg`);
+          Object.keys(entry).forEach((n) => {
+            let p = path.normalize(path.dirname(entry[n])).replace('*', '');
+            p = path.join(this.environment.THEME_DIST, p, `${n}.svg`);
 
-              if (fs.existsSync(path.resolve(p))) {
-                this.Console.info(`Inline SVG sprite assigned to Storybook: ${p}`);
+            if (fs.existsSync(path.resolve(p))) {
+              this.Console.info(`Inline SVG sprite assigned to Storybook: ${p}`);
 
-                sprites[n] = p;
-              }
-            });
-          } catch (exception) {
-            this.Console.warning(`Unable to expose compiled inline SVG sprites: ${exception}`);
-          }
+              sprites[n] = p;
+            }
+          });
+        } catch (exception) {
+          this.Console.warning(`Unable to expose compiled inline SVG sprites: ${exception}`);
         }
 
         config.plugins.push(
