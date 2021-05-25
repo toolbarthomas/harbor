@@ -56,7 +56,7 @@ class JsOptimizer extends Plugin {
                 }
               }
 
-              this.optimizeFile(path, result.error ? data.toString() : result.code)
+              this.write(path, result.error ? data.toString() : result.code)
                 .then(done)
                 .catch((exception) => {
                   this.Console.error(exception);

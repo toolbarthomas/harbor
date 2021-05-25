@@ -1,5 +1,5 @@
 const { dirname, join } = require('path');
-const { readFileSync, statSync, writeFileSync } = require('fs');
+const { readFile, statSync, writeFile } = require('fs');
 const { sync } = require('glob');
 const autoprefixer = require('autoprefixer');
 const mkdirp = require('mkdirp');
@@ -77,23 +77,23 @@ class StyleOptimizer extends Plugin {
    */
   optimizeFile(entry) {
     return new Promise((done) => {
-      const source = readFileSync(entry);
+      readFile(entry, (exception, source) => {
+        this.Console.log(`Optimizing: ${entry}`);
 
-      this.Console.log(`Optimizing: ${entry}`);
+        postcss(this.postcssConfig.plugins)
+          .process(source, {
+            from: entry,
+          })
+          .then(async (result) => {
+            result.warnings().forEach((warning) => {
+              this.Console.warning(warning.toString());
+            });
 
-      postcss(this.postcssConfig.plugins)
-        .process(source, {
-          from: entry,
-        })
-        .then(async (result) => {
-          result.warnings().forEach((warning) => {
-            this.Console.warning(warning.toString());
+            await this.writeFile(entry, result);
+
+            done();
           });
-
-          await this.writeFile(entry, result);
-
-          done();
-        });
+      });
     });
   }
 
@@ -112,11 +112,11 @@ class StyleOptimizer extends Plugin {
         }
 
         // Write the actual css to the filesystem.
-        writeFileSync(`${entry}`, result.css);
+        writeFile(entry, result.css, () => {
+          this.Console.log(`Successfully optimized: ${entry}`);
 
-        this.Console.log(`Successfully optimized: ${entry}`);
-
-        done();
+          done();
+        });
       });
     });
   }
