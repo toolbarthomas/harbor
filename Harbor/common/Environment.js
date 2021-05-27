@@ -29,6 +29,10 @@ class Environment {
     const source = resolve(process.cwd(), '.env');
     const env = existsSync(source) ? config({ path: source }) : {};
 
+    if (env.error) {
+      throw env.error;
+    }
+
     const parsed = env.parsed || {};
 
     // Inherit any missing option from the defaults Object.
