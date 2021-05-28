@@ -1,6 +1,7 @@
 import { extendDefaultPlugins } from 'svgo';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+import path from 'path';
 import glob from 'glob';
 import autoprefixer from 'autoprefixer';
 import combineDuplicateSelectors from 'postcss-combine-duplicated-selectors';
@@ -48,7 +49,11 @@ export default {
             },
         transform: babelConfig.length
           ? null
-          : JSON.parse(readFileSync(resolve(__dirname, '.babelrc'))),
+          : JSON.parse(
+              fs.readFileSync(
+                path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.babelrc')
+              )
+            ),
       },
     },
     SassCompiler: {
@@ -158,7 +163,7 @@ export default {
           '@theme': process.cwd(),
         },
         addons: ['@storybook/addon-essentials', '@storybook/addon-knobs', '@storybook/addon-links'],
-        configDirectory: resolve(process.cwd(), '.storybook'),
+        configDirectory: path.resolve(process.cwd(), '.storybook'),
       },
     },
     Watcher: {
