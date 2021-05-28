@@ -1,15 +1,15 @@
-const copyfiles = require('copyfiles');
-const { existsSync, statSync } = require('fs');
-const { join, relative } = require('path');
+import copyfiles from 'copyfiles';
+import fs from 'fs';
+import path from 'path';
 
-const Logger = require('../common/Logger');
-const Worker = require('./Worker');
+import Logger from '../common/Logger.js';
+import Worker from './Worker.js';
 
 /**
  * Synchronizes the configured Filesync entries to the defined environment
  * destination directory.
  */
-class FileSync extends Worker {
+export default class FileSync extends Worker {
   constructor(services) {
     super(services);
 
@@ -21,10 +21,8 @@ class FileSync extends Worker {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   init() {
-    super.init();
-
-    this.cwd = relative(process.cwd(), this.environment.THEME_SRC);
-    this.dist = relative(process.cwd(), this.environment.THEME_DIST);
+    this.cwd = path.relative(process.cwd(), this.environment.THEME_SRC);
+    this.dist = path.relative(process.cwd(), this.environment.THEME_DIST);
 
     // Get the optional defined resource paths to sync.
     this.defineResourcePatterns();
@@ -81,12 +79,12 @@ class FileSync extends Worker {
 
     // Make sure the path is relative to the cwd path.
     resolvedPatterns = resolvedPatterns.map((entry) => {
-      return String(entry).startsWith(this.cwd) ? entry : join(this.cwd, entry);
+      return String(entry).startsWith(this.cwd) ? entry : path.join(this.cwd, entry);
     });
 
     // Append a glob pattern is the current pattern is an actual directory.
     resolvedPatterns = resolvedPatterns.map((entry) => {
-      if (existsSync(entry) && statSync(entry).isDirectory()) {
+      if (fs.existsSync(entry) && fs.statSync(entry).isDirectory()) {
         return `${entry}/**`;
       }
 
@@ -96,5 +94,3 @@ class FileSync extends Worker {
     return resolvedPatterns;
   }
 }
-
-module.exports = FileSync;

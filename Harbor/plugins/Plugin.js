@@ -1,4 +1,4 @@
-const Core = require('../common/Core');
+import Core from '../common/Core.js';
 
 /**
  * Creates a new Harbor Plugin that will be registered to the TaskManager.
@@ -11,7 +11,7 @@ const Core = require('../common/Core');
  * @param {Object} options Defines the Harbor specific options for the current
  * service.
  */
-class Plugin extends Core {
+export default class Plugin extends Core {
   constructor(services, options, workers) {
     super(services, options, 'plugins', workers);
 
@@ -25,11 +25,13 @@ class Plugin extends Core {
   }
 
   /**
-   * The initial handler that will subscribed to the Harbor TaskManager.
+   * Creates a collection of destination paths from the configured service entry
+   * configuration.
+   *
+   * @param {boolean} useDestination Defines the paths from the THEME_DIST
+   * environment variable.
    */
-  init() {
-    this.defineEntry(true);
+  defineEntry() {
+    super.defineEntry(true);
   }
 }
-
-module.exports = Plugin;

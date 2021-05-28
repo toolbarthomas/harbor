@@ -1,27 +1,28 @@
-const Argv = require('./common/Argv');
-const Environment = require('./common/Environment');
-const Logger = require('./common/Logger');
+import fs from 'fs';
 
-const TaskManager = require('./services/TaskManager');
+import Argv from './common/Argv.js';
+import Environment from './common/Environment.js';
+import Logger from './common/Logger.js';
 
-const Cleaner = require('./workers/Cleaner');
-const FileSync = require('./workers/FileSync');
-const JsCompiler = require('./workers/JsCompiler');
-const Resolver = require('./workers/Resolver');
-const SassCompiler = require('./workers/SassCompiler');
-const SvgSpriteCompiler = require('./workers/SvgSpriteCompiler');
+import TaskManager from './services/TaskManager.js';
 
-const StyleguideCompiler = require('./plugins/StyleguideCompiler');
-const StyleOptimizer = require('./plugins/StyleOptimizer');
-const JsOptimizer = require('./plugins/JsOptimizer');
-const Server = require('./plugins/Server');
-const Watcher = require('./plugins/Watcher');
-const ConfigManager = require('./common/ConfigManager');
+import Cleaner from './workers/Cleaner.js';
+import FileSync from './workers/FileSync.js';
+import JsCompiler from './workers/JsCompiler.js';
+import Resolver from './workers/Resolver.js';
+import SassCompiler from './workers/SassCompiler.js';
+import SvgSpriteCompiler from './workers/SvgSpriteCompiler.js';
+
+import StyleguideCompiler from './plugins/StyleguideCompiler.js';
+import StyleOptimizer from './plugins/StyleOptimizer.js';
+import JsOptimizer from './plugins/JsOptimizer.js';
+import Watcher from './plugins/Watcher.js';
+import ConfigManager from './common/ConfigManager.js';
 
 /**
  * Factory setup for Harbor.
  */
-class Harbor {
+export default class Harbor {
   constructor() {
     this.Argv = new Argv();
 
@@ -29,8 +30,6 @@ class Harbor {
     this.env = Env.define();
 
     this.Console = new Logger(this.env);
-
-    this.config = ConfigManager.load();
 
     this.services = {
       TaskManager: new TaskManager(),
@@ -50,9 +49,6 @@ class Harbor {
         acceptedEnvironments: 'production',
       }),
       StyleguideCompiler: new StyleguideCompiler(this.services, {}, this.workers),
-      Server: new Server(this.services, {
-        acceptedEnvironments: 'development',
-      }),
       StyleOptimizer: new StyleOptimizer(this.services, {
         acceptedEnvironments: 'production',
       }),
@@ -67,6 +63,11 @@ class Harbor {
    */
   async init() {
     const { task, ...args } = this.Argv.args;
+    const config = await ConfigManager.load();
+
+    this.mount(this.workers, config);
+
+    this.mount(this.plugins, config);
 
     try {
       if (task && task.length) {
@@ -105,7 +106,7 @@ class Harbor {
         const plugins = Object.keys(args).filter(
           (arg) =>
             args[arg] &&
-            Object.values(this.config['plugins']).filter(({ hook }) => {
+            Object.values(config['plugins']).filter(({ hook }) => {
               const h = hook ? (Array.isArray(hook) ? hook : [String(hook)]) : [];
 
               if (!h.includes(arg)) {
@@ -131,17 +132,32 @@ class Harbor {
       }
     } catch (exception) {
       if (exception) {
-        throw new Error(exception);
+        throw new Error(
+          `Harbor encounterd an error and could not continue: ${exception.toString()}`
+        );
       }
     }
   }
 
   /**
-   * Defines the configuration Object for the Storybook instance.
+   * Mounts the defined instance with the defined configuration.
    */
-  styleguideSetup() {
-    return this.plugins.StyleguideCompiler.setupTwing(this.env);
+  mount(instances, config) {
+    if (instances instanceof Object) {
+      Object.keys(instances).forEach((name) => {
+        const handler = instances[name];
+        const { hook } = config[handler.type][name];
+        const h = Array.isArray(hook) ? hook : [hook];
+
+        // Define the configuration for the current name.
+        handler.defineConfig(config[handler.type][name]);
+
+        // Define the configuration for the current name.
+        handler.defineEntry();
+
+        // Subscribe the current name to the Harbor TaskManager.
+        handler.subscribe(hook && hook !== name ? [name, ...h] : [...h]);
+      });
+    }
   }
 }
-
-module.exports = Harbor;

@@ -1,18 +1,19 @@
-const { sync } = require('glob');
-const { resolve } = require('path');
-const { readFileSync } = require('fs');
-const autoprefixer = require('autoprefixer');
-const combineDuplicateSelectors = require('postcss-combine-duplicated-selectors');
-const cssnano = require('cssnano');
-const imageminSvgo = require('imagemin-svgo');
-const stylelint = require('stylelint');
+import { extendDefaultPlugins } from 'svgo';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+import glob from 'glob';
+import autoprefixer from 'autoprefixer';
+import combineDuplicateSelectors from 'postcss-combine-duplicated-selectors';
+import cssnano from 'cssnano';
+import imageminSvgo from 'imagemin-svgo';
+import stylelint from 'stylelint';
 
-const eslintConfig = sync('.eslintrc*');
-const styleLintConfig = sync('.stylelintrc*');
-const browserListConfig = sync('.browserlistrc*');
-const babelConfig = sync('.babelrc*');
+const eslintConfig = glob.sync('.eslintrc*');
+const styleLintConfig = glob.sync('.stylelintrc*');
+const browserListConfig = glob.sync('.browserlistrc*');
+const babelConfig = glob.sync('.babelrc*');
 
-module.exports = {
+export default {
   workers: {
     Cleaner: {
       hook: ['clean', 'prepare'],
@@ -86,26 +87,35 @@ module.exports = {
       options: {
         use: [
           imageminSvgo({
-            plugins: [
+            plugins: extendDefaultPlugins([
               {
-                convertPathData: false,
+                name: 'convertPathData',
+                active: false,
               },
               {
-                removeViewBox: false,
+                name: 'removeViewBox',
+                active: false,
               },
               {
-                removeAttrs: {
+                name: 'convertColors',
+                params: {
+                  currentColor: true,
+                },
+              },
+              {
+                name: 'removeAttrs',
+                params: {
                   attrs: ['(fill|stroke|class|style)', 'svg:(width|height)'],
                 },
               },
-            ],
+            ]),
           }),
         ],
       },
     },
     Resolver: {
       hook: ['resolve', 'prepare'],
-      cwd: 'main/vendors',
+      cwd: 'vendors',
       entry: {},
     },
   },
@@ -147,13 +157,7 @@ module.exports = {
         alias: {
           '@theme': process.cwd(),
         },
-        addons: [
-          '@storybook/addon-actions',
-          '@storybook/addon-essentials',
-          '@storybook/addon-knobs',
-          '@storybook/addon-links',
-          '@storybook/addon-viewport',
-        ],
+        addons: ['@storybook/addon-essentials', '@storybook/addon-knobs', '@storybook/addon-links'],
         configDirectory: resolve(process.cwd(), '.storybook'),
       },
     },

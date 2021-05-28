@@ -28,7 +28,6 @@ Additional CLI arguments can be defined to customize the build process:
 | styleguide | Starts the Storybook builder.                                |
 | watch      | Observes for file changes for the running tasks.             |
 | minify     | Minifies the processed assets.                               |
-| serve      | Starts the legacy browsersync server.                        |
 
 You can run one or multiple tasks by defining the `task` parameter.
 Keep in mind that the hook should exist within your configuration:
@@ -78,7 +77,6 @@ More plugins can be included within a single command, the following plugins are 
 | ------------------ | ------------------ | ------------------------------------------------------------------------------------------- | --------------------- |
 | JSOptimizer        | production `only`  | Minifies the defined js entries within the THEME_DIST directory                             | minify                |
 | StyleOptimizer     | production `only`  | Minifies the defined css entries within the THEME_DIST directory                            | minify                |
-| Server             | development `only` | Starts the legacy development server                                                        | serve                 |
 | StyleguideCompiler | production         | Creates a static storybook styleguide.                                                      | storybook, styleguide |
 | StyleguideCompiler | development        | Starts the storybook development server.                                                    | storybook, styleguide |
 | Watcher            | development `only` | Watches the configured instance entries and runs the assigned workers during a file change. | watch                 |
@@ -194,15 +192,6 @@ The Resolver will resolve the defined packages from the node_modules to the envi
 | hook   | string                 | Runs the service if the given hook is subscribed to the Task Manager. |
 
 ## Default Plugin Configuration
-
-### Server Options
-
-The Server is the legacy Express server that should be used if you wan't to serve the result of the destination directory. The should be ignored if Storybook is the chosen styleguide.
-
-| Option  | type   | Description                                                           |
-| ------- | ------ | --------------------------------------------------------------------- |
-| options | Object | Optional configuration for the Express server.                        |
-| hook    | string | Runs the service if the given hook is subscribed to the Task Manager. |
 
 ### StyleguideCompiler configuration
 

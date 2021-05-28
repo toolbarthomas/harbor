@@ -1,11 +1,12 @@
-const chalk = require('chalk');
-const symbols = require('log-symbols');
-const Argv = require('./Argv');
+import chalk from 'chalk';
+import symbols from 'log-symbols';
+
+import Argv from './Argv.js';
 
 /**
  * Helper Class that writes messages to the stdout.
  */
-class Logger {
+export default class Logger {
   constructor(environment) {
     this.environment = environment;
 
@@ -123,5 +124,3 @@ class Logger {
     return styles;
   }
 }
-
-module.exports = Logger;

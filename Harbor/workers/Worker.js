@@ -1,4 +1,4 @@
-const Core = require('../common/Core');
+import Core from '../common/Core.js';
 
 /**
  * Creates a new Harbor Worker that will be registered to the TaskManager.
@@ -11,17 +11,8 @@ const Core = require('../common/Core');
  * @param {Object} options Defines the Harbor specific options for the current
  * service.
  */
-class Worker extends Core {
+export default class Worker extends Core {
   constructor(services, options) {
     super(services, options, 'workers');
   }
-
-  /**
-   * The initial handler that will subscribed to the Harbor TaskManager.
-   */
-  init() {
-    this.defineEntry();
-  }
 }
-
-module.exports = Worker;

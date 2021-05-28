@@ -1,8 +1,8 @@
 const path = require('path');
 const { TwingEnvironment, TwingLoaderFilesystem, TwingFilter, TwingFunction } = require('twing');
 
-const filters = require('./filters');
-const functions = require('./functions');
+const filters = require('./filters/index.cjs');
+const functions = require('./functions/index.cjs');
 
 // Defines the absolute path to the theme specific packages.
 const theme = path.resolve(process.cwd());

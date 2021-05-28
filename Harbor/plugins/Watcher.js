@@ -1,17 +1,16 @@
-const chokidar = require('chokidar');
-const { extname, join } = require('path');
+import chokidar from 'chokidar';
+import path from 'path';
 
-const ConfigManager = require('../common/ConfigManager');
-const Environment = require('../common/Environment');
-const Logger = require('../common/Logger');
-
-const Plugin = require('./Plugin');
+import ConfigManager from '../common/ConfigManager.js';
+import Environment from '../common/Environment.js';
+import Logger from '../common/Logger.js';
+import Plugin from './Plugin.js';
 
 /**
  * Creates a Watcher instance for each defined instance key and will run the
  * configured hook from the constructed TaskManager.
  */
-class Watcher extends Plugin {
+export default class Watcher extends Plugin {
   constructor(services, options) {
     super(services, options);
 
@@ -25,8 +24,6 @@ class Watcher extends Plugin {
    * @param {string} hook Creates a new unique watcher from the given hook.
    */
   async init() {
-    super.init();
-
     const { TaskManager } = this.services;
 
     if (!this.config.instances instanceof Object) {
@@ -45,10 +42,11 @@ class Watcher extends Plugin {
           return;
         }
 
-        const query = (Array.isArray(this.config.instances[name].path)
-          ? this.config.instances[name].path
-          : [this.config.instances[name].path]
-        ).map((p) => join(this.environment.THEME_SRC, p));
+        const query = (
+          Array.isArray(this.config.instances[name].path)
+            ? this.config.instances[name].path
+            : [this.config.instances[name].path]
+        ).map((p) => path.join(this.environment.THEME_SRC, p));
 
         this.Console.log(`Creating Watcher instance: ${name} => ${query.join(', ')}`);
 
@@ -125,5 +123,3 @@ class Watcher extends Plugin {
     });
   }
 }
-
-module.exports = Watcher;

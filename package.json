@@ -1,8 +1,10 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.61.1",
+  "version": "0.70.0",
+  "type": "module",
   "description": "Boilerplate for Drupal Themes",
-  "main": "./Harbor/index.js",
+  "exports": "./Harbor/index.js",
+  "node": "^12.20.0 || ^14.13.1 || >=16.0.0",
   "scripts": {
     "preproduction": "node ./index.js --task=prepare",
     "production": "node ./index.js --task=stylesheets,javascripts,images",
@@ -71,9 +73,9 @@
     "imagemin-svgo": "^8.0.0",
     "log-symbols": "^4.0.0",
     "mkdirp": "^1.0.4",
-    "module-config-loader": "^0.3.3",
     "node-sass": "^6.0.0",
     "node-sass-glob-importer": "^5.3.2",
+    "outdent": "^0.8.0",
     "postcss": "^8.3.0",
     "postcss-combine-duplicated-selectors": "^10.0.3",
     "postcss-nested": "^5.0.5",

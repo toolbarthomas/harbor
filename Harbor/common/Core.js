@@ -1,10 +1,10 @@
-const { join } = require('path');
-const { statSync } = require('fs');
-const { sync } = require('glob');
+import path from 'path';
+import fs from 'fs';
+import glob from 'glob';
 
-const ConfigManager = require('../common/ConfigManager');
-const Environment = require('./Environment');
-const Logger = require('../common/Logger');
+import ConfigManager from '../common/ConfigManager.js';
+import Environment from './Environment.js';
+import Logger from '../common/Logger.js';
 
 /**
  * Base Framework for defining Workers & Plugins.
@@ -14,26 +14,15 @@ const Logger = require('../common/Logger');
  * should not be customized.
  * @param {string} type Defines the new instance as Worker or Plugin.
  */
-class Core {
+export default class Core {
   constructor(services, options, type) {
     this.name = this.constructor.name;
 
     this.environment = this.defineEnvironment();
     this.Console = new Logger(this.environment);
-
-    this.config = ConfigManager.load(this.name, type);
-
     this.type = type;
+
     this.services = Object.assign(this.services || {}, services || {});
-
-    // Defines the initiation hook that will be used by the TaskManager Service.
-    const h = this.config.hook
-      ? Array.isArray(this.config.hook)
-        ? this.config.hook
-        : [String(this.config.hook)]
-      : [this.name];
-
-    const hook = [this.name, ...h.filter((hh) => hh !== this.name)];
 
     if (services) {
       this.Console.log(`Mounting services for ${this.name}: ${Object.keys(services).join(', ')}`);
@@ -42,9 +31,6 @@ class Core {
     }
 
     this.defineOptions(options);
-
-    // Exposes the current instance within the TaskManager Service.
-    this.subscribe(type, hook);
   }
 
   /**
@@ -66,6 +52,15 @@ class Core {
     if (options) {
       this.Console.log(`${this.type} options defined for ${this.name}`);
     }
+  }
+
+  /**
+   * Subscribes the defined configuration object to the current instance.
+   *
+   * @param {Object} config The Harbor configuration object that will be defined.
+   */
+  defineConfig(config) {
+    this.config = config;
   }
 
   /**
@@ -114,17 +109,17 @@ class Core {
 
     this.entry = entries
       .map((name) => {
-        const p = join(
+        const p = path.join(
           useDestination ? this.environment.THEME_DIST : this.environment.THEME_SRC,
           this.config.entry[name]
         );
 
-        return sync(p).filter((e) => {
-          if (!statSync(e).size) {
+        return glob.sync(p).filter((e) => {
+          if (!fs.statSync(e).size) {
             this.Console.log(`Skipping empty entry: ${e}`);
           }
 
-          return statSync(e).size > 0 ? e : null;
+          return fs.statSync(e).size > 0 ? e : null;
         });
       })
       .filter((entry) => entry.length);
@@ -137,7 +132,7 @@ class Core {
    * @param {string} type Defines the Task as Plugin or Worker.
    * @param {string[]} hook Defines the publish hooks to call to subscription.
    */
-  subscribe(type, hook) {
+  subscribe(hook) {
     const { TaskManager } = this.services;
 
     if (!TaskManager) {
@@ -151,7 +146,7 @@ class Core {
     }
 
     TaskManager.subscribe(
-      type,
+      this.type,
       this.name,
       hook,
       TaskManager.initIfAccepted(this.options)
@@ -193,5 +188,3 @@ class Core {
     this.resolve(true);
   }
 }
-
-module.exports = Core;

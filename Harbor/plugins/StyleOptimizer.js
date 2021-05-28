@@ -1,17 +1,16 @@
-const { dirname, join } = require('path');
-const { readFile, statSync, writeFile } = require('fs');
-const { sync } = require('glob');
-const autoprefixer = require('autoprefixer');
-const mkdirp = require('mkdirp');
-const postcss = require('postcss');
+import path from 'path';
+import fs from 'fs';
+import autoprefixer from 'autoprefixer';
+import mkdirp from 'mkdirp';
+import postcss from 'postcss';
 
-const Plugin = require('./Plugin');
+import Plugin from './Plugin.js';
 
 /**
  * Optimizes the compiled stylesheet entries within the defined THEME_DIST
  * directory.
  */
-class StyleOptimizer extends Plugin {
+export default class StyleOptimizer extends Plugin {
   constructor(services, options) {
     super(services, options);
   }
@@ -20,8 +19,6 @@ class StyleOptimizer extends Plugin {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    super.init();
-
     if (!this.entry || !this.entry.length) {
       return super.resolve();
     }
@@ -77,7 +74,7 @@ class StyleOptimizer extends Plugin {
    */
   optimizeFile(entry) {
     return new Promise((done) => {
-      readFile(entry, (exception, source) => {
+      fs.readFile(entry, (exception, source) => {
         this.Console.log(`Optimizing: ${entry}`);
 
         postcss(this.postcssConfig.plugins)
@@ -105,14 +102,14 @@ class StyleOptimizer extends Plugin {
    */
   writeFile(entry, result) {
     return new Promise((done) => {
-      mkdirp(dirname(entry)).then((dirPath, error) => {
+      mkdirp(path.dirname(entry)).then((dirPath, error) => {
         if (error) {
           this.Console.error(error);
           return super.reject();
         }
 
         // Write the actual css to the filesystem.
-        writeFile(entry, result.css, () => {
+        fs.writeFile(entry, result.css, () => {
           this.Console.log(`Successfully optimized: ${entry}`);
 
           done();
@@ -121,5 +118,3 @@ class StyleOptimizer extends Plugin {
     });
   }
 }
-
-module.exports = StyleOptimizer;

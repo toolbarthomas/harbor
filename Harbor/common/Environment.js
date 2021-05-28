@@ -1,6 +1,6 @@
-const { config } = require('dotenv');
-const { existsSync } = require('fs');
-const { resolve } = require('path');
+import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Exposes the environment variables that have been defined
@@ -9,7 +9,7 @@ const { resolve } = require('path');
  * Harbor will define these environment variables and will fall back
  * to the default values when missing.
  */
-class Environment {
+export default class Environment {
   constructor() {
     this.defaults = {
       THEME_SRC: './src',
@@ -26,8 +26,8 @@ class Environment {
    * Loads the environment configuration from the optional environment file.
    */
   define() {
-    const source = resolve(process.cwd(), '.env');
-    const env = existsSync(source) ? config({ path: source }) : {};
+    const source = path.resolve(process.cwd(), '.env');
+    const env = fs.existsSync(source) ? dotenv.config({ path: source }) : {};
 
     if (env.error) {
       throw env.error;
@@ -61,5 +61,3 @@ class Environment {
     return parsed;
   }
 }
-
-module.exports = Environment;

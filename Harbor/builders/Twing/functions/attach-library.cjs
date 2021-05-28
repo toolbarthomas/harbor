@@ -4,7 +4,7 @@ const path = require('path');
  * Includes the defined library from the registered theme libraries with the
  * required dependencies.
  */
-module.exports = function (name) {
+module.exports = (name) => {
   if (!THEME_LIBRARIES || !THEME_LIBRARIES instanceof Object) {
     return;
   }

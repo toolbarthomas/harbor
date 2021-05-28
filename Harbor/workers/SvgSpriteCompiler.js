@@ -1,16 +1,15 @@
-const { statSync, writeFileSync } = require('fs');
-const { sync } = require('glob');
-const imagemin = require('imagemin');
-const mkdirp = require('mkdirp');
-const { basename, dirname, join, resolve } = require('path');
-const svgstore = require('svgstore');
+import fs from 'fs';
+import imagemin from 'imagemin';
+import mkdirp from 'mkdirp';
+import path from 'path';
+import svgstore from 'svgstore';
 
-const Worker = require('./Worker');
+import Worker from './Worker.js';
 
 /**
  * Create SVG sprites from the configured entries.
  */
-class SvgSpriteCompiler extends Worker {
+export default class SvgSpriteCompiler extends Worker {
   constructor(services) {
     super(services);
   }
@@ -19,8 +18,6 @@ class SvgSpriteCompiler extends Worker {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    super.init();
-
     if (!this.entry || !this.entry.length) {
       return super.resolve();
     }
@@ -89,20 +86,22 @@ class SvgSpriteCompiler extends Worker {
 
       this.Console.log(`Generating sprite.`);
 
-      const basePath = join(
+      const basePath = path.join(
         this.environment.THEME_SRC,
-        dirname(this.config.entry[filename].replace('/*', ''))
+        path.dirname(this.config.entry[filename].replace('/*', ''))
       );
 
-      const destination = resolve(basePath).replace(
-        resolve(this.environment.THEME_SRC),
-        resolve(this.environment.THEME_DIST)
-      );
+      const destination = path
+        .resolve(basePath)
+        .replace(
+          path.resolve(this.environment.THEME_SRC),
+          path.resolve(this.environment.THEME_DIST)
+        );
       const name = `${filename}.svg` || 'svgsprite.svg';
 
       const sprite = this.optimizedCwd.reduce(
         (store, entry, index) => {
-          return store.add(this.prefix + basename(cwd[index], '.svg'), entry.data);
+          return store.add(this.prefix + path.basename(cwd[index], '.svg'), entry.data);
         },
         svgstore({
           inline: true,
@@ -120,9 +119,9 @@ class SvgSpriteCompiler extends Worker {
             return super.resolve();
           }
 
-          writeFileSync(resolve(destination, name), sprite.toString());
+          fs.writeFileSync(path.resolve(destination, name), sprite.toString());
 
-          this.Console.log(`Done generating: ${join(destination, name)}`);
+          this.Console.log(`Done generating: ${path.join(destination, name)}`);
 
           done();
         });
@@ -132,5 +131,3 @@ class SvgSpriteCompiler extends Worker {
     });
   }
 }
-
-module.exports = SvgSpriteCompiler;

@@ -1,7 +1,7 @@
-const Environment = require('../common/Environment');
-const Logger = require('../common/Logger');
+import Environment from '../common/Environment.js';
+import Logger from '../common/Logger.js';
 
-class TaskManager {
+export default class TaskManager {
   constructor() {
     this.instances = {
       plugins: {},
@@ -12,6 +12,12 @@ class TaskManager {
     this.environment = Env.define();
 
     this.Console = new Logger(this.environment);
+  }
+
+  list(type) {
+    if (type && this.instances[type] instanceof Object) {
+      this.Console.info(Object.keys(this.instances[type]).join(', '));
+    }
   }
 
   /**
@@ -52,7 +58,7 @@ class TaskManager {
   }
 
   /**
-   *
+   * Marks the current task as resolved.
    */
   resolve(type, name, exit) {
     if (!this.instances[type][name]) {
@@ -180,5 +186,3 @@ class TaskManager {
     return false;
   }
 }
-
-module.exports = TaskManager;

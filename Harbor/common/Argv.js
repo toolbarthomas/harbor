@@ -1,7 +1,7 @@
 /**
  * Exposes the CLI arguments within Harbor.
  */
-class Argv {
+export default class Argv {
   constructor() {
     this.defaults = {
       task: false,
@@ -48,5 +48,3 @@ class Argv {
     return Object.assign(this.defaults, args);
   }
 }
-
-module.exports = Argv;

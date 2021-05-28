@@ -1,19 +1,18 @@
-const { basename, dirname, join, resolve } = require('path');
-const { render } = require('node-sass');
-const { statSync, readFileSync, writeFileSync } = require('fs');
-const { sync } = require('glob');
-const globImporter = require('node-sass-glob-importer');
-const mkdirp = require('mkdirp');
-const postcss = require('postcss');
-const postcssScss = require('postcss-scss');
-const stylelint = require('stylelint');
+import path from 'path';
+import { render } from 'node-sass';
+import fs from 'fs';
+import globImporter from 'node-sass-glob-importer';
+import mkdirp from 'mkdirp';
+import postcss from 'postcss';
+import postcssScss from 'postcss-scss';
+import stylelint from 'stylelint';
 
-const Worker = require('./Worker');
+import Worker from './Worker.js';
 
 /**
  * Compiles the configured entries with Node Sass.
  */
-class SassCompiler extends Worker {
+export default class SassCompiler extends Worker {
   constructor(services) {
     super(services);
 
@@ -34,8 +33,6 @@ class SassCompiler extends Worker {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    super.init();
-
     if (!this.entry || !this.entry.length) {
       return super.resolve();
     }
@@ -44,7 +41,7 @@ class SassCompiler extends Worker {
       this.entry.map(
         (entry) =>
           new Promise((cb) => {
-            const cwd = entry.filter((e) => basename(e)[0] !== '_');
+            const cwd = entry.filter((e) => path.basename(e)[0] !== '_');
 
             if (cwd.length) {
               this.renderCwd(cwd).then(cb);
@@ -79,7 +76,7 @@ class SassCompiler extends Worker {
         cwd.map(
           (entry) =>
             new Promise(async (cb) => {
-              if (String(basename(entry)).indexOf('_') !== 0) {
+              if (String(path.basename(entry)).indexOf('_') !== 0) {
                 await this.lintFile(entry);
                 await this.renderFile(entry);
               }
@@ -102,7 +99,7 @@ class SassCompiler extends Worker {
         return done();
       }
 
-      const source = readFileSync(entry);
+      const source = fs.readFileSync(entry);
 
       return postcss(this.config.plugins.postcss.plugins || [])
         .process(source, {
@@ -144,8 +141,12 @@ class SassCompiler extends Worker {
         this.Console.info(`Ignoring file due to Stylelint errors: ${entry}`);
         done();
       } else {
-        const destination = resolve(entry)
-          .replace(resolve(this.environment.THEME_SRC), resolve(this.environment.THEME_DIST))
+        const destination = path
+          .resolve(entry)
+          .replace(
+            path.resolve(this.environment.THEME_SRC),
+            path.resolve(this.environment.THEME_DIST)
+          )
           .replace('.scss', '.css');
 
         this.Console.log(`Compiling: ${entry}`);
@@ -184,18 +185,18 @@ class SassCompiler extends Worker {
    */
   writeFile(result, destination) {
     return new Promise((done) => {
-      mkdirp(dirname(destination)).then((dirPath, error) => {
+      mkdirp(path.dirname(destination)).then((dirPath, error) => {
         if (error) {
           this.Console.error(error);
 
           super.reject();
         } else {
           // Write the actual css to the filesystem.
-          writeFileSync(destination, result.css.toString());
+          fs.writeFileSync(destination, result.css.toString());
 
           // Also write the map file if the development environment is active.
           if (this.environment.THEME_DEBUG && result.map) {
-            writeFileSync(`${destination}.map`, result.map.toString());
+            fs.writeFileSync(`${destination}.map`, result.map.toString());
           }
 
           this.Console.log(`Compiled: ${destination}`);
@@ -206,5 +207,3 @@ class SassCompiler extends Worker {
     });
   }
 }
-
-module.exports = SassCompiler;

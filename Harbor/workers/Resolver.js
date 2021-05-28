@@ -1,14 +1,15 @@
-const { existsSync, createReadStream, createWriteStream } = require('fs');
-const mkdirp = require('mkdirp');
-const { basename, dirname, join, resolve } = require('path');
+import fs from 'fs';
+import path from 'path';
+import mkdirp from 'mkdirp';
+import { createRequire } from 'module';
 
-const Worker = require('./Worker');
+import Worker from './Worker.js';
 
 /**
  * Resolves the configured Resolver entries to the environment destination
  * directory.
  */
-class Resolver extends Worker {
+export default class Resolver extends Worker {
   constructor(services) {
     super(services);
   }
@@ -17,8 +18,6 @@ class Resolver extends Worker {
    * Resolves the configured Resolver entries.
    */
   async init() {
-    super.init();
-
     if (!this.config.entry || !this.config.entry instanceof Object) {
       return super.resolve();
     }
@@ -35,36 +34,40 @@ class Resolver extends Worker {
           new Promise((done) => {
             try {
               const vendor = this.config.entry[name];
-              const cwd = dirname(require.resolve(`${name}/package.json`));
-              const path = join(cwd, vendor);
+              const require = createRequire(import.meta.url);
 
-              if (!existsSync(path)) {
+              const cwd = path.dirname(require.resolve(`${name}/package.json`));
+              const p = path.join(cwd, vendor);
+
+              if (!fs.existsSync(p)) {
                 this.Console.warning(
-                  `Unable to find ${vendor} from vendor: ${name}. Skipping dependency...`
+                  `Unable to resolve package: ${name}`,
+                  `Package does not exist ${p}`
                 );
+
                 done();
               }
 
               // Define the destination path for the current module.
-              const dest = resolve(
+              const dest = path.resolve(
                 this.environment.THEME_DIST,
                 this.config.cwd || 'vendors',
                 name,
-                basename(path)
+                path.basename(p)
               );
 
-              mkdirp.sync(dirname(dest));
+              mkdirp.sync(path.dirname(dest));
 
               // Stream the actual contents in order to resolve each module faster.
-              createReadStream(path).pipe(
-                createWriteStream(dest).on('close', () => {
-                  this.Console.success(`'${name}' has been resolved successfully!`);
+              fs.createReadStream(p).pipe(
+                fs.createWriteStream(dest).on('close', () => {
+                  this.Console.success(`Package resolved: ${name}`);
 
                   done();
                 })
               );
             } catch (exception) {
-              this.Console.error(`Resolver encountered an error for ${name}: ${exception}`);
+              this.Console.error(`Unable to resolve package: ${name}`, exception);
 
               this.reject();
             }
@@ -75,5 +78,3 @@ class Resolver extends Worker {
     super.resolve();
   }
 }
-
-module.exports = Resolver;

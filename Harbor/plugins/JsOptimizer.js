@@ -1,12 +1,12 @@
-const { readFile, writeFile } = require('fs');
-const { minify } = require('uglify-js');
+import fs from 'fs';
+import { minify } from 'uglify-js';
 
-const Plugin = require('./Plugin');
+import Plugin from './Plugin.js';
 
 /**
  * Minifies the defined js entries within the THEME_DIST directory
  */
-class JsOptimizer extends Plugin {
+export default class JsOptimizer extends Plugin {
   constructor(services, options) {
     super(services, options);
   }
@@ -15,8 +15,6 @@ class JsOptimizer extends Plugin {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    super.init();
-
     if (!this.entry || !this.entry.length) {
       return super.resolve();
     }
@@ -38,7 +36,7 @@ class JsOptimizer extends Plugin {
           new Promise((done) => {
             this.Console.log(`Optimizing: ${path}`);
 
-            readFile(path, (exception, data) => {
+            fs.readFile(path, (exception, data) => {
               if (exception) {
                 this.Console.error(exception);
               }
@@ -86,7 +84,7 @@ class JsOptimizer extends Plugin {
     }
 
     return new Promise((cb) => {
-      writeFile(path, blob, () => {
+      fs.writeFile(path, blob, () => {
         this.Console.log(`File optimized: ${path}`);
 
         cb();
@@ -94,5 +92,3 @@ class JsOptimizer extends Plugin {
     });
   }
 }
-
-module.exports = JsOptimizer;

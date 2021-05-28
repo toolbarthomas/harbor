@@ -1,13 +1,13 @@
-const rimraf = require('rimraf');
-const { existsSync } = require('fs');
-const { resolve } = require('path');
+import rimraf from 'rimraf';
+import fs from 'fs';
+import path from 'path';
 
-const Worker = require('./Worker');
+import Worker from './Worker.js';
 
 /**
  * Clears the defined environment destination directory.
  */
-class Cleaner extends Worker {
+export default class Cleaner extends Worker {
   constructor(services) {
     super(services);
   }
@@ -16,12 +16,10 @@ class Cleaner extends Worker {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    super.init();
-
     if (this.environment) {
-      this.path = resolve(this.environment.THEME_DIST);
+      this.path = path.resolve(this.environment.THEME_DIST);
 
-      if (existsSync(this.path)) {
+      if (fs.existsSync(this.path)) {
         this.Console.info(`Cleaning directory: ${this.path}`);
 
         rimraf(this.path, () => {
@@ -37,5 +35,3 @@ class Cleaner extends Worker {
     }
   }
 }
-
-module.exports = Cleaner;

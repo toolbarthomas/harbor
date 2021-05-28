@@ -1,16 +1,15 @@
-const { transformFileAsync, transformFromAstSync } = require('@babel/core');
-const { statSync, readFileSync, writeFileSync } = require('fs');
-const { Linter, SourceCode } = require('eslint');
-const { sync } = require('glob');
-const mkdirp = require('mkdirp');
-const { dirname, join, resolve } = require('path');
+import { Linter, SourceCode } from 'eslint';
+import { transformFileAsync, transformFromAstSync } from '@babel/core';
+import fs from 'fs';
+import path from 'path';
+import mkdirp from 'mkdirp';
 
-const Worker = require('./Worker');
+import Worker from './Worker.js';
 
 /**
  * Compiles the configured entries with Babel.
  */
-class JsCompiler extends Worker {
+export default class JsCompiler extends Worker {
   constructor(services, options) {
     super(services, options);
 
@@ -21,8 +20,6 @@ class JsCompiler extends Worker {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    super.init();
-
     if (!this.entry || !this.entry.length) {
       return super.resolve();
     }
@@ -66,17 +63,19 @@ class JsCompiler extends Worker {
                   this.config.plugins.transform
                 )
               ).then((result) => {
-                const { code, map } = transformFromAstSync(result.ast, readFileSync(entry));
+                const { code, map } = transformFromAstSync(result.ast, fs.readFileSync(entry));
 
                 if (!code) {
                   this.Console.info(`Skipping empty entry: ${entry}`);
                   return cb();
                 }
 
-                const destination = resolve(entry).replace(
-                  resolve(this.environment.THEME_SRC),
-                  resolve(this.environment.THEME_DIST)
-                );
+                const destination = path
+                  .resolve(entry)
+                  .replace(
+                    path.resolve(this.environment.THEME_SRC),
+                    path.resolve(this.environment.THEME_DIST)
+                  );
 
                 if (this.config.plugins.eslint) {
                   const linter = this.linter.verify(code, this.config.plugins.eslint, {
@@ -87,7 +86,7 @@ class JsCompiler extends Worker {
                     linter.forEach((f) => {
                       if (f.fatal) {
                         const m = [
-                          `Unable to compile: ${resolve(destination)}:${f.line}:${f.column}`,
+                          `Unable to compile: ${path.resolve(destination)}:${f.line}:${f.column}`,
                           `'${f.message}`,
                         ];
 
@@ -108,15 +107,15 @@ class JsCompiler extends Worker {
                  * Create the destination directory before writing the source to
                  * the filesystem.
                  */
-                mkdirp(dirname(destination)).then((dirPath, error) => {
+                mkdirp(path.dirname(destination)).then((dirPath, error) => {
                   if (error) {
                     this.Console.error(error);
                   }
 
-                  writeFileSync(destination, code);
+                  fs.writeFileSync(destination, code);
 
                   if (this.environment.THEME_DEBUG && map) {
-                    writeFileSync(`${destination}.map`, map);
+                    fs.writeFileSync(`${destination}.map`, map);
                   }
 
                   this.Console.log(`Successfully transpiled: ${destination}`);
@@ -130,5 +129,3 @@ class JsCompiler extends Worker {
     });
   }
 }
-
-module.exports = JsCompiler;
