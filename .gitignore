@@ -5,3 +5,5 @@ src
 *.map
 *.log
 .env
+.storybook/main.cjs
+.storybook/main.js
