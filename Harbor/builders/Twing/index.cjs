@@ -9,7 +9,6 @@ const theme = path.resolve(process.cwd());
 
 // Use the resolved paths as base path for the Twing Filesystem.
 const loader = new TwingLoaderFilesystem([theme]);
-// const { THEME_LIBRARIES } = process.env;
 
 // In storybook we get this returned as an instance of
 // TWigLoaderNull, we need to avoid processing this.

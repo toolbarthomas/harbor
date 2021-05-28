@@ -69,7 +69,7 @@
     "eslint-plugin-import": "^2.23.3",
     "eslint-plugin-prettier": "^3.4.0",
     "html-escaper": "^3.0.3",
-    "imagemin": "^7.0.0",
+    "imagemin": "^7.0.1",
     "imagemin-svgo": "^8.0.0",
     "log-symbols": "^4.0.0",
     "mkdirp": "^1.0.4",

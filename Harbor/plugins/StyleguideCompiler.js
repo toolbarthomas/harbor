@@ -75,6 +75,11 @@ export default class StyleguideCompiler extends Plugin {
     });
   }
 
+  /**
+   * Generates the Storybook configuration with the defined Harbor configuration.
+   * This ensures that the actual storybook instance is loaded as a CommonJS
+   * module.
+   */
   setup() {
     if (!this.config.entry instanceof Object) {
       return;
