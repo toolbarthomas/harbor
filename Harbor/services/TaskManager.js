@@ -14,10 +14,17 @@ export default class TaskManager {
     this.Console = new Logger(this.environment);
   }
 
-  list(type) {
-    if (type && this.instances[type] instanceof Object) {
-      this.Console.info(Object.keys(this.instances[type]).join(', '));
+  workerHooks() {
+    if (!this.instances || !this.instances.workers) {
+      return;
     }
+
+    const hooks = Object.keys(this.instances.workers)
+      .map((plugin) => this.instances.workers[plugin].hook)
+      .filter((plugin) => plugin)
+      .flat();
+
+    return hooks;
   }
 
   /**

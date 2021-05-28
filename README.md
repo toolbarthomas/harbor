@@ -29,7 +29,7 @@ Additional CLI arguments can be defined to customize the build process:
 | watch      | Observes for file changes for the running tasks.             |
 | minify     | Minifies the processed assets.                               |
 
-You can run one or multiple tasks by defining the `task` parameter.
+You can run one or multiple tasks by using the configured hook as direct command or by defining it within the `task` parameter.
 Keep in mind that the hook should exist within your configuration:
 The default hooks are: `prepare`, `javascripts`, `stylesheets`, `serve`, `styleguide`, `images`
 

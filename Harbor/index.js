@@ -63,15 +63,27 @@ export default class Harbor {
    */
   async init() {
     const { task, ...args } = this.Argv.args;
+    const { customArgs } = args;
     const config = await ConfigManager.load();
 
     this.mount(this.workers, config);
 
     this.mount(this.plugins, config);
 
+    let tasks = task;
+    if (!tasks || !tasks.length) {
+      tasks = [];
+
+      this.services.TaskManager.workerHooks().forEach((hook) => {
+        if (Object.keys(customArgs).includes(hook)) {
+          tasks.push(hook);
+        }
+      });
+    }
+
     try {
-      if (task && task.length) {
-        const workerResult = await this.services.TaskManager.publish('workers', task);
+      if (tasks && tasks.length) {
+        const workerResult = await this.services.TaskManager.publish('workers', tasks);
 
         // Output the result of the initial build and throw an exception for the
         // production environment.
@@ -89,7 +101,7 @@ export default class Harbor {
 
           if (workerResult.completed && workerResult.completed.length) {
             if (workerResult.exceptions && !workerResult.exceptions.length) {
-              this.Console.success(`Successfully completed ${workerResult.completed.length} tasks`);
+              this.Console.success(`Successfully completed: ${workerResult.completed.join(', ')}`);
             }
           } else if (workerResult.exceptions && workerResult.exceptions.length) {
             this.Console.warning(
