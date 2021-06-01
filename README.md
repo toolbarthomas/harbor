@@ -1,10 +1,12 @@
 # Harbor
 
 Harbor is an asset builder that fits within the theme architecture of [Drupal](https://drupal.org/) 8+ setups.
-It can be used to easily create a [Drupal](https://drupal.org/) compatible theme without the need to install the actual CMS.
-With the help of [Storybook](https://storybookjs.org/) it can generate the Twig templates that Drupal uses for it's templating system.
+It can create [Drupal](https://drupal.org/) compatible themes without the need to install the actual CMS.
+With the help of [Storybook](https://storybookjs.org/) it can generate the Twig templates that are used by Drupal themes.
 
-The assets are processed on a very basic level, sass files can be compiled with the included `Sasscompiler` and Babel will transform the defined javascript files to enable JS compatibility for older browsers. It does not care about any frameworks and you can include additional plugins for the configured workers.
+The assets are processed on a very basic level, stylesheets files can be compiled with the included compiler and Babel will transform the defined javascript files to enable JS compatibility for older browsers.
+
+It does not care about any frameworks and you can include additional plugins for the configured workers.
 
 ## Setup
 
@@ -29,22 +31,36 @@ Additional CLI arguments can be defined to customize the build process:
 | watch      | Observes for file changes for the running tasks.             |
 | minify     | Minifies the processed assets.                               |
 
-You can run one or multiple tasks by using the configured hook as direct command or by defining it within the `task` parameter.
-Keep in mind that the hook should exist within your configuration:
-The default hooks are: `prepare`, `javascripts`, `stylesheets`, `serve`, `styleguide`, `images`
-
 ## Workers
 
-The tasks (a.k.a. workers) are assigned to the `task` CLI argument, by defining this argument you can run one or multiple tasks, this can come in handy during the development stage.
-All of the configured workers will be initiated if the task argument has not been defined, one or multiple tasks can be started from the CLI:
+A worker provides the core tasks for Harbor and can be adjusted within the configuration.
+Workers can be initiated during a Harbor process by calling the defined hook within the command or as CLI argument.
 
 ```shell
 # Starts the workers that have the stylesheets hook from the configuration.
 $ node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets
+$ node node_modules/@toolbarthomas/harbor/index.js stylesheets
 ```
 
 This example will start the workers that are defined with the `stylesheets` hook, by default it will process the configured sass entry files (or it will try to use the default configured entries).
-Multiple tasks can be started within a single command by adding the required hooks with comma separations:
+
+The actual hooks are defined within the default configuration of each worker, these hooks can be adjusted within your custom configuration. Workers that share the same hook will be called in synchronous order. The order of this queue can be adjusted by adding the an optional flag with the index value to mark the order.
+This configuration example will start the Cleaner worker before the FileSync worker during the usage of the `prepare` task within the CLI.
+
+```js
+...
+Cleaner: {
+  hook: ['clean', 'prepare::0'],
+  ...
+},
+FileSync: {
+  hook: ['sync', 'prepare::1']
+  ...
+}
+...
+```
+
+Harbor can also run the worker in a parallel order by using multiple hooks within the command:
 
 ```shell
 # Will process the stylesheets & javascript services in a paralell order.

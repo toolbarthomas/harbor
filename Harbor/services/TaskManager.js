@@ -106,9 +106,34 @@ export default class TaskManager {
     const queue = list
       .filter((item, index) => list.indexOf(item) == index)
       .map((item) => {
-        const tasks = Object.values(this.instances[type]).filter(
-          (task) => Array.isArray(task.hook) && task.hook.includes(item)
-        );
+        const entries = new Map();
+
+        // Define the optional order if the hook has been marked with the twin
+        // double collon :: flag.
+        // E.g. hook::0, hook::1, hook::2
+        Object.values(this.instances[type]).forEach((task) => {
+          if (!Array.isArray(task.hook)) {
+            return;
+          }
+
+          const triggers = task.hook.map((h) => h.split('::')[0]);
+
+          if (!triggers.includes(item)) {
+            return;
+          }
+
+          const order =
+            parseInt(
+              task.hook.filter((h) => h.split('::') && h.split('::')[1])[0].split('::')[1]
+            ) || 0;
+
+          let key = entries.has(order) ? order + 1 : order;
+
+          entries.set(key, task);
+        });
+
+        // Ensure the tasks queue is sorted according to the optional index value.
+        const tasks = [...entries.keys()].sort((a, b) => a - b).map((entry) => entries.get(entry));
 
         if (!tasks.length) {
           return;

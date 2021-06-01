@@ -17,10 +17,10 @@ const babelConfig = glob.sync('.babelrc*');
 export default {
   workers: {
     Cleaner: {
-      hook: ['clean', 'prepare'],
+      hook: ['clean', 'prepare::0'],
     },
     FileSync: {
-      hook: ['sync', 'prepare'],
+      hook: ['sync', 'prepare::2'],
       patterns: ['main/images', 'main/webfonts'],
     },
     JsCompiler: {
@@ -119,7 +119,7 @@ export default {
       },
     },
     Resolver: {
-      hook: ['resolve', 'prepare'],
+      hook: ['resolve', 'prepare::3'],
       cwd: 'vendors',
       entry: {},
     },

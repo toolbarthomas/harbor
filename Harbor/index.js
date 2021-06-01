@@ -75,8 +75,8 @@ export default class Harbor {
       tasks = [];
 
       this.services.TaskManager.workerHooks().forEach((hook) => {
-        if (Object.keys(customArgs).includes(hook)) {
-          tasks.push(hook);
+        if (Object.keys(customArgs).includes(hook.split('::')[0])) {
+          tasks.push(hook.split('::')[0]);
         }
       });
     }
