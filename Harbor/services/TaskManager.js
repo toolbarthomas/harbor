@@ -167,7 +167,7 @@ export default class TaskManager {
             for (let i = 0; i < job.tasks.length; i++) {
               const { hook, fn } = job.tasks[i];
 
-              this.Console.info(`Launching service: ${hook[0]}`);
+              this.Console.info(`Launching task: ${hook[0]}`);
 
               if (typeof fn === 'function') {
                 await fn()
