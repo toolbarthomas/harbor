@@ -70,10 +70,8 @@ export default class Harbor {
 
     this.mount(this.plugins, config);
 
-    let tasks = task;
+    let tasks = [task].filter((t) => t);
     if (!tasks || !tasks.length) {
-      tasks = [];
-
       this.services.TaskManager.workerHooks().forEach((hook) => {
         if (Object.keys(customArgs).includes(hook.split('::')[0])) {
           tasks.push(hook.split('::')[0]);
@@ -111,6 +109,10 @@ export default class Harbor {
             );
           }
         }
+      } else {
+        this.Console.error(
+          `Unable to start Harbor workers from undefined command: ${process.argv.slice(2)[0]}`
+        );
       }
 
       if (args) {

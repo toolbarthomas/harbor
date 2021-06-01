@@ -124,7 +124,7 @@ export default class TaskManager {
 
           const order =
             parseInt(
-              task.hook.filter((h) => h.split('::') && h.split('::')[1])[0].split('::')[1]
+              (task.hook.filter((h) => h.split('::') && h.split('::')[1])[0] || '').split('::')[1]
             ) || 0;
 
           let key = entries.has(order) ? order + 1 : order;
@@ -147,7 +147,9 @@ export default class TaskManager {
       .filter((t) => t);
 
     if (!queue.length) {
-      this.Console.error(`Unable to find ${type}: ${list.join(', ')}`);
+      this.Console.error(
+        `Unable to start ${type}, no hook has been defined for: ${list.join(', ')}`
+      );
 
       return;
     }
