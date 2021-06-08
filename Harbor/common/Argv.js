@@ -7,7 +7,7 @@ export default class Argv {
       task: false,
       watch: false,
       styleguide: false,
-      optimize: false,
+      minify: false,
       serve: false,
       verbose: false,
     };

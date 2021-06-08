@@ -1,13 +1,13 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.71.0",
+  "version": "0.72.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
   "node": "^12.20.0 || ^14.13.1 || >=16.0.0",
   "scripts": {
     "preproduction": "node ./index.js --task=prepare",
-    "production": "node ./index.js --task=stylesheets,javascripts,images",
+    "production": "node ./index.js --task=stylesheets,javascripts,images --minify",
     "predevelopment": "npm run production",
     "development": "node ./index.js --watch --styleguide",
     "images": "node ./index.js --task=images",

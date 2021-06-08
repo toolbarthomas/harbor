@@ -68,8 +68,6 @@ export default class Harbor {
 
     this.mount(this.workers, config);
 
-    this.mount(this.plugins, config);
-
     let tasks = [task].filter((t) => t);
     if (!tasks || !tasks.length) {
       this.services.TaskManager.workerHooks().forEach((hook) => {
@@ -110,9 +108,7 @@ export default class Harbor {
           }
         }
       } else {
-        this.Console.error(
-          `Unable to start Harbor workers from undefined command: ${process.argv.slice(2)[0]}`
-        );
+        this.Console.warning('Harbor has not processed anything this time.');
       }
 
       if (args) {
@@ -123,7 +119,7 @@ export default class Harbor {
             Object.values(config['plugins']).filter(({ hook }) => {
               const h = hook ? (Array.isArray(hook) ? hook : [String(hook)]) : [];
 
-              if (!h.includes(arg)) {
+              if (!h.includes(String(arg).split('::')[0])) {
                 return;
               }
 
@@ -132,6 +128,8 @@ export default class Harbor {
         );
 
         if (plugins.length) {
+          this.mount(this.plugins, config);
+
           this.Console.log(
             `Using ${plugins.length} ${plugins.length === 1 ? 'plugin' : 'plugins'} for ${
               this.env.THEME_ENVIRONMENT

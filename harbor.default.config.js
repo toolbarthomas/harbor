@@ -20,7 +20,7 @@ export default {
       hook: ['clean', 'prepare::0'],
     },
     FileSync: {
-      hook: ['sync', 'prepare::2'],
+      hook: ['sync', 'prepare::1'],
       patterns: ['main/images', 'main/webfonts'],
     },
     JsCompiler: {
@@ -119,7 +119,7 @@ export default {
       },
     },
     Resolver: {
-      hook: ['resolve', 'prepare::3'],
+      hook: ['resolve', 'prepare::2'],
       cwd: 'vendors',
       entry: {},
     },

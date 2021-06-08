@@ -157,7 +157,7 @@ export default class Core {
                 this.name
               } will not be launched since it is only accepted for the ${this.options.acceptedEnvironments.join(
                 ', '
-              )} environments.`
+              )} environment(s).`
             );
 
             return this.resolve();

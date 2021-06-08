@@ -42,7 +42,7 @@ export default class JsOptimizer extends Plugin {
               }
 
               if (!data) {
-                super.resolve();
+                return super.resolve();
               }
 
               const result = minify(data.toString(), this.config.options || {});
