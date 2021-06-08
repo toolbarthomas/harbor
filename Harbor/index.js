@@ -66,6 +66,7 @@ export default class Harbor {
     const { customArgs } = args;
     const config = await ConfigManager.load();
 
+    // Ensure the configuration is defined before mounting anything.
     this.mount(this.workers, config);
 
     let tasks = [task].filter((t) => t);
@@ -83,30 +84,7 @@ export default class Harbor {
 
         // Output the result of the initial build and throw an exception for the
         // production environment.
-        if (workerResult) {
-          if (workerResult.exceptions && workerResult.exceptions.length) {
-            if (this.env.THEME_ENVIRONMENT === 'production') {
-              this.Console.error(
-                `Not all workers have been completed correctly: ${workerResult.exceptions.join(
-                  ', '
-                )}`
-              );
-              throw Error();
-            }
-          }
-
-          if (workerResult.completed && workerResult.completed.length) {
-            if (workerResult.exceptions && !workerResult.exceptions.length) {
-              this.Console.success(`Successfully completed: ${workerResult.completed.join(', ')}`);
-            }
-          } else if (workerResult.exceptions && workerResult.exceptions.length) {
-            this.Console.warning(
-              `The following workers did not complete correctly: ${workerResult.exceptions.join(
-                ', '
-              )}`
-            );
-          }
-        }
+        this.validateResult(workerResult);
       } else {
         this.Console.warning('Harbor has not processed anything this time.');
       }
@@ -128,6 +106,8 @@ export default class Harbor {
         );
 
         if (plugins.length) {
+          // Mount the actual plugins when all workers are completed to ensure
+          // the plugin entries are defined correctly.
           this.mount(this.plugins, config);
 
           this.Console.log(
@@ -140,6 +120,8 @@ export default class Harbor {
             'plugins',
             plugins.join(',')
           );
+
+          this.validateResult(pluginResult);
         }
       }
     } catch (exception) {
@@ -152,7 +134,7 @@ export default class Harbor {
   }
 
   /**
-   * Mounts the defined instance with the defined configuration.
+   * Defines the required properties for the defined Harbor worker or plugin.
    */
   mount(instances, config) {
     if (instances instanceof Object) {
@@ -170,6 +152,31 @@ export default class Harbor {
         // Subscribe the current name to the Harbor TaskManager.
         handler.subscribe(hook && hook !== name ? [name, ...h] : [...h]);
       });
+    }
+  }
+
+  /**
+   * Validates the results of all used workers & plugins in order to define the
+   * final result of the running Harbor instance.
+   */
+  validateResult(results, type) {
+    if (results.exceptions && results.exceptions.length) {
+      if (this.env.THEME_ENVIRONMENT === 'production') {
+        this.Console.error(
+          `Not all ${type} have been completed correctly: ${results.exceptions.join(', ')}`
+        );
+        throw Error();
+      }
+    }
+
+    if (results.completed && results.completed.length) {
+      if (results.exceptions && !results.exceptions.length) {
+        this.Console.success(`Successfully completed: ${results.completed.join(', ')}`);
+      }
+    } else if (results.exceptions && results.exceptions.length) {
+      this.Console.warning(
+        `The following ${type} did not complete correctly: ${results.exceptions.join(', ')}`
+      );
     }
   }
 }
