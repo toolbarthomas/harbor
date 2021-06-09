@@ -73,6 +73,9 @@ export default class Watcher extends Plugin {
           this.config.instances[name].services.forEach((worker) => {
             this.Console.log('Resetting shutdown timer...');
             clearTimeout(this.instances[name].watcher);
+            clearTimeout(this.instances[name].reset);
+
+            this.defineReset(name);
 
             if (!this.instances[name].active) {
               this.instances[name].watcher = setTimeout(async () => {
@@ -96,30 +99,38 @@ export default class Watcher extends Plugin {
           });
         });
 
-        // The actual shutdown handler that will close the current Watcher.
-        this.instances[name].reset = setTimeout(() => {
-          if (!this.instances[name].instance.close) {
-            return;
-          }
-
-          this.Console.log(`Closing watcher instance: ${name}`);
-
-          this.instances[name].instance.close().then(() => {
-            this.Console.log(`Watcher instance closed: ${name}`);
-
-            this.instances[name].running = null;
-            clearTimeout(this.instances[name].running);
-
-            if (!Object.values(this.instances).filter(({ running }) => running).length) {
-              this.Console.info('Closing Watcher plugin...');
-
-              done();
-            }
-          });
-        }, this.config.options.duration || 1000 * 60 * 15);
+        this.defineReset(name);
 
         this.instances[name].running = true;
       });
     });
+  }
+
+  defineReset(name) {
+    if (this.instances[name].reset) {
+      this.Console.info(`Resetting watcher instance: ${name} `);
+    }
+
+    // The actual shutdown handler that will close the current Watcher.
+    this.instances[name].reset = setTimeout(() => {
+      if (!this.instances[name].instance.close) {
+        return;
+      }
+
+      this.Console.log(`Closing watcher instance: ${name}`);
+
+      this.instances[name].instance.close().then(() => {
+        this.Console.log(`Watcher instance closed: ${name}`);
+
+        this.instances[name].running = null;
+        clearTimeout(this.instances[name].reset);
+
+        if (!Object.values(this.instances).filter(({ running }) => running).length) {
+          this.Console.info('Closing Watcher plugin...');
+
+          done();
+        }
+      });
+    }, this.config.options.duration || 1000 * 60 * 15);
   }
 }
