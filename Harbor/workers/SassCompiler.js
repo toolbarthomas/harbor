@@ -59,6 +59,8 @@ export default class SassCompiler extends Worker {
     if (length) {
       this.Console.error(`Sasscompiler encountered ${length} error${length !== 1 ? 's' : ''}...`);
 
+      this.stylelintExceptions = [];
+
       return super.reject();
     }
 
