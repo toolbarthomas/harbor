@@ -60,6 +60,7 @@ export default class SassCompiler extends Worker {
       this.Console.error(`Sasscompiler encountered ${length} error${length !== 1 ? 's' : ''}...`);
 
       this.stylelintExceptions = [];
+      this.sassExceptions = [];
 
       return super.reject();
     }
@@ -164,7 +165,7 @@ export default class SassCompiler extends Worker {
           async (error, result) => {
             if (error) {
               this.Console.error([
-                `Sass error encountered: ${error.file}:${error.line}:${error.column}`,
+                `Sass error  encountered : ${error.file}:${error.line}:${error.column}`,
                 error.message,
                 `From: ${entry}`,
               ]);
