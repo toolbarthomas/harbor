@@ -21,7 +21,7 @@ export default {
     },
     FileSync: {
       hook: ['sync', 'prepare::1'],
-      patterns: ['main/images', 'main/webfonts'],
+      patterns: ['images', 'webfonts'],
     },
     JsCompiler: {
       entry: {
@@ -87,7 +87,7 @@ export default {
       hook: ['svg', 'images'],
       prefix: 'svg--',
       entry: {
-        svgsprite: 'main/images/*/**.svg',
+        svgsprite: 'images/*/**.svg',
       },
       options: {
         use: [
@@ -190,7 +190,7 @@ export default {
         },
         sync: {
           event: 'add',
-          path: ['main/webfonts', 'main/images'],
+          path: ['webfonts/**', 'images/**'],
           services: ['FileSync'],
         },
       },
