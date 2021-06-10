@@ -99,14 +99,22 @@ export default class Watcher extends Plugin {
           });
         });
 
-        this.defineReset(name);
+        this.defineReset(name, done);
 
         this.instances[name].running = true;
       });
     });
   }
 
-  defineReset(name) {
+  /**
+   * Defines the Watcher lifecycle reset handler that will autoclose the
+   * Watcher instance.
+   *
+   * @param {string} name The defined Watcher that should reset.
+   * @param {function} callback The resolve handler that will be called when
+   * the reset has been initiated.
+   */
+  defineReset(name, callback) {
     if (this.instances[name].reset) {
       this.Console.info(`Resetting watcher instance: ${name} `);
     }
@@ -128,7 +136,7 @@ export default class Watcher extends Plugin {
         if (!Object.values(this.instances).filter(({ running }) => running).length) {
           this.Console.info('Closing Watcher plugin...');
 
-          done();
+          return callback();
         }
       });
     }, this.config.options.duration || 1000 * 60 * 15);
