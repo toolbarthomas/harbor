@@ -34,6 +34,7 @@ export default class ConfigManager {
             m.default && typeof m.default === 'function' ? m.default() : m.default
           );
         } catch (error) {
+          console.log(error);
           customConfig = {};
         }
       }

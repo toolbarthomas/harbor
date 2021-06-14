@@ -171,7 +171,7 @@ export default class StyleguideCompiler extends Plugin {
 
             Object.keys(entry).forEach((n) => {
               let p = path.normalize(path.dirname(entry[n])).replace('*', '');
-              p = path.join('${this.environment.THEME_DIST}', p, n + '.svg');
+              p = path.resolve('${this.environment.THEME_DIST}', p, n + '.svg');
 
               if (fs.existsSync(path.resolve(p))) {
                 sprites[n] = p;
