@@ -75,7 +75,7 @@ export default class Watcher extends Plugin {
             clearTimeout(this.instances[name].watcher);
             clearTimeout(this.instances[name].reset);
 
-            this.defineReset(name);
+            this.defineReset(name, done);
 
             if (!this.instances[name].active) {
               this.instances[name].watcher = setTimeout(async () => {
