@@ -6,7 +6,6 @@ import glob from 'glob';
 import autoprefixer from 'autoprefixer';
 import combineDuplicateSelectors from 'postcss-combine-duplicated-selectors';
 import cssnano from 'cssnano';
-import imageminSvgo from 'imagemin-svgo';
 import stylelint from 'stylelint';
 
 const eslintConfig = glob.sync('.eslintrc*');
@@ -90,32 +89,31 @@ export default {
         svgsprite: 'images/*/**.svg',
       },
       options: {
-        use: [
-          imageminSvgo({
-            plugins: extendDefaultPlugins([
-              {
-                name: 'convertPathData',
-                active: false,
+        svgo: {
+          plugins: extendDefaultPlugins([
+            {
+              name: 'convertPathData',
+              active: false,
+            },
+            {
+              name: 'removeViewBox',
+              active: false,
+            },
+            // {
+            //   name: 'convertColors',
+            //   params: {
+            //     currentColor: true,
+            //   },
+            // },
+            {
+              name: 'removeAttrs',
+              params: {
+                preserveCurrentColor: true,
+                attrs: '(stroke|fill)',
               },
-              {
-                name: 'removeViewBox',
-                active: false,
-              },
-              {
-                name: 'convertColors',
-                params: {
-                  currentColor: true,
-                },
-              },
-              {
-                name: 'removeAttrs',
-                params: {
-                  attrs: ['(fill|stroke|class|style)', 'svg:(width|height)'],
-                },
-              },
-            ]),
-          }),
-        ],
+            },
+          ]),
+        },
       },
     },
     Resolver: {

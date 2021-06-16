@@ -3,6 +3,8 @@ import imagemin from 'imagemin';
 import mkdirp from 'mkdirp';
 import path from 'path';
 import svgstore from 'svgstore';
+import SVGO from 'svgo';
+import isSvg from 'is-svg';
 
 import Worker from './Worker.js';
 
@@ -61,8 +63,26 @@ export default class SvgSpriteCompiler extends Worker {
   async prepareCwd(cwd, name) {
     this.Console.log(`Preparing sprite ${name}...`);
 
+    const optimizer = () => async (buffer) => {
+      let b = buffer;
+
+      if (!isSvg(buffer)) {
+        return Promise.resolve(buffer);
+      }
+
+      if (Buffer.isBuffer(buffer)) {
+        b = buffer.toString();
+      }
+
+      const result = SVGO.optimize(buffer, this.config.options.svgo);
+
+      return Buffer.from(result.data);
+    };
+
     return new Promise((done) => {
-      imagemin(cwd, this.config.options).then((result) => {
+      imagemin(cwd, {
+        plugins: [optimizer()],
+      }).then((result) => {
         this.optimizedCwd = result;
 
         this.Console.log(`Done preparing sprite.`);
@@ -101,6 +121,18 @@ export default class SvgSpriteCompiler extends Worker {
 
       const sprite = this.optimizedCwd.reduce(
         (store, entry, index) => {
+          const d = path
+            .resolve(entry.sourcePath)
+            .replace(
+              path.resolve(this.environment.THEME_SRC),
+              path.resolve(this.environment.THEME_DIST)
+            );
+
+          mkdirp.sync(path.dirname(d));
+
+          this.Console.info(`Writing optimized inline svg image: ${destination}`);
+          fs.writeFileSync(d, entry.data);
+
           return store.add(this.prefix + path.basename(cwd[index], '.svg'), entry.data);
         },
         svgstore({
