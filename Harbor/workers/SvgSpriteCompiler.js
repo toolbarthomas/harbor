@@ -130,7 +130,8 @@ export default class SvgSpriteCompiler extends Worker {
 
           mkdirp.sync(path.dirname(d));
 
-          this.Console.info(`Writing optimized inline svg image: ${destination}`);
+          this.Console.log(`Writing optimized inline svg image: ${destination}`);
+
           fs.writeFileSync(d, entry.data);
 
           return store.add(this.prefix + path.basename(cwd[index], '.svg'), entry.data);
