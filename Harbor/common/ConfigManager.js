@@ -2,6 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
+import Environment from './Environment.js';
+import Logger from '../common/Logger.js';
+
 /**
  * The Configmanager exposes the given Harbor option from the default and
  * custom configuration.
@@ -19,6 +22,9 @@ export default class ConfigManager {
         m.default && typeof m.default === 'function' ? m.default() : m.default
       );
 
+      const environment = new Environment().define();
+      const Console = new Logger(environment);
+
       // Check if the defined configuration key has already been defined within
       // the current Node instance in order to prevent the confiuration from
       // loading a second time.
@@ -33,8 +39,9 @@ export default class ConfigManager {
           customConfig = await import(configPath).then((m) =>
             m.default && typeof m.default === 'function' ? m.default() : m.default
           );
-        } catch (error) {
-          console.log(error);
+        } catch (exception) {
+          Console.error(exception);
+
           customConfig = {};
         }
       }
@@ -57,14 +64,28 @@ export default class ConfigManager {
         return Object.assign(state, proposal);
       };
 
-      const config = merge(defaultConfig, customConfig);
+      let config;
 
-      if (type && option) {
-        done(config[type][option]);
-      } else if (type) {
-        done(config[type]);
-      } else {
-        done(config);
+      try {
+        config = merge(defaultConfig, customConfig);
+
+        if (Object.values(customConfig).length) {
+          Console.info(`Running Harbor with custom configuration from: ${configPath}`);
+        }
+      } catch (exception) {
+        Console.error(exception);
+
+        done({});
+      }
+
+      if (config) {
+        if (type && option) {
+          done(config[type][option]);
+        } else if (type) {
+          done(config[type]);
+        } else {
+          done(config);
+        }
       }
     });
   }

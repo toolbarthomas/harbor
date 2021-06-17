@@ -167,7 +167,7 @@ export default class TaskManager {
             for (let i = 0; i < job.tasks.length; i++) {
               const { hook, fn } = job.tasks[i];
 
-              this.Console.info(`Launching task: ${hook[0]}`);
+              this.Console.log(`Launching task: ${hook[0]}`);
 
               if (typeof fn === 'function') {
                 await fn()
@@ -179,7 +179,7 @@ export default class TaskManager {
                     }
                   })
                   .catch((exception) => this.Console.error(exception));
-                this.Console.info(`Complete: ${hook[0]}`);
+                this.Console.log(`Complete: ${hook[0]}`);
               } else {
                 this.Console.warning(`No handler has been defined for ${job.task}`);
               }
