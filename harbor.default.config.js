@@ -99,12 +99,12 @@ export default {
               name: 'removeViewBox',
               active: false,
             },
-            // {
-            //   name: 'convertColors',
-            //   params: {
-            //     currentColor: true,
-            //   },
-            // },
+            {
+              name: 'convertColors',
+              params: {
+                currentColor: true,
+              },
+            },
             {
               name: 'removeAttrs',
               params: {

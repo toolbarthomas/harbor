@@ -63,25 +63,9 @@ export default class SvgSpriteCompiler extends Worker {
   async prepareCwd(cwd, name) {
     this.Console.log(`Preparing sprite ${name}...`);
 
-    const optimizer = () => async (buffer) => {
-      let b = buffer;
-
-      if (!isSvg(buffer)) {
-        return Promise.resolve(buffer);
-      }
-
-      if (Buffer.isBuffer(buffer)) {
-        b = buffer.toString();
-      }
-
-      const result = SVGO.optimize(buffer, this.config.options.svgo);
-
-      return Buffer.from(result.data);
-    };
-
     return new Promise((done) => {
       imagemin(cwd, {
-        plugins: [optimizer()],
+        plugins: [this.svgOptimize()],
       }).then((result) => {
         this.optimizedCwd = result;
 
@@ -162,5 +146,32 @@ export default class SvgSpriteCompiler extends Worker {
         done();
       }
     });
+  }
+
+  /**
+   * Optimizes the given SVG buffer to make it compatible as an inline sprite.
+   */
+  svgOptimize() {
+    return async (buffer) => {
+      let b = buffer;
+
+      if (!isSvg(buffer)) {
+        return Promise.resolve(buffer);
+      }
+
+      if (Buffer.isBuffer(buffer)) {
+        b = buffer.toString();
+      }
+
+      let result;
+
+      try {
+        result = SVGO.optimize(buffer, this.config.options.svgo);
+      } catch (exception) {
+        this.Console.error(exception);
+      }
+
+      return result.data && Buffer.from(result.data);
+    };
   }
 }
