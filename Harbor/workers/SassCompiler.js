@@ -111,8 +111,8 @@ export default class SassCompiler extends Worker {
         })
         .then((result) => {
           this.stylelintExceptions = result.stylelint
-            ? result.stylelint.stylelintError || false
-            : false;
+            ? result.stylelint.stylelintError || []
+            : [];
 
           if (this.stylelintExceptions) {
             this.Console.warning(`Stylelint encountered some problems:`);

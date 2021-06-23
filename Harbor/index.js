@@ -161,11 +161,12 @@ export default class Harbor {
    */
   validateResult(results, type) {
     if (results.exceptions && results.exceptions.length) {
-      if (this.env.THEME_ENVIRONMENT === 'production') {
-        this.Console.error(
-          `Not all ${type} have been completed correctly: ${results.exceptions.join(', ')}`
-        );
-        throw Error();
+      if (this.env.THEME_ENVIRONMENT !== 'development') {
+        const msg = `Not all ${type} have been completed correctly: ${results.exceptions.join(', ')}`
+
+        this.Console.error(msg);
+
+        throw Error(msg);
       }
     }
 
