@@ -9,7 +9,7 @@ import path from 'path';
  * Harbor will define these environment variables and will fall back
  * to the default values when missing.
  */
-export default class Environment {
+class Environment {
   constructor() {
     this.defaults = {
       THEME_SRC: './src',
@@ -38,8 +38,8 @@ export default class Environment {
     // Inherit any missing option from the defaults Object.
     Object.keys(this.defaults).forEach((defaultOption) => {
       if (!Object.prototype.hasOwnProperty.call(parsed, defaultOption)) {
-        parsed[defaultOption] = parseInt(this.defaults[defaultOption], 2)
-          ? parseInt(this.defaults[defaultOption], 2)
+        parsed[defaultOption] = parseInt(this.defaults[defaultOption], 10)
+          ? parseInt(this.defaults[defaultOption], 10)
           : this.defaults[defaultOption];
       }
 
@@ -63,3 +63,5 @@ export default class Environment {
     return parsed;
   }
 }
+
+export default Environment;

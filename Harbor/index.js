@@ -20,7 +20,7 @@ import ConfigManager from './common/ConfigManager.js';
 /**
  * Factory setup for Harbor.
  */
-export default class Harbor {
+class Harbor {
   constructor() {
     this.Argv = new Argv();
 
@@ -181,3 +181,5 @@ export default class Harbor {
     }
   }
 }
+
+export default Harbor;

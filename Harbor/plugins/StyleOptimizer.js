@@ -10,7 +10,7 @@ import Plugin from './Plugin.js';
  * Optimizes the compiled stylesheet entries within the defined THEME_DIST
  * directory.
  */
-export default class StyleOptimizer extends Plugin {
+class StyleOptimizer extends Plugin {
   constructor(services, options) {
     super(services, options);
   }
@@ -118,3 +118,5 @@ export default class StyleOptimizer extends Plugin {
     });
   }
 }
+
+export default StyleOptimizer;

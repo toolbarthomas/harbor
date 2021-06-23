@@ -9,7 +9,7 @@ import Worker from './Worker.js';
  * Resolves the configured Resolver entries to the environment destination
  * directory.
  */
-export default class Resolver extends Worker {
+class Resolver extends Worker {
   constructor(services) {
     super(services);
   }
@@ -78,3 +78,5 @@ export default class Resolver extends Worker {
     super.resolve();
   }
 }
+
+export default Resolver;

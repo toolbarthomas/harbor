@@ -11,7 +11,7 @@ import Worker from './Worker.js';
 /**
  * Create SVG sprites from the configured entries.
  */
-export default class SvgSpriteCompiler extends Worker {
+class SvgSpriteCompiler extends Worker {
   constructor(services) {
     super(services);
   }
@@ -175,3 +175,5 @@ export default class SvgSpriteCompiler extends Worker {
     };
   }
 }
+
+export default SvgSpriteCompiler;

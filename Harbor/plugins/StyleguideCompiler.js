@@ -14,7 +14,7 @@ import FileSync from '../workers/FileSync.js';
  * Create a new Styleguide with the compiled assets from the destination
  * directory.
  */
-export default class StyleguideCompiler extends Plugin {
+class StyleguideCompiler extends Plugin {
   constructor(services, options, workers) {
     super(services, options, workers);
   }
@@ -204,3 +204,5 @@ export default class StyleguideCompiler extends Plugin {
     return template;
   }
 }
+
+export default StyleguideCompiler;

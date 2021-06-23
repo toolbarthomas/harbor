@@ -13,7 +13,7 @@ import Logger from './Logger.js';
  * should not be customized.
  * @param {string} type Defines the new instance as Worker or Plugin.
  */
-export default class Core {
+class Core {
   constructor(services, options, type) {
     this.name = this.constructor.name;
 
@@ -185,3 +185,5 @@ export default class Core {
     this.resolve(true);
   }
 }
+
+export default Core;

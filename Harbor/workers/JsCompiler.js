@@ -8,7 +8,7 @@ import Worker from './Worker.js';
 /**
  * Compiles the configured entries with Babel.
  */
-export default class JsCompiler extends Worker {
+class JsCompiler extends Worker {
   constructor(services, options) {
     super(services, options);
 
@@ -120,3 +120,5 @@ export default class JsCompiler extends Worker {
     done();
   }
 }
+
+export default JsCompiler;

@@ -11,8 +11,10 @@ import Core from '../common/Core.js';
  * @param {Object} options Defines the Harbor specific options for the current
  * service.
  */
-export default class Worker extends Core {
+class Worker extends Core {
   constructor(services, options) {
     super(services, options, 'workers');
   }
 }
+
+export default Worker;

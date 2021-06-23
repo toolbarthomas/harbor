@@ -6,7 +6,7 @@ import Argv from './Argv.js';
 /**
  * Helper Class that writes messages to the stdout.
  */
-export default class Logger {
+class Logger {
   constructor(environment) {
     this.environment = environment;
 
@@ -124,3 +124,5 @@ export default class Logger {
     return styles;
   }
 }
+
+export default Logger;

@@ -11,7 +11,7 @@ import Core from '../common/Core.js';
  * @param {Object} options Defines the Harbor specific options for the current
  * service.
  */
-export default class Plugin extends Core {
+class Plugin extends Core {
   constructor(services, options, workers) {
     super(services, options, 'plugins', workers);
 
@@ -35,3 +35,5 @@ export default class Plugin extends Core {
     super.defineEntry(true);
   }
 }
+
+export default Plugin;

@@ -1,7 +1,7 @@
 import Environment from '../common/Environment.js';
 import Logger from '../common/Logger.js';
 
-export default class TaskManager {
+class TaskManager {
   constructor() {
     this.instances = {
       plugins: {},
@@ -127,7 +127,7 @@ export default class TaskManager {
           const order =
             parseInt(
               (task.hook.filter((h) => h.split('::') && h.split('::')[1])[0] || '').split('::')[1],
-              2
+              10
             ) || 0;
 
           const key = entries.has(order) ? order + 1 : order;
@@ -172,11 +172,11 @@ export default class TaskManager {
           for (let i = 0; i < tasks.length; i += 1) {
             const task = tasks[i];
 
-            this.Console.info(`Starting ${task.hook[0]}`);
+            this.Console.info(`Starting task: ${task.hook[0]}`);
 
             // eslint-disable-next-line no-await-in-loop
             await task.fn().then((exit) => {
-              this.Console.info(`Completed ${task.hook[0]}`);
+              this.Console.info(`Done: ${task.hook[0]}`);
 
               if (!exit) {
                 completed.push(task.hook[0]);
@@ -184,11 +184,9 @@ export default class TaskManager {
                 exceptions.push(task.hook[0]);
               }
             });
-
-            if (completed.length + exceptions.length === tasks.length) {
-              done({ completed, exceptions });
-            }
           }
+
+          done({ completed, exceptions });
         });
       }, Promise.resolve());
     });
@@ -214,3 +212,5 @@ export default class TaskManager {
     return false;
   }
 }
+
+export default TaskManager;

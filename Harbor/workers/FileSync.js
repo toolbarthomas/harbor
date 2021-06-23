@@ -8,7 +8,7 @@ import Worker from './Worker.js';
  * Synchronizes the configured Filesync entries to the defined environment
  * destination directory.
  */
-export default class FileSync extends Worker {
+class FileSync extends Worker {
   constructor(services) {
     super(services);
 
@@ -91,3 +91,5 @@ export default class FileSync extends Worker {
     return resolvedPatterns;
   }
 }
+
+export default FileSync;

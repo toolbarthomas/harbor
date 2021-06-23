@@ -11,7 +11,7 @@ import Worker from './Worker.js';
 /**
  * Compiles the configured entries with Node Sass.
  */
-export default class SassCompiler extends Worker {
+class SassCompiler extends Worker {
   constructor(services) {
     super(services);
 
@@ -194,3 +194,5 @@ export default class SassCompiler extends Worker {
     });
   }
 }
+
+export default SassCompiler;

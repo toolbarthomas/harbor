@@ -10,7 +10,7 @@ import Plugin from './Plugin.js';
  * Creates a Watcher instance for each defined instance key and will run the
  * configured hook from the constructed TaskManager.
  */
-export default class Watcher extends Plugin {
+class Watcher extends Plugin {
   constructor(services, options) {
     super(services, options);
 
@@ -142,3 +142,5 @@ export default class Watcher extends Plugin {
     }, this.config.options.duration || 1000 * 60 * 15);
   }
 }
+
+export default Watcher;

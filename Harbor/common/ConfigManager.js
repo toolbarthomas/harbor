@@ -9,7 +9,7 @@ import Logger from '../common/Logger.js';
  * The Configmanager exposes the given Harbor option from the default and
  * custom configuration.
  */
-export default class ConfigManager {
+class ConfigManager {
   static load(option, type) {
     return new Promise(async (done) => {
       const defaultConfigPath = path.resolve(
@@ -90,3 +90,5 @@ export default class ConfigManager {
     });
   }
 }
+
+export default ConfigManager;

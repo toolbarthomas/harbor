@@ -6,7 +6,7 @@ import Plugin from './Plugin.js';
 /**
  * Minifies the defined js entries within the THEME_DIST directory
  */
-export default class JsOptimizer extends Plugin {
+class JsOptimizer extends Plugin {
   constructor(services, options) {
     super(services, options);
   }
@@ -92,3 +92,5 @@ export default class JsOptimizer extends Plugin {
     });
   }
 }
+
+export default JsOptimizer;
