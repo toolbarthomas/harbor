@@ -162,47 +162,36 @@ export default class TaskManager {
     const completed = [];
     const exceptions = [];
 
-    await Promise.all(
-      jobs.map((job) =>
-        new Promise((done) => {
-          if (job.tasks && job.tasks.length) {
-            this.Console.info(`Starting: ${job.hook}`);
+    return new Promise((done) => {
+      jobs.reduce(async (instance, job) => {
+        instance.then(async () => {
+          const { hook, tasks } = job;
 
-            for (let i = 0; i < job.tasks.length; i += 1) {
-              const { hook, fn } = job.tasks[i];
+          this.Console.info(`Launching tasks from: ${hook}`);
 
-              this.Console.log(`Launching task: ${hook[0]}`);
+          for (let i = 0; i < tasks.length; i += 1) {
+            const task = tasks[i];
 
-              if (typeof fn === 'function') {
-                fn()
-                  .then((exit) => {
-                    if (!exit) {
-                      completed.push(hook[0]);
-                    } else {
-                      exceptions.push(hook[0]);
-                    }
+            this.Console.info(`Starting ${task.hook[0]}`);
 
-                    done(`Done: ${job.hook}`);
-                  })
-                  .catch((exception) => {
-                    this.Console.error(exception);
+            // eslint-disable-next-line no-await-in-loop
+            await task.fn().then((exit) => {
+              this.Console.info(`Completed ${task.hook[0]}`);
 
-                    done(`Done: ${job.hook}`);
-                  });
-                this.Console.log(`Complete: ${hook[0]}`);
+              if (!exit) {
+                completed.push(task.hook[0]);
               } else {
-                this.Console.warning(`No handler has been defined for ${job.task}`);
+                exceptions.push(task.hook[0]);
               }
+            });
+
+            if (completed.length + exceptions.length === tasks.length) {
+              done({ completed, exceptions });
             }
           }
-        }).then((message) => message && this.Console.success(message))
-      )
-    );
-
-    return {
-      completed,
-      exceptions,
-    };
+        });
+      }, Promise.resolve());
+    });
   }
 
   /**
