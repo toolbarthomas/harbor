@@ -125,7 +125,7 @@ class Harbor {
     } catch (exception) {
       if (exception) {
         this.Console.error(
-          `Harbor encounterd an error and could not continue: ${exception.toString()}`
+          `Harbor stopped because of an error and could not continue: ${exception.toString()}`
         );
 
         process.exit(1);
@@ -176,7 +176,7 @@ class Harbor {
       }
     } else if (results.exceptions && results.exceptions.length) {
       this.Console.warning(
-        `The following ${type} did not complete correctly: ${results.exceptions.join(', ')}`
+        `The following task did not complete correctly: ${results.exceptions.join(', ')}`
       );
     }
   }
