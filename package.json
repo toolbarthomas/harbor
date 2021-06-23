@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.75.5",
+  "version": "0.75.6",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
