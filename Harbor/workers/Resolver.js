@@ -69,7 +69,7 @@ export default class Resolver extends Worker {
             } catch (exception) {
               this.Console.error(`Unable to resolve package: ${name}`, exception);
 
-              this.reject();
+              super.reject();
             }
           })
       )

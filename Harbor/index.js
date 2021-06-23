@@ -1,5 +1,3 @@
-import fs from 'fs';
-
 import Argv from './common/Argv.js';
 import Environment from './common/Environment.js';
 import Logger from './common/Logger.js';

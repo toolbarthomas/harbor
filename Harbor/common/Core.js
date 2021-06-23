@@ -2,9 +2,8 @@ import path from 'path';
 import fs from 'fs';
 import glob from 'glob';
 
-import ConfigManager from '../common/ConfigManager.js';
 import Environment from './Environment.js';
-import Logger from '../common/Logger.js';
+import Logger from './Logger.js';
 
 /**
  * Base Framework for defining Workers & Plugins.
@@ -40,14 +39,12 @@ export default class Core {
    * instance.
    */
   defineOptions(options) {
-    this.options = Object.assign(
-      {
-        acceptedEnvironments: [],
-      },
-      Object.assign(options || {}, {
-        acceptedEnvironments: this.defineAcceptedEnvironments(options),
-      })
-    );
+    this.options = {
+      acceptedEnvironments: [],
+      ...Object.assign(options || {}, {
+        acceptedEnvironments: Core.defineAcceptedEnvironments(options),
+      }),
+    };
 
     if (options) {
       this.Console.log(`${this.type} options defined for ${this.name}`);
@@ -69,13 +66,13 @@ export default class Core {
    *
    * @param {Object} options Defines the value from the given options.
    */
-  defineAcceptedEnvironments(options) {
+  static defineAcceptedEnvironments(options) {
     if (!options) {
-      return;
+      return [];
     }
 
     if (!options.acceptedEnvironments) {
-      return;
+      return [];
     }
 
     return Array.isArray(options.acceptedEnvironments)
@@ -97,7 +94,7 @@ export default class Core {
    * environment variable.
    */
   defineEntry(useDestination) {
-    if (!this.config.entry || !this.config.entry instanceof Object) {
+    if (!this.config.entry || !(this.config.entry instanceof Object)) {
       return;
     }
 
@@ -178,7 +175,7 @@ export default class Core {
     }
     this.Console.log(`Resolving ${this.type}: ${this.name}`);
 
-    TaskManager.resolve(this.type, this.name, exit);
+    return TaskManager.resolve(this.type, this.name, exit);
   }
 
   /**

@@ -38,19 +38,21 @@ export default class Environment {
     // Inherit any missing option from the defaults Object.
     Object.keys(this.defaults).forEach((defaultOption) => {
       if (!Object.prototype.hasOwnProperty.call(parsed, defaultOption)) {
-        parsed[defaultOption] = this.defaults[defaultOption];
+        parsed[defaultOption] = parseInt(this.defaults[defaultOption], 2)
+          ? parseInt(this.defaults[defaultOption], 2)
+          : this.defaults[defaultOption];
       }
 
       if (
         typeof parsed[defaultOption] === 'string' &&
-        parsed[defaultOption].toLowerCase() === 'false'
+        ['false', '0'].includes(parsed[defaultOption].toLowerCase())
       ) {
         parsed[defaultOption] = false;
       }
 
       if (
         typeof parsed[defaultOption] === 'string' &&
-        parsed[defaultOption].toLowerCase() === 'true'
+        ['true', '1'].includes(parsed[defaultOption].toLowerCase())
       ) {
         parsed[defaultOption] = true;
       }

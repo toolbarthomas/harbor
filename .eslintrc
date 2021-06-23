@@ -1,6 +1,7 @@
 {
   "env": {
-    "browser": true
+    "browser": true,
+    "es6": true
   },
   "extends": [
     "eslint-config-airbnb-base",
@@ -9,10 +10,14 @@
   "plugins": [
     "prettier"
   ],
+  "globals": {
+    "jQuery": "readonly",
+    "Drupal": "writable",
+    "drupalSettings": "readonly"
+  },
   "rules": {
-    "import/no-extraneous-dependencies": "0",
-    "prettier/prettier": [
-      "error"
-    ]
+    "import/no-extraneous-dependencies": 0,
+    "import/extensions": 0,
+    "prettier/prettier": "error"
   }
 }

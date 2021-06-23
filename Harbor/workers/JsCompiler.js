@@ -1,5 +1,4 @@
-import { Linter, SourceCode } from 'eslint';
-import { transformFileAsync, transformFromAstSync } from '@babel/core';
+import { transformFileAsync } from '@babel/core';
 import fs from 'fs';
 import path from 'path';
 import mkdirp from 'mkdirp';
@@ -13,7 +12,15 @@ export default class JsCompiler extends Worker {
   constructor(services, options) {
     super(services, options);
 
-    this.linter = new Linter();
+    /**
+     * Keeps track of the entries that cannot be transpiled.
+     */
+    this.transpileExceptions = [];
+
+    /**
+     * Keeps track of the entries that are not valid according to the linter.
+     */
+    this.linterExceptions = [];
   }
 
   /**
@@ -24,22 +31,23 @@ export default class JsCompiler extends Worker {
       return super.resolve();
     }
 
-    await Promise.all(
-      this.entry.map(
-        (entry) =>
-          new Promise((cb) => {
-            if (entry.length) {
-              this.transpileCwd(entry).then(cb);
-            } else {
-              this.Console.warning(`Unable to find entry from: ${p}`);
+    const queue = this.entry.map((entry) => new Promise((done) => this.transpileCwd(entry, done)));
 
-              cb();
-            }
-          })
-      )
-    );
+    await Promise.all(queue);
 
-    super.resolve();
+    const { length } = this.transpileExceptions.length;
+
+    if (length) {
+      this.Console.error(`JsCompiler encountered ${length} error${length !== 1 ? 's' : ''}...`);
+
+      this.transpileExceptions = [];
+
+      this.linterExceptions = [];
+
+      return super.reject();
+    }
+
+    return super.resolve();
   }
 
   /**
@@ -47,85 +55,58 @@ export default class JsCompiler extends Worker {
    *
    * @param {Array} cwd Array of javascript files to process.
    */
-  transpileCwd(cwd) {
-    return new Promise(async (done) => {
-      Promise.all(
-        cwd.map(
-          (entry) =>
-            new Promise((cb) => {
-              transformFileAsync(
-                entry,
-                Object.assign(
-                  {
-                    ast: true,
-                    code: false,
-                  },
-                  this.config.plugins.transform
-                )
-              ).then((result) => {
-                const { code, map } = transformFromAstSync(result.ast, fs.readFileSync(entry));
+  async transpileCwd(cwd, done) {
+    await Promise.all(
+      cwd.map(
+        (entry) =>
+          new Promise((cb) => {
+            transformFileAsync(entry, {
+              sourceMaps: true,
+              ...this.config.plugins.transform,
+            }).then((result) => {
+              const { code, map } = result;
 
-                if (!code) {
-                  this.Console.info(`Skipping empty entry: ${entry}`);
-                  return cb();
+              if (!code) {
+                this.Console.info(`Skipping empty entry: ${entry}`);
+
+                return cb();
+              }
+
+              const destination = path
+                .resolve(entry)
+                .replace(
+                  path.resolve(this.environment.THEME_SRC),
+                  path.resolve(this.environment.THEME_DIST)
+                );
+
+              return mkdirp(path.dirname(destination)).then((dirPath, dirException) => {
+                if (dirException) {
+                  this.Console.error(dirException);
+
+                  return super.reject();
                 }
 
-                const destination = path
-                  .resolve(entry)
-                  .replace(
-                    path.resolve(this.environment.THEME_SRC),
-                    path.resolve(this.environment.THEME_DIST)
-                  );
+                return fs.writeFile(destination, code, (fileException) => {
+                  if (fileException) {
+                    this.Console.error(fileException);
 
-                if (this.config.plugins.eslint) {
-                  const linter = this.linter.verify(code, this.config.plugins.eslint, {
-                    filename: destination,
-                  });
-
-                  if (Array.isArray(linter)) {
-                    linter.forEach((f) => {
-                      if (f.fatal) {
-                        const m = [
-                          `Unable to compile: ${path.resolve(destination)}:${f.line}:${f.column}`,
-                          `'${f.message}`,
-                        ];
-
-                        if (this.environment.THEME_DEBUG) {
-                          this.Console.warning(m);
-                          return cb();
-                        }
-
-                        this.Console.error(m);
-
-                        process.exit(1);
-                      }
-                    });
+                    return super.reject();
                   }
-                }
-
-                /**
-                 * Create the destination directory before writing the source to
-                 * the filesystem.
-                 */
-                mkdirp(path.dirname(destination)).then((dirPath, error) => {
-                  if (error) {
-                    this.Console.error(error);
-                  }
-
-                  fs.writeFileSync(destination, code);
 
                   if (this.environment.THEME_DEBUG && map) {
-                    fs.writeFileSync(`${destination}.map`, map);
+                    fs.writeFileSync(`${destination}.map`, JSON.stringify(map));
                   }
 
                   this.Console.log(`Successfully transpiled: ${destination}`);
 
-                  cb();
+                  return cb();
                 });
               });
-            })
-        )
-      ).then(done);
-    });
+            });
+          })
+      )
+    );
+
+    done();
   }
 }

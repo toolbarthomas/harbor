@@ -2,7 +2,6 @@ import copyfiles from 'copyfiles';
 import fs from 'fs';
 import path from 'path';
 
-import Logger from '../common/Logger.js';
 import Worker from './Worker.js';
 
 /**
@@ -73,14 +72,12 @@ export default class FileSync extends Worker {
     let resolvedPatterns = [...new Set(entries)];
 
     // Exclude any empty entries.
-    resolvedPatterns = resolvedPatterns.filter((entry) => {
-      return entry;
-    });
+    resolvedPatterns = resolvedPatterns.filter((entry) => entry);
 
     // Make sure the path is relative to the cwd path.
-    resolvedPatterns = resolvedPatterns.map((entry) => {
-      return String(entry).startsWith(this.cwd) ? entry : path.join(this.cwd, entry);
-    });
+    resolvedPatterns = resolvedPatterns.map((entry) =>
+      String(entry).startsWith(this.cwd) ? entry : path.join(this.cwd, entry)
+    );
 
     // Append a glob pattern is the current pattern is an actual directory.
     resolvedPatterns = resolvedPatterns.map((entry) => {

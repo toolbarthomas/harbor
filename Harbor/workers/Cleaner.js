@@ -8,10 +8,6 @@ import Worker from './Worker.js';
  * Clears the defined environment destination directory.
  */
 export default class Cleaner extends Worker {
-  constructor(services) {
-    super(services);
-  }
-
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */

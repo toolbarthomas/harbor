@@ -5,7 +5,6 @@ import globImporter from 'node-sass-glob-importer';
 import mkdirp from 'mkdirp';
 import postcss from 'postcss';
 import postcssScss from 'postcss-scss';
-import stylelint from 'stylelint';
 
 import Worker from './Worker.js';
 
@@ -46,7 +45,7 @@ export default class SassCompiler extends Worker {
             if (cwd.length) {
               this.renderCwd(cwd).then(cb);
             } else {
-              this.Console.warning(`Unable to find entry from: ${p}`);
+              this.Console.warning(`Unable to find entry from: ${entry}`);
 
               cb();
             }
@@ -65,7 +64,7 @@ export default class SassCompiler extends Worker {
       return super.reject();
     }
 
-    super.resolve();
+    return super.resolve();
   }
 
   /**
@@ -73,22 +72,13 @@ export default class SassCompiler extends Worker {
    *
    * @param {Array} cwd The actual array to process.
    */
-  renderCwd(cwd) {
-    return new Promise((done) => {
-      Promise.all(
-        cwd.map(
-          (entry) =>
-            new Promise(async (cb) => {
-              if (String(path.basename(entry)).indexOf('_') !== 0) {
-                await this.lintFile(entry);
-                await this.renderFile(entry);
-              }
-
-              cb();
-            })
-        )
-      ).then(done);
-    });
+  async renderCwd(cwd) {
+    await Promise.all(
+      cwd.map(
+        (entry) =>
+          new Promise((cb) => this.lintFile(entry).then(() => this.renderFile(entry).then(cb)))
+      )
+    );
   }
 
   /**
@@ -96,41 +86,35 @@ export default class SassCompiler extends Worker {
    *
    * @param {String} entry Path to the source stylesheet to render.
    */
-  lintFile(entry) {
-    return new Promise((done) => {
-      if (!this.environment.THEME_DEBUG) {
-        return done();
-      }
+  async lintFile(entry) {
+    if (!this.environment.THEME_DEBUG) {
+      return;
+    }
 
-      const source = fs.readFileSync(entry);
+    const source = fs.readFileSync(entry);
 
-      return postcss(this.config.plugins.postcss.plugins || [])
-        .process(source, {
-          from: entry,
-          syntax: postcssScss,
-        })
-        .then((result) => {
-          this.stylelintExceptions = result.stylelint
-            ? result.stylelint.stylelintError || []
-            : [];
+    await postcss(this.config.plugins.postcss.plugins || [])
+      .process(source, {
+        from: entry,
+        syntax: postcssScss,
+      })
+      .then((result) => {
+        this.stylelintExceptions = result.stylelint ? result.stylelint.stylelintError || [] : [];
 
-          if (this.stylelintExceptions) {
-            this.Console.warning(`Stylelint encountered some problems:`);
+        if (this.stylelintExceptions && this.stylelintExceptions.length) {
+          this.Console.warning(`Stylelint encountered some problems:`);
 
-            if (result.messages) {
-              result.messages.forEach((message) => {
-                if (message.text) {
-                  this.Console[message.type || 'info'](
-                    `- ${message.text} | ${entry}:${message.line}:${message.column}`
-                  );
-                }
-              });
-            }
+          if (result.messages) {
+            result.messages.forEach((message) => {
+              if (message.text) {
+                this.Console[message.type || 'info'](
+                  `- ${message.text} | ${entry}:${message.line}:${message.column}`
+                );
+              }
+            });
           }
-
-          done();
-        });
-    });
+        }
+      });
   }
 
   /**

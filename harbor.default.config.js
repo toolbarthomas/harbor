@@ -8,7 +8,6 @@ import combineDuplicateSelectors from 'postcss-combine-duplicated-selectors';
 import cssnano from 'cssnano';
 import stylelint from 'stylelint';
 
-const eslintConfig = glob.sync('.eslintrc*');
 const styleLintConfig = glob.sync('.stylelintrc*');
 const browserListConfig = glob.sync('.browserlistrc*');
 const babelConfig = glob.sync('.babelrc*');
@@ -29,23 +28,6 @@ export default {
       },
       hook: ['js', 'javascripts'],
       plugins: {
-        eslint: eslintConfig.length
-          ? null
-          : {
-              env: {
-                browser: true,
-              },
-              extends: ['eslint-config-airbnb-base', 'prettier'],
-              globals: {
-                Drupal: 'writable',
-                drupalSettings: 'readonly',
-              },
-              plugins: ['prettier'],
-              rules: {
-                'import/no-extraneous-dependencies': '0',
-                'prettier/prettier': 'error',
-              },
-            },
         transform: babelConfig.length
           ? null
           : JSON.parse(
