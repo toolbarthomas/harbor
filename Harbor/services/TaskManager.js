@@ -157,7 +157,8 @@ export default class TaskManager {
       return null;
     }
 
-    const jobs = [...queue];
+    const jobs = [].concat(...queue);
+
     const completed = [];
     const exceptions = [];
 
