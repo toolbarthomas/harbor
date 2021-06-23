@@ -126,9 +126,9 @@ export default class Harbor {
       }
     } catch (exception) {
       if (exception) {
-        throw new Error(
-          `Harbor encounterd an error and could not continue: ${exception.toString()}`
-        );
+        this.Console.error(`Harbor encounterd an error and could not continue: ${exception.toString()}`)
+
+        process.exit(1);
       }
     }
   }
@@ -162,11 +162,11 @@ export default class Harbor {
   validateResult(results, type) {
     if (results.exceptions && results.exceptions.length) {
       if (this.env.THEME_ENVIRONMENT !== 'development') {
-        const msg = `Not all ${type} have been completed correctly: ${results.exceptions.join(', ')}`
+        const msg = `Not all tasks have been completed correctly: ${results.exceptions.join(', ')}`
 
         this.Console.error(msg);
 
-        throw Error(msg);
+        process.exit(1);
       }
     }
 
