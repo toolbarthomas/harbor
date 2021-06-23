@@ -65,9 +65,9 @@ export default class Harbor {
     const config = await ConfigManager.load();
 
     // Ensure the configuration is defined before mounting anything.
-    this.mount(this.workers, config);
+    Harbor.mount(this.workers, config);
 
-    let tasks = [task].filter((t) => t);
+    const tasks = [task].filter((t) => t);
     if (!tasks || !tasks.length) {
       this.services.TaskManager.workerHooks().forEach((hook) => {
         if (Object.keys(customArgs).includes(hook.split('::')[0])) {
@@ -92,11 +92,11 @@ export default class Harbor {
         const plugins = Object.keys(args).filter(
           (arg) =>
             args[arg] &&
-            Object.values(config['plugins']).filter(({ hook }) => {
+            Object.values(config.plugins).filter(({ hook }) => {
               const h = hook ? (Array.isArray(hook) ? hook : [String(hook)]) : [];
 
               if (!h.includes(String(arg).split('::')[0])) {
-                return;
+                return false;
               }
 
               return true;
@@ -106,7 +106,7 @@ export default class Harbor {
         if (plugins.length) {
           // Mount the actual plugins when all workers are completed to ensure
           // the plugin entries are defined correctly.
-          this.mount(this.plugins, config);
+          Harbor.mount(this.plugins, config);
 
           this.Console.log(
             `Using ${plugins.length} ${plugins.length === 1 ? 'plugin' : 'plugins'} for ${
@@ -124,7 +124,9 @@ export default class Harbor {
       }
     } catch (exception) {
       if (exception) {
-        this.Console.error(`Harbor encounterd an error and could not continue: ${exception.toString()}`)
+        this.Console.error(
+          `Harbor encounterd an error and could not continue: ${exception.toString()}`
+        );
 
         process.exit(1);
       }
@@ -134,7 +136,7 @@ export default class Harbor {
   /**
    * Defines the required properties for the defined Harbor worker or plugin.
    */
-  mount(instances, config) {
+  static mount(instances, config) {
     if (instances instanceof Object) {
       Object.keys(instances).forEach((name) => {
         const handler = instances[name];
@@ -160,7 +162,7 @@ export default class Harbor {
   validateResult(results, type) {
     if (results.exceptions && results.exceptions.length) {
       if (this.env.THEME_ENVIRONMENT !== 'development') {
-        const msg = `Not all tasks have been completed correctly: ${results.exceptions.join(', ')}`
+        const msg = `Not all tasks have been completed correctly: ${results.exceptions.join(', ')}`;
 
         this.Console.error(msg);
 

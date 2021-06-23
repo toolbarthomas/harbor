@@ -35,7 +35,7 @@ export default class JsCompiler extends Worker {
 
     await Promise.all(queue);
 
-    const { length } = this.transpileExceptions.length;
+    const { length } = this.transpileExceptions;
 
     if (length) {
       this.Console.error(`JsCompiler encountered ${length} error${length !== 1 ? 's' : ''}...`);
@@ -63,46 +63,56 @@ export default class JsCompiler extends Worker {
             transformFileAsync(entry, {
               sourceMaps: true,
               ...this.config.plugins.transform,
-            }).then((result) => {
-              const { code, map } = result;
+            })
+              .then((result) => {
+                const { code, map } = result;
 
-              if (!code) {
-                this.Console.info(`Skipping empty entry: ${entry}`);
+                if (!code) {
+                  this.Console.info(`Skipping empty entry: ${entry}`);
 
-                return cb();
-              }
-
-              const destination = path
-                .resolve(entry)
-                .replace(
-                  path.resolve(this.environment.THEME_SRC),
-                  path.resolve(this.environment.THEME_DIST)
-                );
-
-              return mkdirp(path.dirname(destination)).then((dirPath, dirException) => {
-                if (dirException) {
-                  this.Console.error(dirException);
-
-                  return super.reject();
+                  return cb();
                 }
 
-                return fs.writeFile(destination, code, (fileException) => {
-                  if (fileException) {
-                    this.Console.error(fileException);
+                const destination = path
+                  .resolve(entry)
+                  .replace(
+                    path.resolve(this.environment.THEME_SRC),
+                    path.resolve(this.environment.THEME_DIST)
+                  );
+
+                return mkdirp(path.dirname(destination)).then((dirPath, dirException) => {
+                  if (dirException) {
+                    this.Console.error(dirException);
 
                     return super.reject();
                   }
 
-                  if (this.environment.THEME_DEBUG && map) {
-                    fs.writeFileSync(`${destination}.map`, JSON.stringify(map));
-                  }
+                  return fs.writeFile(destination, code, (fileException) => {
+                    if (fileException) {
+                      this.Console.error(fileException);
 
-                  this.Console.log(`Successfully transpiled: ${destination}`);
+                      return super.reject();
+                    }
 
-                  return cb();
+                    if (this.environment.THEME_DEBUG && map) {
+                      fs.writeFileSync(`${destination}.map`, JSON.stringify(map));
+                    }
+
+                    this.Console.log(`Successfully transpiled: ${destination}`);
+
+                    return cb();
+                  });
                 });
+              })
+              .catch((exception) => {
+                if (exception) {
+                  this.Console.error(exception);
+
+                  this.transpileExceptions.push(exception);
+
+                  cb();
+                }
               });
-            });
           })
       )
     );

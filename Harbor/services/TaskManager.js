@@ -16,7 +16,7 @@ export default class TaskManager {
 
   workerHooks() {
     if (!this.instances || !this.instances.workers) {
-      return;
+      return [];
     }
 
     const hooks = Object.keys(this.instances.workers)
@@ -51,7 +51,7 @@ export default class TaskManager {
 
     const fn = () => {
       try {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           this.instances[type][name].resolve = resolve;
 
           return handler(args);
@@ -59,6 +59,8 @@ export default class TaskManager {
       } catch (exception) {
         this.Console.error(exception);
       }
+
+      return null;
     };
 
     this.instances[type][name].fn = fn;
@@ -86,25 +88,25 @@ export default class TaskManager {
    *
    * @param {string[]} hook Initialtes the subscribed handlers from the given hooks.
    */
-  async publish(type, hook) {
-    if (!hook) {
+  async publish(type, name) {
+    if (!name) {
       this.Console.warning('No task have been defined...');
-      return;
+
+      return null;
     }
 
-    const list = String(hook)
+    const list = String(name)
       .split(',')
-      .map((t) => {
-        return t.trim();
-      });
+      .map((t) => t.trim());
 
     if (!list.length) {
       this.Console.warning('No task has been defined.');
-      return;
+
+      return null;
     }
 
     const queue = list
-      .filter((item, index) => list.indexOf(item) == index)
+      .filter((item, index) => list.indexOf(item) === index)
       .map((item) => {
         const entries = new Map();
 
@@ -124,10 +126,11 @@ export default class TaskManager {
 
           const order =
             parseInt(
-              (task.hook.filter((h) => h.split('::') && h.split('::')[1])[0] || '').split('::')[1]
+              (task.hook.filter((h) => h.split('::') && h.split('::')[1])[0] || '').split('::')[1],
+              2
             ) || 0;
 
-          let key = entries.has(order) ? order + 1 : order;
+          const key = entries.has(order) ? order + 1 : order;
 
           entries.set(key, task);
         });
@@ -136,7 +139,7 @@ export default class TaskManager {
         const tasks = [...entries.keys()].sort((a, b) => a - b).map((entry) => entries.get(entry));
 
         if (!tasks.length) {
-          return;
+          return null;
         }
 
         return {
@@ -151,41 +154,45 @@ export default class TaskManager {
         `Unable to start ${type}, no hook has been defined for: ${list.join(', ')}`
       );
 
-      return;
+      return null;
     }
 
-    const jobs = [].concat.apply([], queue);
+    const jobs = [...queue];
     const completed = [];
     const exceptions = [];
 
-    const result = await Promise.all(
+    await Promise.all(
       jobs.map((job) =>
-        new Promise(async (done) => {
+        new Promise((done) => {
           if (job.tasks && job.tasks.length) {
             this.Console.info(`Starting: ${job.hook}`);
 
-            for (let i = 0; i < job.tasks.length; i++) {
+            for (let i = 0; i < job.tasks.length; i += 1) {
               const { hook, fn } = job.tasks[i];
 
               this.Console.log(`Launching task: ${hook[0]}`);
 
               if (typeof fn === 'function') {
-                await fn()
+                fn()
                   .then((exit) => {
                     if (!exit) {
                       completed.push(hook[0]);
                     } else {
                       exceptions.push(hook[0]);
                     }
+
+                    done(`Done: ${job.hook}`);
                   })
-                  .catch((exception) => this.Console.error(exception));
+                  .catch((exception) => {
+                    this.Console.error(exception);
+
+                    done(`Done: ${job.hook}`);
+                  });
                 this.Console.log(`Complete: ${hook[0]}`);
               } else {
                 this.Console.warning(`No handler has been defined for ${job.task}`);
               }
             }
-
-            done(`Done: ${job.hook}`);
           }
         }).then((message) => message && this.Console.success(message))
       )
@@ -202,9 +209,6 @@ export default class TaskManager {
    * within the acceptedEnvironments option.
    */
   initIfAccepted(options) {
-    const environment = new Environment();
-    const env = environment.define();
-
     if (!options) {
       return true;
     }
@@ -213,7 +217,7 @@ export default class TaskManager {
       return true;
     }
 
-    if (options.acceptedEnvironments.includes(env.THEME_ENVIRONMENT)) {
+    if (options.acceptedEnvironments.includes(this.environment.THEME_ENVIRONMENT)) {
       return true;
     }
 
