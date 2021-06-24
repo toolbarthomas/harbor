@@ -174,16 +174,28 @@ class TaskManager {
 
             this.Console.info(`Starting task: ${task.hook[0]}`);
 
-            // eslint-disable-next-line no-await-in-loop
-            await task.fn().then((exit) => {
-              if (!exit) {
-                this.Console.info(`Done: ${task.hook[0]}`);
+            if (type === 'plugins') {
+              task.fn().then((exit) => {
+                if (!exit) {
+                  this.Console.info(`Done: ${task.hook[0]}`);
 
-                completed.push(task.hook[0]);
-              } else {
-                exceptions.push(task.hook[0]);
-              }
-            });
+                  completed.push(task.hook[0]);
+                } else {
+                  exceptions.push(task.hook[0]);
+                }
+              });
+            } else {
+              // eslint-disable-next-line no-await-in-loop
+              await task.fn().then((exit) => {
+                if (!exit) {
+                  this.Console.info(`Done: ${task.hook[0]}`);
+
+                  completed.push(task.hook[0]);
+                } else {
+                  exceptions.push(task.hook[0]);
+                }
+              });
+            }
           }
         }),
       Promise.resolve()
