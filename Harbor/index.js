@@ -124,11 +124,9 @@ class Harbor {
       }
     } catch (exception) {
       if (exception) {
-        this.Console.error(
-          `Harbor stopped because of an error and could not continue: ${exception.toString()}`
-        );
+        this.Console.error('Harbor stopped because of an error:');
 
-        process.exit(1);
+        throw Error(exception.toString());
       }
     }
   }
@@ -162,11 +160,9 @@ class Harbor {
   validateResult(results, type) {
     if (results.exceptions && results.exceptions.length) {
       if (this.env.THEME_ENVIRONMENT !== 'development') {
-        const msg = `Not all tasks have been completed correctly: ${results.exceptions.join(', ')}`;
-
-        this.Console.error(msg);
-
-        process.exit(1);
+        throw Error(
+          `Not all tasks have been completed correctly: ${results.exceptions.join(', ')}`
+        );
       }
     }
 
