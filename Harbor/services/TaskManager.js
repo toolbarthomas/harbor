@@ -162,34 +162,31 @@ class TaskManager {
     const completed = [];
     const exceptions = [];
 
-    await Promise.all(
-      jobs.map(
-        (job) =>
-          new Promise(async (done) => {
-            const { hook, tasks } = job;
+    await jobs.reduce(
+      (instance, job) =>
+        instance.then(async () => {
+          const { hook, tasks } = job;
 
-            this.Console.info(`Launching tasks from: ${hook}`);
+          this.Console.info(`Launching tasks from: ${hook}`);
 
-            for (let i = 0; i < tasks.length; i += 1) {
-              const task = tasks[i];
+          for (let i = 0; i < tasks.length; i += 1) {
+            const task = tasks[i];
 
-              this.Console.info(`Starting task: ${task.hook[0]}`);
+            this.Console.info(`Starting task: ${task.hook[0]}`);
 
-              // eslint-disable-next-line no-await-in-loop
-              await task.fn().then((exit) => {
-                if (!exit) {
-                  this.Console.info(`Done: ${task.hook[0]}`);
+            // eslint-disable-next-line no-await-in-loop
+            await task.fn().then((exit) => {
+              if (!exit) {
+                this.Console.info(`Done: ${task.hook[0]}`);
 
-                  completed.push(task.hook[0]);
-                } else {
-                  exceptions.push(task.hook[0]);
-                }
-
-                done();
-              });
-            }
-          })
-      )
+                completed.push(task.hook[0]);
+              } else {
+                exceptions.push(task.hook[0]);
+              }
+            });
+          }
+        }),
+      Promise.resolve()
     );
 
     return {
