@@ -15,7 +15,19 @@ const loader = new TwingLoaderFilesystem([theme]);
 // Use namespace to maintain the exact include paths for both Drupal and
 // Storybook.
 if (typeof loader.addPath === 'function') {
-  loader.addPath(theme, 'theme');
+  if (process.env.THEME_ALIAS) {
+    try {
+      const alias = JSON.parse(process.env.THEME_ALIAS);
+
+      if (alias) {
+        Object.keys(alias).forEach((name) => {
+          loader.addPath(path.resolve(process.cwd(), alias[name]), name.replace('@', ''));
+        });
+      }
+    } catch (exception) {
+      throw new Error(exception);
+    }
+  }
 }
 
 const environment = new TwingEnvironment(loader, { autoescape: false });

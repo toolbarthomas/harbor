@@ -190,8 +190,11 @@ class StyleguideCompiler extends Plugin {
             THEME_LIBRARIES: JSON.stringify(libraries),
             THEME_DIST: '${path.normalize(this.environment.THEME_DIST)}/',
             THEME_SPRITES: JSON.stringify(sprites),
+            THEME_ALIAS: JSON.stringify(${JSON.stringify(this.config.options.alias)}),
           })
         );
+
+        process.env['THEME_ALIAS'] = JSON.stringify(${JSON.stringify(this.config.options.alias)});
 
         return config;
       }
