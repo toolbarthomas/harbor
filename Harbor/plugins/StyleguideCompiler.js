@@ -1,11 +1,12 @@
 import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
-import fs from 'fs';
+import fs, { mkdir } from 'fs';
 import glob from 'glob';
+import mkdirp from 'mkdirp';
+import outdent from 'outdent';
 import path from 'path';
 import webpack from 'webpack';
 import YAML from 'yaml';
-import outdent from 'outdent';
 
 import Plugin from './Plugin.js';
 import FileSync from '../workers/FileSync.js';
@@ -42,6 +43,7 @@ class StyleguideCompiler extends Plugin {
       // currently doesn't support the implementation of ESM.
       const template = this.setup();
       fs.existsSync(mainPath) && fs.unlinkSync(mainPath);
+      mkdirp.sync(path.dirname(mainPath));
       fs.writeFileSync(mainPath, template);
 
       let command;
