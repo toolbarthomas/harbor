@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.77.2",
+  "version": "0.78.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -28,7 +28,7 @@
     "index.js",
     "Harbor/",
     "harbor.default.config.js",
-    ".storybook/preview-head.html",
+    ".storybook/index.ejs",
     ". book"
   ],
   "repository": {

@@ -256,8 +256,7 @@ You can assign the following NPM script entries when using the default hook conf
 
 ### Asset management
 
-Harbor (currently) uses an internal Storybook instance where the `preview-head.html` is reserved to ensure the compatibilty within Drupal.
-Assets can be included by using the [attach_library](https://www.drupal.org/docs/theming-drupal/adding-stylesheets-css-and-javascript-js-to-a-drupal-theme) Twig function within your templatess.
+Assets can be included by using the [attach_library](https://www.drupal.org/docs/theming-drupal/adding-stylesheets-css-and-javascript-js-to-a-drupal-theme) Twig function within your templates.
 
 You need a valid Drupal theme library configuration file within your theme with the defined resources:
 
@@ -279,6 +278,8 @@ The defined assets will be included within the template that use the `attach_lib
 {{ attach_library('example/base') }}
 
 ```
+
+It also possible to use the defined Storybook preview head & body snippets within your project. Harbor will copy the configuration files from the defined `configDirectory` option within the `StyleguideCompiler` plugin ('./storybook').
 
 You can also import the actual assets within each storybook story to enable Hot Module Reload during a file change.
 Keep in mind that you still need to define the required libraries within Drupal if you don't include assets with the `attach_library` function.

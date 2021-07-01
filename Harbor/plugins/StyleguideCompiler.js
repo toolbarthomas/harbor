@@ -41,10 +41,43 @@ class StyleguideCompiler extends Plugin {
 
       // Define the Storybook configuration as CommonJS module since Storybook
       // currently doesn't support the implementation of ESM.
-      const template = this.setup();
+      const template = this.setup(config);
       fs.existsSync(mainPath) && fs.unlinkSync(mainPath);
       mkdirp.sync(path.dirname(mainPath));
       fs.writeFileSync(mainPath, template);
+
+      // Extends the Storybook instance with the optional custom configuration.
+      if (this.config.options.configDirectory) {
+        const customConfigurations = glob
+          .sync(path.join(this.config.options.configDirectory, '/**'))
+          .filter(
+            (configuration) =>
+              [
+                path.basename(this.config.options.configDirectory),
+                'index.ejs',
+                'main.js',
+                'main.cjs',
+              ].includes(path.basename(configuration)) === false
+          );
+
+        if (customConfigurations.length) {
+          this.Console.info(
+            `Using storybook configuration from: ${this.config.options.configDirectory}`
+          );
+
+          customConfigurations.forEach((configuration) => {
+            this.Console.log(`Extending configuration: ${configuration}`);
+
+            const destination = path.join(configPath, path.basename(configuration));
+
+            if (destination !== configuration) {
+              fs.existsSync(destination) && fs.unlinkSync(destination);
+
+              fs.existsSync(configuration) && fs.copyFileSync(configuration, destination);
+            }
+          });
+        }
+      }
 
       let command;
 
@@ -82,7 +115,7 @@ class StyleguideCompiler extends Plugin {
    * This ensures that the actual storybook instance is loaded as a CommonJS
    * module.
    */
-  setup() {
+  setup(cwd) {
     if (!this.config.entry instanceof Object) {
       return;
     }
@@ -97,6 +130,8 @@ class StyleguideCompiler extends Plugin {
 
     const addons =
       this.config.options && this.config.options.addons ? this.config.options.addons || [] : [];
+
+    const previewMainTemplate = path.resolve(cwd, 'index.ejs');
 
     const template = outdent`
       const fs = require('fs');
@@ -202,7 +237,8 @@ class StyleguideCompiler extends Plugin {
       module.exports = {
         stories,
         addons,
-        webpackFinal
+        webpackFinal,
+        previewMainTemplate: '${previewMainTemplate}',
       }
     `;
 
