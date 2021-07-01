@@ -10,18 +10,6 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <% if (typeof headHtmlSnippet !== 'undefined') { %> <%= headHtmlSnippet %> <% } %> <%
-    files.css.forEach(file => { %>
-    <link href="<%= file %>" rel="stylesheet" />
-    <% }); %>
-
-    <style>
-      #root[hidden],
-      #docs-root[hidden] {
-        display: none !important;
-      }
-    </style>
-
     <script>
       // Prepare the Drupal behaviors object in order to enable the logic within
       // storybook without using a different syntax.
@@ -65,6 +53,21 @@
         false
       );
     </script>
+
+    <% if (typeof headHtmlSnippet !== 'undefined') { %>
+      <%= headHtmlSnippet %>
+    <% } %>
+
+    <% files.css.forEach(file => { %>
+    <link href="<%= file %>" rel="stylesheet" />
+    <% }); %>
+
+    <style>
+      #root[hidden],
+      #docs-root[hidden] {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
     <% if (typeof bodyHtmlSnippet !== 'undefined') { %>
