@@ -1,6 +1,5 @@
 import path from 'path';
 import fs from 'fs';
-import autoprefixer from 'autoprefixer';
 import mkdirp from 'mkdirp';
 import postcss from 'postcss';
 
@@ -11,10 +10,6 @@ import Plugin from './Plugin.js';
  * directory.
  */
 class StyleOptimizer extends Plugin {
-  constructor(services, options) {
-    super(services, options);
-  }
-
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
@@ -44,14 +39,15 @@ class StyleOptimizer extends Plugin {
             if (entry.length) {
               this.optimizeCwd(entry).then(cb);
             } else {
-              this.Console.warning(`Unable to find entry from: ${p}`);
+              this.Console.warning('Unable to find optimize stylesheet entry');
+
               cb();
             }
           })
       )
     );
 
-    super.resolve();
+    return super.resolve();
   }
 
   /**
@@ -109,7 +105,7 @@ class StyleOptimizer extends Plugin {
         }
 
         // Write the actual css to the filesystem.
-        fs.writeFile(entry, result.css, () => {
+        return fs.writeFile(entry, result.css, () => {
           this.Console.log(`Successfully optimized: ${entry}`);
 
           done();

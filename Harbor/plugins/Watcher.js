@@ -2,8 +2,6 @@ import chokidar from 'chokidar';
 import path from 'path';
 
 import ConfigManager from '../common/ConfigManager.js';
-import Environment from '../common/Environment.js';
-import Logger from '../common/Logger.js';
 import Plugin from './Plugin.js';
 
 /**
@@ -65,39 +63,42 @@ class Watcher extends Plugin {
 
         // Create the Shutdown handler that will close the new Watcher after configured
         // time has passed.
-        this.instances[name].instance.on(this.config.instances[name].event || 'change', (path) => {
-          if (!this.config.instances[name].services) {
-            return;
-          }
-
-          this.config.instances[name].services.forEach((worker) => {
-            this.Console.log('Resetting shutdown timer...');
-            clearTimeout(this.instances[name].watcher);
-            clearTimeout(this.instances[name].reset);
-
-            this.defineReset(name, done);
-
-            if (!this.instances[name].active) {
-              this.instances[name].watcher = setTimeout(async () => {
-                this.instances[name].active = true;
-
-                if (this.config.instances[name].event !== 'all') {
-                  this.Console.info(`File updated ${path}`);
-                }
-
-                if (TaskManager) {
-                  const { hook } = ConfigManager.load(worker, 'workers');
-
-                  TaskManager.publish('workers', hook || worker);
-
-                  this.Console.info(`Resuming watcher: ${name}`);
-                }
-
-                this.instances[name].active = false;
-              }, this.config.options.delay || 500);
+        this.instances[name].instance.on(
+          this.config.instances[name].event || 'change',
+          (source) => {
+            if (!this.config.instances[name].services) {
+              return;
             }
-          });
-        });
+
+            this.config.instances[name].services.forEach((worker) => {
+              this.Console.log('Resetting shutdown timer...');
+              clearTimeout(this.instances[name].watcher);
+              clearTimeout(this.instances[name].reset);
+
+              this.defineReset(name, done);
+
+              if (!this.instances[name].active) {
+                this.instances[name].watcher = setTimeout(async () => {
+                  this.instances[name].active = true;
+
+                  if (this.config.instances[name].event !== 'all') {
+                    this.Console.info(`File updated ${source}`);
+                  }
+
+                  if (TaskManager) {
+                    const { hook } = ConfigManager.load(worker, 'workers');
+
+                    TaskManager.publish('workers', hook || worker);
+
+                    this.Console.info(`Resuming watcher: ${name}`);
+                  }
+
+                  this.instances[name].active = false;
+                }, this.config.options.delay || 500);
+              }
+            });
+          }
+        );
 
         this.defineReset(name, done);
 
@@ -138,6 +139,8 @@ class Watcher extends Plugin {
 
           return callback();
         }
+
+        return null;
       });
     }, this.config.options.duration || 1000 * 60 * 15);
   }

@@ -22,7 +22,7 @@ class Logger {
    * @param {Boolean} keepAlive Prevents an exit on the current process.
    */
   error(message) {
-    this.outputMessages(message, 'error', 'error');
+    Logger.outputMessages(message, 'error', 'error');
   }
 
   /**
@@ -31,7 +31,7 @@ class Logger {
    * @param {String|Array} message The message to display.
    */
   warning(message) {
-    this.outputMessages(message, 'warn', 'warning');
+    Logger.outputMessages(message, 'warn', 'warning');
   }
 
   /**
@@ -40,7 +40,7 @@ class Logger {
    * @param {String|Array} message The message to display.
    */
   success(message) {
-    this.outputMessages(message, 'log', 'success');
+    Logger.outputMessages(message, 'log', 'success');
   }
 
   /**
@@ -49,7 +49,7 @@ class Logger {
    * @param {String|Array} message The message to display.
    */
   info(message) {
-    this.outputMessages(message, 'info', 'info');
+    Logger.outputMessages(message, 'info', 'info');
   }
 
   /**
@@ -63,7 +63,7 @@ class Logger {
       return;
     }
 
-    this.outputMessages(message, 'log');
+    Logger.outputMessages(message, 'log');
   }
 
   /**
@@ -73,7 +73,7 @@ class Logger {
    * @param {String|Array} message The actual message to output
    * @param {String} method Defines the method to use for the console Object.
    */
-  outputMessages(message, method, type) {
+  static outputMessages(message, method, type) {
     const styles = Logger.getMessageStyle(type);
 
     if (message.constructor === Array && message instanceof Array) {

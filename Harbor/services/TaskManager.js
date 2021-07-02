@@ -14,8 +14,27 @@ class TaskManager {
     this.Console = new Logger(this.environment);
   }
 
+  /**
+   * Returns the hooks of the subscribed workers.
+   */
   workerHooks() {
-    if (!this.instances || !this.instances.workers) {
+    return this.hooks('workers');
+  }
+
+  /**
+   * Returns the hooks of the subscribed plugins.
+   */
+  pluginHooks() {
+    return this.hooks('plugins');
+  }
+
+  /**
+   * Returns an flat array with all the subscribed hook of the defined instance.
+   *
+   * @param {string} type Returns the hooks of the defined instance.
+   */
+  hooks(type) {
+    if (!this.instances || !this.instances[type]) {
       return [];
     }
 
@@ -88,7 +107,7 @@ class TaskManager {
    *
    * @param {string[]} hook Initialtes the subscribed handlers from the given hooks.
    */
-  async publish(type, name) {
+  async publish(type, name, initialTasks) {
     if (!name) {
       this.Console.warning('No task have been defined...');
 
@@ -157,7 +176,29 @@ class TaskManager {
       return null;
     }
 
-    const jobs = [].concat(...queue);
+    const jobs = [].concat(...queue).map((job) => {
+      if (!initialTasks || !initialTasks.length) {
+        return job;
+      }
+
+      // Ensure the current job hooks are present within the defined tasks.
+      const filteredTasks = job.tasks.filter((tt) => {
+        if (
+          ![]
+            .concat(...initialTasks.map((t) => t.split(',')))
+            .filter((initialTask) => tt.hook.includes(initialTask)).length
+        ) {
+          return null;
+        }
+
+        return tt;
+      });
+
+      return {
+        tasks: filteredTasks,
+        hook: job.hook,
+      };
+    });
 
     const completed = [];
     const exceptions = [];
@@ -167,7 +208,9 @@ class TaskManager {
         instance.then(async () => {
           const { hook, tasks } = job;
 
-          this.Console.info(`Launching tasks from: ${hook}`);
+          if (tasks.length) {
+            this.Console.info(`Launching: ${hook}`);
+          }
 
           for (let i = 0; i < tasks.length; i += 1) {
             const task = tasks[i];
@@ -185,6 +228,9 @@ class TaskManager {
                 }
               });
             } else {
+              // @TODO: Await needs to return directly within the upper scope
+              // otherwise it would initiate grouped tasks in paralel.
+              //
               // eslint-disable-next-line no-await-in-loop
               await task.fn().then((exit) => {
                 if (!exit) {
@@ -205,6 +251,14 @@ class TaskManager {
       completed,
       exceptions,
     };
+  }
+
+  publishPlugins(name, tasks) {
+    return this.publish('plugins', name, tasks);
+  }
+
+  publishWorkers(name) {
+    return this.publish('workers', name);
   }
 
   /**

@@ -48,12 +48,16 @@ class Argv {
     const privateArgs = {};
     Object.keys(args)
       .filter((arg) => Object.keys(this.defaults).includes(arg))
-      .forEach((arg) => (privateArgs[arg] = args[arg]));
+      .forEach((arg) => {
+        privateArgs[arg] = args[arg];
+      });
 
     const customArgs = {};
     Object.keys(args)
       .filter((arg) => !Object.keys(this.defaults).includes(arg))
-      .forEach((arg) => (customArgs[arg] = args[arg]));
+      .forEach((arg) => {
+        customArgs[arg] = args[arg];
+      });
 
     return Object.assign(this.defaults, Object.assign(privateArgs, { customArgs: customArgs }));
   }

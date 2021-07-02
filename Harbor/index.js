@@ -78,7 +78,7 @@ class Harbor {
 
     try {
       if (tasks && tasks.length) {
-        const workerResult = await this.services.TaskManager.publish('workers', tasks);
+        const workerResult = await this.services.TaskManager.publishWorkers(tasks);
 
         // Output the result of the initial build and throw an exception for the
         // production environment.
@@ -114,9 +114,9 @@ class Harbor {
             }...`
           );
 
-          const pluginResult = await this.services.TaskManager.publish(
-            'plugins',
-            plugins.join(',')
+          const pluginResult = await this.services.TaskManager.publishPlugins(
+            plugins.join(','),
+            tasks
           );
 
           this.validateResult(pluginResult);

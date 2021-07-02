@@ -110,14 +110,17 @@ export default {
         main: '**/javascripts/**/*.js',
         modules: 'modules/*/*/*.js',
       },
-      hook: ['minify:js', 'minify'],
-      options: {},
+      hook: ['minify:js', 'minify', 'javascripts'],
+      options: {
+        minify: {},
+        bundle: false,
+      },
     },
     Server: {
       options: {},
     },
     StyleOptimizer: {
-      hook: ['minify:css', 'minify'],
+      hook: ['minify:css', 'minify', 'stylesheets'],
       plugins: {
         autoprefixer: autoprefixer(
           browserListConfig.length
