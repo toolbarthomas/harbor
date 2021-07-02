@@ -13,6 +13,8 @@ class Logger {
     const { args } = new Argv();
 
     this.verbose = args.verbose;
+
+    this.styles = null;
   }
 
   /**
@@ -22,7 +24,7 @@ class Logger {
    * @param {Boolean} keepAlive Prevents an exit on the current process.
    */
   error(message) {
-    Logger.outputMessages(message, 'error', 'error');
+    this.outputMessages(message, 'error', 'error');
   }
 
   /**
@@ -31,7 +33,7 @@ class Logger {
    * @param {String|Array} message The message to display.
    */
   warning(message) {
-    Logger.outputMessages(message, 'warn', 'warning');
+    this.outputMessages(message, 'warn', 'warning');
   }
 
   /**
@@ -40,7 +42,7 @@ class Logger {
    * @param {String|Array} message The message to display.
    */
   success(message) {
-    Logger.outputMessages(message, 'log', 'success');
+    this.outputMessages(message, 'log', 'success');
   }
 
   /**
@@ -49,7 +51,7 @@ class Logger {
    * @param {String|Array} message The message to display.
    */
   info(message) {
-    Logger.outputMessages(message, 'info', 'info');
+    this.outputMessages(message, 'info', 'info');
   }
 
   /**
@@ -63,7 +65,7 @@ class Logger {
       return;
     }
 
-    Logger.outputMessages(message, 'log');
+    this.outputMessages(message, 'log');
   }
 
   /**
@@ -73,8 +75,10 @@ class Logger {
    * @param {String|Array} message The actual message to output
    * @param {String} method Defines the method to use for the console Object.
    */
-  static outputMessages(message, method, type) {
-    const styles = Logger.getMessageStyle(type);
+  outputMessages(message, method, type) {
+    this.styles = Logger.getMessageStyle(type);
+
+    const { styles } = this;
 
     if (message.constructor === Array && message instanceof Array) {
       message.forEach((m) => {

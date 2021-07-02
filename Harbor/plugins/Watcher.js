@@ -24,7 +24,7 @@ class Watcher extends Plugin {
   async init() {
     const { TaskManager } = this.services;
 
-    if (!this.config.instances instanceof Object) {
+    if (!(this.config.instances instanceof Object)) {
       return;
     }
 

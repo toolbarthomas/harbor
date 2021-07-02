@@ -59,7 +59,7 @@ class Argv {
         customArgs[arg] = args[arg];
       });
 
-    return Object.assign(this.defaults, Object.assign(privateArgs, { customArgs: customArgs }));
+    return Object.assign(this.defaults, Object.assign(privateArgs, { customArgs }));
   }
 }
 
