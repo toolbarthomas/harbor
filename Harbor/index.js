@@ -83,8 +83,8 @@ class Harbor {
         // Output the result of the initial build and throw an exception for the
         // production environment.
         this.validateResult(workerResult);
-      } else {
-        this.Console.warning('Harbor has not processed anything this time.');
+      } else if (!Environment.hasBuild(this.env)) {
+        this.Console.warning('The defined build folder is empty!');
       }
 
       if (args) {
@@ -157,7 +157,7 @@ class Harbor {
    * Validates the results of all used workers & plugins in order to define the
    * final result of the running Harbor instance.
    */
-  validateResult(results, type) {
+  validateResult(results) {
     if (results.exceptions && results.exceptions.length) {
       if (this.env.THEME_ENVIRONMENT !== 'development') {
         throw Error(

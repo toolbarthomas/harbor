@@ -62,6 +62,23 @@ class Environment {
 
     return parsed;
   }
+
+  /**
+   * Checks if the defined environment build destination is empty.
+   *
+   * @param {Object} environment The environment configuration to use.
+   */
+  static hasBuild(environment) {
+    if (!environment || !environment.THEME_DIST) {
+      return false;
+    }
+
+    if (!fs.existsSync(path.resolve(environment.THEME_DIST))) {
+      return false;
+    }
+
+    return fs.readdirSync(path.resolve(environment.THEME_DIST)).length > 0;
+  }
 }
 
 export default Environment;
