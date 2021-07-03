@@ -43,9 +43,7 @@ class Harbor {
     };
 
     this.plugins = {
-      JsOptimizer: new JsOptimizer(this.services, {
-        acceptedEnvironments: 'production',
-      }),
+      JsOptimizer: new JsOptimizer(this.services, {}),
       StyleguideCompiler: new StyleguideCompiler(this.services, {}, this.workers),
       StyleOptimizer: new StyleOptimizer(this.services, {
         acceptedEnvironments: 'production',

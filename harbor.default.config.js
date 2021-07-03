@@ -113,7 +113,7 @@ export default {
       hook: ['minify:js', 'minify', 'javascripts'],
       options: {
         minify: {},
-        bundle: false,
+        bundle: true,
       },
     },
     Server: {
