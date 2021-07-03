@@ -51,12 +51,17 @@ class ConfigManager {
 
         if (state && commit && commit instanceof Object && state instanceof Object) {
           Object.keys(commit).forEach((key) => {
-            const val = commit[key];
-
-            if (val instanceof Object && state[key] instanceof Object) {
-              proposal[key] = merge(state[key], val);
+            if (key === 'entry' && commit[key] instanceof Object) {
+              console.log('use entry', commit[key]);
+              proposal[key] = commit[key];
             } else {
-              proposal[key] = val;
+              const val = commit[key];
+
+              if (val instanceof Object && state[key] instanceof Object) {
+                proposal[key] = merge(state[key], val);
+              } else {
+                proposal[key] = val;
+              }
             }
           });
         }
