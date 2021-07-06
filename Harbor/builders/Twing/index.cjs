@@ -53,6 +53,7 @@ if (typeof environment.addFunction === 'function') {
 
   environment.addFunction(new TwingFunction('dump', functions.dump));
   environment.addFunction(new TwingFunction('link', functions.mock));
+  environment.addFunction(new TwingFunction('path', functions.mock));
   environment.addFunction(new TwingFunction('active_theme', functions.mock));
 }
 
