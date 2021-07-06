@@ -33,28 +33,34 @@ if (typeof loader.addPath === 'function') {
 const environment = new TwingEnvironment(loader, { autoescape: false });
 
 if (typeof environment.addFilter === 'function') {
-  environment.addFilter(new TwingFilter('without', filters.without));
-  environment.addFilter(new TwingFilter('t', filters.mock));
-  environment.addFilter(new TwingFilter('trans', filters.mock));
-  environment.addFilter(new TwingFilter('placeholder', filters.placeholder));
   environment.addFilter(new TwingFilter('clean_class', filters.mock));
   environment.addFilter(new TwingFilter('clean_id', filters.mock));
-  environment.addFilter(new TwingFilter('render', filters.mock));
-  environment.addFilter(new TwingFilter('format_date', filters.date));
-  environment.addFilter(new TwingFilter('escape', filters.escape));
   environment.addFilter(new TwingFilter('drupal_escape', filters.escape));
+  environment.addFilter(new TwingFilter('escape', filters.escape));
+  environment.addFilter(new TwingFilter('format_date', filters.date));
+  environment.addFilter(new TwingFilter('placeholder', filters.placeholder));
+  environment.addFilter(new TwingFilter('render', filters.mock));
   environment.addFilter(new TwingFilter('safe_join', filters.safeJoin));
+  environment.addFilter(new TwingFilter('t', filters.mock));
+  environment.addFilter(new TwingFilter('trans', filters.mock));
+  environment.addFilter(new TwingFilter('without', filters.without));
 }
 
 if (typeof environment.addFunction === 'function') {
   environment.addFunction(new TwingFunction('add_svg', functions.addSVG));
-  environment.addFunction(new TwingFunction('svg_path', functions.addSVG));
   environment.addFunction(new TwingFunction('attach_library', functions.attachLibrary));
+  environment.addFunction(new TwingFunction('svg_path', functions.addSVG));
 
+  environment.addFunction(new TwingFunction('active_theme_path', functions.mock));
+  environment.addFunction(new TwingFunction('active_theme', functions.mock));
+  environment.addFunction(new TwingFunction('create_attribute', functions.mock));
   environment.addFunction(new TwingFunction('dump', functions.dump));
+  environment.addFunction(new TwingFunction('file_url', functions.mock));
+  environment.addFunction(new TwingFunction('link', functions.mock));
   environment.addFunction(new TwingFunction('link', functions.mock));
   environment.addFunction(new TwingFunction('path', functions.mock));
-  environment.addFunction(new TwingFunction('active_theme', functions.mock));
+  environment.addFunction(new TwingFunction('render_var', functions.mock));
+  environment.addFunction(new TwingFunction('url', functions.mock));
 }
 
 module.exports = environment;
