@@ -1,10 +1,11 @@
-import path from 'path';
 import { render } from 'node-sass';
 import fs from 'fs';
+import glob from 'glob';
 import globImporter from 'node-sass-glob-importer';
 import mkdirp from 'mkdirp';
-import postcss from 'postcss';
-import postcssScss from 'postcss-scss';
+import outdent from 'outdent';
+import path from 'path';
+import stylelint from 'stylelint';
 
 import Worker from './Worker.js';
 
@@ -53,15 +54,33 @@ class SassCompiler extends Worker {
       )
     );
 
+    //     const method =
+    //   this.environment.THEME_ENVIRONMENT === 'production' ? 'error' : 'warning';
+
+    // // this.Console[method](exception);
+
+    this.stylelintExceptions = this.stylelintExceptions.filter(
+      (item, index) => this.stylelintExceptions.indexOf(item) === index
+    );
+
     const length = this.stylelintExceptions.length + this.sassExceptions.length;
 
     if (length) {
-      this.Console.error(`Sasscompiler encountered ${length} error${length !== 1 ? 's' : ''}...`);
+      this.stylelintExceptions.forEach((e) =>
+        this.environment.THEME_ENVIRONMENT !== 'production'
+          ? this.Console.warning(e)
+          : this.Console.error(e)
+      );
 
+      // Ensures no previous exceptions are inherited within endless processes.
       this.stylelintExceptions = [];
       this.sassExceptions = [];
 
-      return super.reject();
+      if (this.environment.THEME_ENVIRONMENT === 'production') {
+        this.Console.error(`Sasscompiler encountered ${length} error${length !== 1 ? 's' : ''}...`);
+
+        return super.reject();
+      }
     }
 
     return super.resolve();
@@ -91,28 +110,35 @@ class SassCompiler extends Worker {
       return;
     }
 
-    const source = fs.readFileSync(entry);
-
-    await postcss(this.config.plugins.postcss.plugins || [])
-      .process(source, {
-        from: entry,
-        syntax: postcssScss,
-      })
+    await stylelint
+      .lint(
+        Object.assign(this.config.plugins.stylelint, {
+          files: glob.sync(path.join(path.dirname(entry), '**/*.scss')),
+        })
+      )
       .then((result) => {
-        this.stylelintExceptions = result.stylelint ? result.stylelint.stylelintError || [] : [];
+        if (result.errored && result.results) {
+          const exceptions = [];
 
-        if (this.stylelintExceptions && this.stylelintExceptions.length) {
-          this.Console.warning(`Stylelint encountered some problems:`);
+          result.results.forEach((r) => {
+            r.warnings
+              .map(
+                (warning) =>
+                  outdent`
+                  Stylelint ${warning.severity} - [${warning.rule}]:
+                   - ${r.source}:${warning.line}:${warning.column}
+                   - ${warning.text};
 
-          if (result.messages) {
-            result.messages.forEach((message) => {
-              if (message.text) {
-                this.Console[message.type || 'info'](
-                  `- ${message.text} | ${entry}:${message.line}:${message.column}`
-                );
-              }
-            });
-          }
+                `
+              )
+              .forEach((exception) => {
+                if (!exceptions.includes(exception)) {
+                  exceptions.push(exception);
+                }
+              });
+          });
+
+          this.stylelintExceptions.push(...exceptions);
         }
       });
   }
@@ -124,45 +150,40 @@ class SassCompiler extends Worker {
    */
   renderFile(entry) {
     return new Promise((done) => {
-      if (this.stylelintExceptions.length) {
-        this.Console.info(`Ignoring file due to Stylelint errors: ${entry}`);
-        done();
-      } else {
-        const destination = path
-          .resolve(entry)
-          .replace(
-            path.resolve(this.environment.THEME_SRC),
-            path.resolve(this.environment.THEME_DIST)
-          )
-          .replace('.scss', '.css');
+      const destination = path
+        .resolve(entry)
+        .replace(
+          path.resolve(this.environment.THEME_SRC),
+          path.resolve(this.environment.THEME_DIST)
+        )
+        .replace('.scss', '.css');
 
-        this.Console.log(`Compiling: ${entry}`);
+      this.Console.log(`Compiling: ${entry}`);
 
-        render(
-          Object.assign(this.config.options, {
-            file: entry,
-            includePaths: [this.environment.THEME_SRC],
-            sourceMap: this.environment.THEME_DEBUG,
-            importer: globImporter(),
-            outFile: destination,
-          }),
-          async (error, result) => {
-            if (error) {
-              this.Console.error([
-                `Sass error  encountered : ${error.file}:${error.line}:${error.column}`,
-                error.message,
-                `From: ${entry}`,
-              ]);
+      render(
+        Object.assign(this.config.options, {
+          file: entry,
+          includePaths: [this.environment.THEME_SRC],
+          sourceMap: this.environment.THEME_DEBUG,
+          importer: globImporter(),
+          outFile: destination,
+        }),
+        async (error, result) => {
+          if (error) {
+            this.Console.error([
+              `Sass error  encountered : ${error.file}:${error.line}:${error.column}`,
+              error.message,
+              `From: ${entry}`,
+            ]);
 
-              this.sassExceptions.push(error);
-            } else {
-              await this.writeFile(result, destination);
-            }
-
-            done();
+            this.sassExceptions.push(error);
+          } else {
+            await this.writeFile(result, destination);
           }
-        );
-      }
+
+          done();
+        }
+      );
     });
   }
 

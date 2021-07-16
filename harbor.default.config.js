@@ -43,21 +43,16 @@ export default {
       },
       hook: ['sass', 'stylesheets', 'compile'],
       plugins: {
-        postcss: {
-          plugins: [
-            stylelint(
-              styleLintConfig.length
-                ? {}
-                : {
-                    rules: {
-                      'selector-max-compound-selectors': 3,
-                      'no-duplicate-selectors': null,
-                      'no-descending-specificity': null,
-                    },
-                  }
-            ),
-          ],
-          extends: ['stylelint-config-recommended', 'stylelint'],
+        stylelint: {
+          plugins: ['stylelint-scss'],
+          rules: styleLintConfig.length
+            ? {}
+            : {
+                'selector-max-compound-selectors': 3,
+                'no-duplicate-selectors': null,
+                'no-descending-specificity': null,
+              },
+          extends: 'stylelint-config-recommended-scss',
         },
       },
       entry: {
