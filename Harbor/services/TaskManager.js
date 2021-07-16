@@ -233,13 +233,13 @@ class TaskManager {
           const { hook, tasks } = job;
 
           if (tasks.length) {
-            this.Console.info(`Launching: ${hook}`);
+            this.Console.log(`Starting: ${hook}`);
           }
 
           for (let i = 0; i < tasks.length; i += 1) {
             const task = tasks[i];
 
-            this.Console.info(`Starting task: ${task.hook[0]}`);
+            this.Console.info(`Launching worker: ${task.hook[0]}`);
 
             if (type === 'plugins' || !task.hook.filter((h) => h.indexOf('::') > 0).length) {
               // Collects the callback within the JIT for the current asynchronous

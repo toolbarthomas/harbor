@@ -35,7 +35,7 @@ class FileSync extends Worker {
     // Push the destination path
     this.patterns.push(this.dist);
 
-    this.Console.info('Starting filesync...');
+    this.Console.log('Syncing files...');
 
     // Sync the actual files.
     copyfiles(

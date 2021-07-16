@@ -16,10 +16,10 @@ class Cleaner extends Worker {
       this.path = path.resolve(this.environment.THEME_DIST);
 
       if (fs.existsSync(this.path)) {
-        this.Console.info(`Cleaning directory: ${this.path}`);
+        this.Console.log(`Cleaning directory: ${this.path}`);
 
         rimraf(this.path, () => {
-          this.Console.success(`Directory cleaned: ${this.path}`);
+          this.Console.log(`Directory cleaned: ${this.path}`);
 
           super.resolve();
         });

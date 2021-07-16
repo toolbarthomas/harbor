@@ -62,6 +62,8 @@ class Harbor {
     const { customArgs } = args;
     const config = await ConfigManager.load();
 
+    this.Console.info(`Starting Harbor...`);
+
     // Ensure the configuration is defined before mounting anything.
     Harbor.mount(this.workers, config);
 
