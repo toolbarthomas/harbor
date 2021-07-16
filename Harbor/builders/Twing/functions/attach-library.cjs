@@ -48,6 +48,40 @@ module.exports = (name) => {
               typeof media === 'string' ? media : 'all'
             }" />`
           );
+
+          cssSnippets.push(
+            `<script>
+              const sheets = document.querySelectorAll('link[href*="${file}"');
+
+              if (!window.bootlegReload) {
+                window.bootlegReload = {};
+              }
+
+              for (let i = 0; i < sheets.length; i++) {
+                const version = '?v=' + Date.now();
+                let start;
+
+                const reload = (timestamp) => {
+                  if (start === undefined) {
+                    start = timestamp;
+                  }
+
+                  const elapsed = timestamp - start;
+
+                  if (elapsed > 1500) {
+                    sheets[i].href = '${file}' + version;
+
+                    start = timestamp;
+                  }
+
+                  window.requestAnimationFrame(reload);
+                }
+
+                window.bootlegReload['${file}'] = window.requestAnimationFrame(reload);
+              }
+
+            </script>`
+          );
         });
       });
     }

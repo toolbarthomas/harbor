@@ -3,5 +3,3 @@ base:
   css:
     theme:
       dist/main/stylesheets/index.css: {}
-    js:
-      dist/main/javascripts/main.bundle.js: {}

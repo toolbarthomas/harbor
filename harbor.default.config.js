@@ -154,22 +154,22 @@ export default {
         stylesheets: {
           event: 'change',
           path: '**/stylesheets/**/**.scss',
-          services: ['SassCompiler'],
+          workers: ['SassCompiler'],
         },
         javascripts: {
           event: 'change',
           path: '**/javascripts/**/**.js',
-          services: ['JsCompiler'],
+          workers: ['JsCompiler'],
         },
         svgprites: {
           event: 'all',
           path: '**/images/**/**.svg',
-          services: ['SvgSpriteCompiler'],
+          workers: ['SvgSpriteCompiler'],
         },
         sync: {
           event: 'add',
           path: ['webfonts/**', 'images/**'],
-          services: ['FileSync'],
+          workers: ['FileSync'],
         },
       },
     },

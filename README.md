@@ -44,7 +44,8 @@ $ node node_modules/@toolbarthomas/harbor/index.js stylesheets
 
 This example will start the workers that are defined with the `stylesheets` hook, by default it will process the configured sass entry files (or it will try to use the default configured entries).
 
-The actual hooks are defined within the default configuration of each worker, these hooks can be adjusted within your custom configuration. Workers that share the same hook will be called in synchronous order. The order of this queue can be adjusted by adding the an optional flag with the index value to mark the order.
+The actual hooks are defined within the default configuration of each worker, these hooks can be adjusted within your custom configuration. Workers that share the same hook will be called in parallel order by default.
+The order of this queue can be adjusted by adding the optional flag `::` with the index value to mark the order, this will also run the queue in a sequence.
 This configuration example will start the Cleaner worker before the FileSync worker during the usage of the `prepare` task within the CLI.
 
 ```js
@@ -60,11 +61,11 @@ FileSync: {
 ...
 ```
 
-Harbor can also run the worker in a parallel order by using multiple hooks within the command:
+The actual workers that share the same hook without the double colon flag will run in a parallel order:
 
 ```shell
-# Will process the stylesheets & javascript services in a paralell order.
-$ node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets,javascripts
+# Will process the JsCompiler & SassCompiler in a sequential order since they both have the compile hook.
+$ node node_modules/@toolbarthomas/harbor/index.js --task=compile
 ```
 
 The following workers are configured within the default configuration:
@@ -119,7 +120,7 @@ The following configuration can be adjusted, the default values will be used for
 
 ## Default Configuration
 
-The Harbor services can be configured to point out the location of your assets. A default configuration has been defined within Harbor,
+The Harbor workers can be configured to point out the location of your assets. A default configuration has been defined within Harbor,
 a custom configuration can be used by creating `harbor.config.js` within the working directory.
 
 For example:
@@ -145,11 +146,11 @@ For example:
 
 ### Cleaner configuration
 
-The Cleaner is a default Harbor service that will delete all files within the defined environment destination directory: `THEME_DIST`
+The Cleaner is a default Harbor worker that will delete all files within the defined environment destination directory: `THEME_DIST`
 
-| Option | type   | Description                                                           |
-| ------ | ------ | --------------------------------------------------------------------- |
-| hook   | string | Runs the service if the given hook is subscribed to the Task Manager. |
+| Option | type   | Description                                                          |
+| ------ | ------ | -------------------------------------------------------------------- |
+| hook   | string | Runs the worker if the given hook is subscribed to the Task Manager. |
 
 ### FileSync configuration
 
@@ -158,7 +159,7 @@ The FileSync will synchronize the defined static entries to the configured envir
 | Option   | type     | Description                                                                                   |
 | -------- | -------- | --------------------------------------------------------------------------------------------- |
 | patterns | string[] | Copies the given patterns and it's folder structure to the environment destination directory. |
-| hook     | string   | Runs the service if the given hook is subscribed to the Task Manager.                         |
+| hook     | string   | Runs the worker if the given hook is subscribed to the Task Manager.                          |
 
 ### JsCompiler configuration
 
@@ -168,7 +169,7 @@ The result will be written relative to the configured environment destination di
 | Option            | type                   | Description                                                             |
 | ----------------- | ---------------------- | ----------------------------------------------------------------------- |
 | entry             | Object[string, string] | Transforms & lints the given entries with Babel & Eslint.               |
-| hook              | string                 | Runs the service if the given hook is subscribed to the Task Manager.   |
+| hook              | string                 | Runs the worker if the given hook is subscribed to the Task Manager.    |
 | plugins           | Object                 | Optional plugins that will be assigned to the Babel & Eslint instances. |
 | plugins.eslint    | Object                 | The optional Eslint plugin(configuration).                              |
 | plugins.transform | Object                 | The optional Babel transform(configuration).                            |
@@ -178,34 +179,34 @@ The result will be written relative to the configured environment destination di
 The SassCompiler renders & prepares the defined entries with Node Sass & Postcss.
 The result will be written relative to the configured environment destination directory.
 
-| Option          | type                   | Description                                                           |
-| --------------- | ---------------------- | --------------------------------------------------------------------- |
-| options         | Object                 | Optional configuration for the Node Sass compiler.                    |
-| hook            | string                 | Runs the service if the given hook is subscribed to the Task Manager. |
-| plugins         | Object                 | Optional plugins that will be assigned to the Postcss plugin.         |
-| plugins.postcss | Object                 | The optional Postcss plugin(configuration).                           |
-| entry           | Object[string, string] | Renders & lints the given entries with Node Sass & Postcss.           |
+| Option          | type                   | Description                                                          |
+| --------------- | ---------------------- | -------------------------------------------------------------------- |
+| options         | Object                 | Optional configuration for the Node Sass compiler.                   |
+| hook            | string                 | Runs the worker if the given hook is subscribed to the Task Manager. |
+| plugins         | Object                 | Optional plugins that will be assigned to the Postcss plugin.        |
+| plugins.postcss | Object                 | The optional Postcss plugin(configuration).                          |
+| entry           | Object[string, string] | Renders & lints the given entries with Node Sass & Postcss.          |
 
 ### SvgSpriteCompiler configuration
 
 The SvgSpriteCompiler will compile the defined entries into inline SVG sprites.
 The result will be written relative to the configured environment destination directory.
 
-| Option  | type                   | Description                                                           |
-| ------- | ---------------------- | --------------------------------------------------------------------- |
-| entry   | Object[string, string] | Compiles the given entries with SvgStore.                             |
-| options | Object                 | Optional configuration for the Sprite compiler.                       |
-| hook    | string                 | Runs the service if the given hook is subscribed to the Task Manager. |
-| prefix  | string                 | The ID prefix for each icon within the compiled sprite.               |
+| Option  | type                   | Description                                                          |
+| ------- | ---------------------- | -------------------------------------------------------------------- |
+| entry   | Object[string, string] | Compiles the given entries with SvgStore.                            |
+| options | Object                 | Optional configuration for the Sprite compiler.                      |
+| hook    | string                 | Runs the worker if the given hook is subscribed to the Task Manager. |
+| prefix  | string                 | The ID prefix for each icon within the compiled sprite.              |
 
 ### Resolver configuration
 
 The Resolver will resolve the defined packages from the node_modules to the environment destination.
 
-| Option | type                   | Description                                                           |
-| ------ | ---------------------- | --------------------------------------------------------------------- |
-| entry  | Object[string, string] | Resolves the given entry packages to the environment destination.     |
-| hook   | string                 | Runs the service if the given hook is subscribed to the Task Manager. |
+| Option | type                   | Description                                                          |
+| ------ | ---------------------- | -------------------------------------------------------------------- |
+| entry  | Object[string, string] | Resolves the given entry packages to the environment destination.    |
+| hook   | string                 | Runs the worker if the given hook is subscribed to the Task Manager. |
 
 ## Default Plugin Configuration
 
@@ -213,26 +214,26 @@ The Resolver will resolve the defined packages from the node_modules to the envi
 
 The Styleguide Compiler will generate a new Storybook instance that can be accesed on the configured environment port.
 
-| Option  | type                   | Description                                                           |
-| ------- | ---------------------- | --------------------------------------------------------------------- |
-| entry   | Object[string, string] | Compiles the given entries with Storybook.                            |
-| options | Object                 | Optional configuration for the Storybook compiler.                    |
-| hook    | string                 | Runs the service if the given hook is subscribed to the Task Manager. |
+| Option  | type                   | Description                                                          |
+| ------- | ---------------------- | -------------------------------------------------------------------- |
+| entry   | Object[string, string] | Compiles the given entries with Storybook.                           |
+| options | Object                 | Optional configuration for the Storybook compiler.                   |
+| hook    | string                 | Runs the worker if the given hook is subscribed to the Task Manager. |
 
 ### Watcher configuration
 
 The Watcher can be started by defining the `watch` parameter to the CLI and will run the defined hooks from the TaskManager.
 The Watcher will shutdown automatically if no event occured during the defined duration.
 
-| Option               | type                   | Description                                                                             |
-| -------------------- | ---------------------- | --------------------------------------------------------------------------------------- |
-| options              | Object                 | Optional configuration for the Watcher class.                                           |
-| options.delay        | number                 | Creates a timeout before running the connected Service after a Watch event has occured. |
-| options.duration     | number                 | Defines the lifetime of the spawned Watcher instances.                                  |
-| instances            | Object[string, object] | Spawns a Wacther instance for each defined entry.                                       |
-| instances[].event    | string                 | Defines the Event handler and will publish the defined hook with the TaskManager.       |
-| instances[].path     | string/string[]        | Watches the given paths for the spawned Watcher.                                        |
-| instances[].services | string[]               | Will publish the defined Harbor services in order.                                      |
+| Option              | type                   | Description                                                                             |
+| ------------------- | ---------------------- | --------------------------------------------------------------------------------------- |
+| options             | Object                 | Optional configuration for the Watcher class.                                           |
+| options.delay       | number                 | Creates a timeout before running the connected Workers after a Watch event has occured. |
+| options.duration    | number                 | Defines the lifetime of the spawned Watcher instances.                                  |
+| instances           | Object[string, object] | Spawns a Wacther instance for each defined entry.                                       |
+| instances[].event   | string                 | Defines the Event handler and will publish the defined hook with the TaskManager.       |
+| instances[].path    | string/string[]        | Watches the given paths for the spawned Watcher.                                        |
+| instances[].workers | string[]               | Will publish the defined Harbor workers in order.                                       |
 
 ## Example NPM script setup
 

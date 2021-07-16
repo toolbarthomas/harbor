@@ -66,11 +66,11 @@ class Watcher extends Plugin {
         this.instances[name].instance.on(
           this.config.instances[name].event || 'change',
           (source) => {
-            if (!this.config.instances[name].services) {
+            if (!this.config.instances[name].workers) {
               return;
             }
 
-            this.config.instances[name].services.forEach((worker) => {
+            this.config.instances[name].workers.forEach((worker) => {
               this.Console.log('Resetting shutdown timer...');
               clearTimeout(this.instances[name].watcher);
               clearTimeout(this.instances[name].reset);
@@ -88,7 +88,7 @@ class Watcher extends Plugin {
                   if (TaskManager) {
                     const { hook } = ConfigManager.load(worker, 'workers');
 
-                    TaskManager.publish('workers', hook || worker);
+                    await TaskManager.publish('workers', hook || worker);
 
                     this.Console.info(`Resuming watcher: ${name}`);
                   }
@@ -135,7 +135,11 @@ class Watcher extends Plugin {
         clearTimeout(this.instances[name].reset);
 
         if (!Object.values(this.instances).filter(({ running }) => running).length) {
-          this.Console.info('Closing Watcher plugin...');
+          this.Console.info(
+            `Closing file watcher, no changes have been detected within ${
+              this.config.options.duration / 1000
+            }s`
+          );
 
           return callback();
         }
