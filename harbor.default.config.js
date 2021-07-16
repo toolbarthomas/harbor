@@ -26,7 +26,7 @@ export default {
         main: '**/javascripts/**/*.js',
         modules: 'modules/*/*/*.js',
       },
-      hook: ['js', 'javascripts'],
+      hook: ['js', 'javascripts', 'compile'],
       plugins: {
         transform: babelConfig.length
           ? null
@@ -41,7 +41,7 @@ export default {
       options: {
         outputStyle: 'compact',
       },
-      hook: ['sass', 'stylesheets'],
+      hook: ['sass', 'stylesheets', 'compile'],
       plugins: {
         postcss: {
           plugins: [
@@ -65,7 +65,7 @@ export default {
       },
     },
     SvgSpriteCompiler: {
-      hook: ['svg', 'images'],
+      hook: ['svg', 'images', 'compile'],
       prefix: 'svg--',
       entry: {
         svgsprite: 'images/*/**.svg',

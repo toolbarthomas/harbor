@@ -124,6 +124,15 @@ class TaskManager {
       return null;
     }
 
+    // Defines a non existing index key for the defined entries Map.
+    const increment = (key, collection) => {
+      if (collection.has(String(key))) {
+        return increment(key + 1, collection);
+      }
+
+      return key;
+    };
+
     const queue = list
       .filter((item, index) => list.indexOf(item) === index)
       .map((item) => {
@@ -149,9 +158,9 @@ class TaskManager {
               10
             ) || 0;
 
-          const key = entries.has(order) ? order + 1 : order;
+          const key = increment(order, entries);
 
-          entries.set(key, task);
+          entries.set(String(key), task);
         });
 
         // Ensure the tasks queue is sorted according to the optional index value.
@@ -203,9 +212,24 @@ class TaskManager {
     const completed = [];
     const exceptions = [];
 
+    const postRun = (exit, name) => {
+      if (!exit) {
+        this.Console.info(`Done: ${name}`);
+
+        completed.push(name);
+      } else {
+        exceptions.push(name);
+      }
+    };
+
+    // Ensures the parallel tasks within
     await jobs.reduce(
       (instance, job) =>
         instance.then(async () => {
+          // Ensures the process to wait for all parallel tasks to complete
+          // before the next job can continue.
+          const JIT = [];
+
           const { hook, tasks } = job;
 
           if (tasks.length) {
@@ -217,31 +241,35 @@ class TaskManager {
 
             this.Console.info(`Starting task: ${task.hook[0]}`);
 
-            if (type === 'plugins') {
-              task.fn().then((exit) => {
-                if (!exit) {
-                  this.Console.info(`Done: ${task.hook[0]}`);
+            if (type === 'plugins' || !task.hook.filter((h) => h.indexOf('::') > 0).length) {
+              // Collects the callback within the JIT for the current asynchronous
+              // job to ensure it is not finished before all parallel tasks are
+              // finished.
 
-                  completed.push(task.hook[0]);
-                } else {
-                  exceptions.push(task.hook[0]);
-                }
-              });
+              if (type === 'plugins') {
+                task.fn().then((exit) => postRun(exit, task.hook[0]));
+              } else {
+                JIT.push(
+                  new Promise((cc) =>
+                    task.fn().then((exit) => {
+                      postRun(exit, task.hook[0]);
+
+                      cc();
+                    })
+                  )
+                );
+              }
             } else {
               // @TODO: Await needs to return directly within the upper scope
               // otherwise it would initiate grouped tasks in paralel.
               //
               // eslint-disable-next-line no-await-in-loop
-              await task.fn().then((exit) => {
-                if (!exit) {
-                  this.Console.info(`Done: ${task.hook[0]}`);
-
-                  completed.push(task.hook[0]);
-                } else {
-                  exceptions.push(task.hook[0]);
-                }
-              });
+              await task.fn().then((exit) => postRun(exit, task.hook[0]));
             }
+          }
+
+          if (JIT.length) {
+            await Promise.all(JIT);
           }
         }),
       Promise.resolve()
