@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.81.0",
+  "version": "0.82.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -91,6 +91,7 @@
     "twing-loader": "2.0.2",
     "type-name": "^2.0.2",
     "uglify-js": "^3.13.10",
+    "ws": "^7.5.3",
     "yaml": "^1.10.2"
   }
 }

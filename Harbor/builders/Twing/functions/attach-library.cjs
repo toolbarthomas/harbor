@@ -49,6 +49,7 @@ module.exports = (name) => {
             }" />`
           );
 
+          // Setup a new LiveReload websocket to reload the attached stylesheets.
           cssSnippets.push(
             `<script>
               const sheets = document.querySelectorAll('link[href*="${file}"');
@@ -57,27 +58,19 @@ module.exports = (name) => {
                 window.bootlegReload = {};
               }
 
+              const socket = new WebSocket('ws://localhost:35729');
+
               for (let i = 0; i < sheets.length; i++) {
-                const version = '?v=' + Date.now();
-                let start;
+                socket.addEventListener('message', (event) => {
+                    console.log('Message from server ', event.data);
+                    const version = '?v=' + Date.now();
 
-                const reload = (timestamp) => {
-                  if (start === undefined) {
-                    start = timestamp;
-                  }
-
-                  const elapsed = timestamp - start;
-
-                  if (elapsed > 1500) {
                     sheets[i].href = '${file}' + version;
+                });
 
-                    start = timestamp;
-                  }
-
-                  window.requestAnimationFrame(reload);
-                }
-
-                window.bootlegReload['${file}'] = window.requestAnimationFrame(reload);
+                socket.addEventListener('open', (event) => {
+                    socket.send('Connection established!');
+                });
               }
 
             </script>`

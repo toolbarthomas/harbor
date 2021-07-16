@@ -1,5 +1,6 @@
 import chokidar from 'chokidar';
 import path from 'path';
+import WebSocket from 'ws';
 
 import ConfigManager from '../common/ConfigManager.js';
 import Plugin from './Plugin.js';
@@ -33,6 +34,17 @@ class Watcher extends Plugin {
     if (!instances.length) {
       return;
     }
+
+    this.wss = new WebSocket.Server({
+      // @TODO should be bound with Websocket client port
+      port: 35729,
+    });
+
+    this.wss.on('connection', (ws) => {
+      this.Console.info(`Websocket connection established...`);
+
+      this.ws = ws;
+    });
 
     await new Promise((done) => {
       instances.forEach((name) => {
@@ -89,6 +101,12 @@ class Watcher extends Plugin {
                     const { hook } = ConfigManager.load(worker, 'workers');
 
                     await TaskManager.publish('workers', hook || worker);
+
+                    if (this.ws.send) {
+                      this.Console.info('Sending update state to Websocket Server');
+
+                      this.ws.send(`Published hook: ${hook || worker}`);
+                    }
 
                     this.Console.info(`Resuming watcher: ${name}`);
                   }
