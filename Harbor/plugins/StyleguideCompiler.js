@@ -226,6 +226,7 @@ class StyleguideCompiler extends Plugin {
             THEME_DIST: '${path.normalize(this.environment.THEME_DIST)}/',
             THEME_SPRITES: JSON.stringify(sprites),
             THEME_ALIAS: JSON.stringify(${JSON.stringify(this.config.options.alias)}),
+            THEME_WEBSOCKET_PORT: '${this.environment.THEME_WEBSOCKET_PORT}',
           })
         );
 

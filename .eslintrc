@@ -13,6 +13,13 @@
   "globals": {
     "jQuery": "readonly",
     "Drupal": "writable",
+    "THEME_SRC": "readonly",
+    "THEME_DIST": "readonly",
+    "THEME_PORT": "readonly",
+    "THEME_DEBUG": "readonly",
+    "THEME_LIBRARIES": "readonly",
+    "THEME_ENVIRONMENT": "readonly",
+    "THEME_WEBSOCKET_PORT": "readonly",
     "drupalSettings": "readonly"
   },
   "rules": {

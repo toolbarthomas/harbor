@@ -35,17 +35,23 @@ class Watcher extends Plugin {
       return;
     }
 
-    this.wss = new WebSocket.Server({
-      // @TODO should be bound with Websocket client port
-      port: 35729,
-    });
+    // Enables HMR within the styleguide for the generated assets.
+    if (this.environment.THEME_WEBSOCKET_PORT) {
+      if (WebSocket) {
+        this.Console.log(`Preparing Socket...`);
 
-    this.wss.on('connection', (ws) => {
-      this.Console.info(`Websocket connection established...`);
+        this.wss = new WebSocket.Server({
+          port: this.environment.THEME_WEBSOCKET_PORT,
+        });
 
-      this.ws = ws;
-    });
+        this.wss.on('connection', () => {
+          this.Console.log(`Client connection established!`);
+        });
+      }
+    }
 
+    // Ensures the plugin is done only if all the defined Watcher instances
+    // are closed.
     await new Promise((done) => {
       instances.forEach((name) => {
         if (this.instances[name]) {
@@ -102,10 +108,14 @@ class Watcher extends Plugin {
 
                     await TaskManager.publish('workers', hook || worker);
 
-                    if (this.ws.send) {
-                      this.Console.info('Sending update state to Websocket Server');
+                    if (this.wss.clients) {
+                      this.wss.clients.forEach((client) => {
+                        if (client.readyState === WebSocket.OPEN) {
+                          this.Console.info('Sending update state to Websocket Server');
 
-                      this.ws.send(`Published hook: ${hook || worker}`);
+                          client.send(`Published hook: ${hook || worker}`);
+                        }
+                      });
                     }
 
                     this.Console.info(`Resuming watcher: ${name}`);
@@ -123,6 +133,8 @@ class Watcher extends Plugin {
         this.instances[name].running = true;
       });
     });
+
+    super.resolve();
   }
 
   /**
@@ -158,6 +170,12 @@ class Watcher extends Plugin {
               this.config.options.duration / 1000
             }s`
           );
+
+          if (this.wss && this.wss.close) {
+            this.Console.info(`Closing Socket Connection...`);
+
+            this.wss.close();
+          }
 
           return callback();
         }

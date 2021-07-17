@@ -1,12 +1,10 @@
-const path = require('path');
-
 /**
  * Includes the defined library from the registered theme libraries with the
  * required dependencies.
  */
 module.exports = (name) => {
-  if (!THEME_LIBRARIES || !THEME_LIBRARIES instanceof Object) {
-    return;
+  if (!THEME_LIBRARIES || !(THEME_LIBRARIES instanceof Object)) {
+    return null;
   }
 
   // Stores all required library entries.
@@ -50,31 +48,29 @@ module.exports = (name) => {
           );
 
           // Setup a new LiveReload websocket to reload the attached stylesheets.
-          cssSnippets.push(
-            `<script>
-              const sheets = document.querySelectorAll('link[href*="${file}"');
+          if (THEME_WEBSOCKET_PORT) {
+            cssSnippets.push(
+              `<script>
+                const sheets = document.querySelectorAll('link[href*="${file}"');
 
-              if (!window.bootlegReload) {
-                window.bootlegReload = {};
-              }
+                const socket = new WebSocket('ws://localhost:${String(THEME_WEBSOCKET_PORT)}');
 
-              const socket = new WebSocket('ws://localhost:35729');
+                for (let i = 0; i < sheets.length; i++) {
+                  socket.addEventListener('message', (event) => {
+                      console.log('Message from server ', event.data);
+                      const version = '?v=' + Date.now();
 
-              for (let i = 0; i < sheets.length; i++) {
-                socket.addEventListener('message', (event) => {
-                    console.log('Message from server ', event.data);
-                    const version = '?v=' + Date.now();
+                      sheets[i].href = '${file}' + version;
+                  });
 
-                    sheets[i].href = '${file}' + version;
-                });
+                  socket.addEventListener('open', (event) => {
+                      socket.send('Connection established!');
+                  });
+                }
 
-                socket.addEventListener('open', (event) => {
-                    socket.send('Connection established!');
-                });
-              }
-
-            </script>`
-          );
+              </script>`
+            );
+          }
         });
       });
     }

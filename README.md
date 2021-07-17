@@ -110,13 +110,14 @@ $ node node_modules/@toolbarthomas/harbor/index.js --task=javascripts --minify -
 An optional Harbor environment can be defined by creating a [dotenv](https://www.npmjs.com/package/dotenv) file within the root of your theme directory.
 The following configuration can be adjusted, the default values will be used for any missing environment variable.
 
-| Environment variable | Default value | Description                                                                             |
-| -------------------- | ------------- | --------------------------------------------------------------------------------------- |
-| THEME_SRC            | ./src         | Defines the working source directory for all Worker entries.                            |
-| THEME_DIST           | ./dist        | Defines the build directory for all Worker entries & the styleguide development server. |
-| THEME_PORT           | 8080          | Defines the server port for the styleguide development server.                          |
-| THEME_ENVIRONMENT    | production    | Defines the server port for the styleguide development server.                          |
-| THEME_DEBUG          | false         | Includes sourcemaps if the defined entries support it.                                  |
+| Environment variable | Default value | Description                                                                                                                                                  |
+| -------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| THEME_SRC            | ./src         | Defines the working source directory for all Worker entries.                                                                                                 |
+| THEME_DIST           | ./dist        | Defines the build directory for all Worker entries & the styleguide development server.                                                                      |
+| THEME_PORT           | 8080          | Defines the server port for the styleguide development server.                                                                                               |
+| THEME_ENVIRONMENT    | production    | Defines the server port for the styleguide development server.                                                                                               |
+| THEME_DEBUG          | false         | Includes sourcemaps if the defined entries support it.                                                                                                       |
+| THEME_WEBSOCKET_PORT | 35729         | Enables attached library stylesheets to be automatically refreshed within the styleguide, the websocket won't be created if there is no port number defined. |
 
 ## Default Configuration
 
@@ -259,20 +260,22 @@ You can assign the following NPM script entries when using the default hook conf
 
 Assets can be included by using the [attach_library](https://www.drupal.org/docs/theming-drupal/adding-stylesheets-css-and-javascript-js-to-a-drupal-theme) Twig function within your templates.
 
-You need a valid Drupal theme library configuration file within your theme with the defined resources:
+Stylesheets that are injected from the `attach_library` function will also refresh during a file change.
+
+You need a valid Drupal theme library configuration file within your theme with the defined resources you want to use within the theme:
 
 ```yml
 # example.libraries.yml
 base:
   version: 1.x
   css:
-    theme:
+    base:
       dist/main/stylesheets/index.css: {}
   js:
     dist/main/javascripts/base.js: {}
 ```
 
-The defined assets will be included within the template that use the `attach_library` Twig function:
+The defined assets will be included within the templates that uses the `attach_library` Twig function:
 
 ```twig
 
@@ -282,8 +285,7 @@ The defined assets will be included within the template that use the `attach_lib
 
 It also possible to use the defined Storybook preview head & body snippets within your project. Harbor will copy the configuration files from the defined `configDirectory` option within the `StyleguideCompiler` plugin ('./storybook').
 
-You can also import the actual assets within each storybook story to enable Hot Module Reload during a file change.
-Keep in mind that you still need to define the required libraries within Drupal if you don't include assets with the `attach_library` function.
+You can also import the actual assets within each storybook story to enable Hot Module Reload. Keep in mind that you still need to define the required libraries within Drupal if you don't include assets with the `attach_library` function.
 
 ```js
 // example.stories.js

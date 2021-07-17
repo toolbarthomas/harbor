@@ -17,6 +17,7 @@ class Environment {
       THEME_PORT: 8080,
       THEME_DEBUG: false,
       THEME_ENVIRONMENT: 'production',
+      THEME_WEBSOCKET_PORT: 35729,
     };
 
     this.config = {};
