@@ -64,20 +64,19 @@ FileSync: {
 The actual workers that share the same hook without the double colon flag will run in a parallel order:
 
 ```shell
-# Will process the JsCompiler & SassCompiler in a sequential order since they both have the compile hook.
 $ node node_modules/@toolbarthomas/harbor/index.js --task=compile
 ```
 
 The following workers are configured within the default configuration:
 
-| Worker           | Description                                                                     | Hook(s)                         |
-| ---------------- | ------------------------------------------------------------------------------- | ------------------------------- |
-| Cleaner          | Cleans the defined THEME_DIST environment directory.                            | Cleaner, clean, prepare         |
-| FileSync         | Synchronizes the defined entry files to the THEME_DIST environment directory.   | FilSync, sync, prepare          |
-| JsCompiler       | Transforms the defined entry javascript files with Babel.                       | JSCompiler, js, javascripts     |
-| Resolver         | Resolves NPM installed vendor pacakges to the THEME_DIST environment directory. | Resolver, resolve, prepare      |
-| SassCompiler     | Compiles the defined entry Sass files with Node Sass.                           | SassCompiler, sass, stylesheets |
-| SVSpriteCompiler | Creates one or more inline SVG sprites based from the configured entries.       | SVGSpriteCompiler, svg, images  |
+| Worker           | Description                                                                     | Hook(s)                                       |
+| ---------------- | ------------------------------------------------------------------------------- | --------------------------------------------- |
+| Cleaner          | Cleans the defined THEME_DIST environment directory.                            | `Cleaner` `clean` `prepare`                   |
+| FileSync         | Synchronizes the defined entry files to the THEME_DIST environment directory.   | `FilSync` `sync` `prepare`                    |
+| JsCompiler       | Transforms the defined entry javascript files with Babel.                       | `JSCompiler` `js` `javascripts` `compile`     |
+| Resolver         | Resolves NPM installed vendor pacakges to the THEME_DIST environment directory. | `Resolver` `resolve` `prepare`                |
+| SassCompiler     | Compiles the defined entry Sass files with Node Sass.                           | `SassCompiler` `sass` `stylesheets` `compile` |
+| SVSpriteCompiler | Creates one or more inline SVG sprites based from the configured entries.       | `SVGSpriteCompiler` `svg` `images` `compile`  |
 
 ## Plugins
 
