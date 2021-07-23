@@ -285,7 +285,7 @@ class StyleguideCompiler extends Plugin {
       this.config.options && this.config.options.addons ? this.config.options.addons || [] : [];
 
     const previewMainTemplate = path.resolve(cwd, 'index.ejs');
-    const builderPath = path.resolve(this.configPath(), 'twing.cjs');
+    const environmentModulePath = path.resolve(this.configPath(), 'twing.cjs');
 
     const template = outdent`
       const fs = require('fs');
@@ -303,7 +303,7 @@ class StyleguideCompiler extends Plugin {
           test: /\.twig$/,
           loader: 'twing-loader',
           options: {
-            environmentModulePath: '${builderPath}',
+            environmentModulePath: '${environmentModulePath}',
           },
         });
 
@@ -329,10 +329,9 @@ class StyleguideCompiler extends Plugin {
           .join(',')}];
         const libraries = {};
         if (libraryPaths.length) {
-          console.log('Reading ' + libraryPaths.length + ' libraries...');
-
           libraryPaths.forEach((l) => {
             const c = fs.readFileSync(l).toString();
+            console.log('Reading library: ' + l);
 
             if (c && c.length) {
               try {
