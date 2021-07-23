@@ -7,6 +7,7 @@ import outdent from 'outdent';
 import path from 'path';
 import webpack from 'webpack';
 import YAML from 'yaml';
+import { snakeCase } from 'snake-case';
 
 import Plugin from './Plugin.js';
 import FileSync from '../workers/FileSync.js';
@@ -32,19 +33,15 @@ class StyleguideCompiler extends Plugin {
         ? path.resolve(`node_modules/.bin/${bin}`)
         : path.resolve(`../../.bin/${bin}`);
 
-      const configPath = path.resolve(
-        path.dirname(fileURLToPath(import.meta.url)),
-        '../../.storybook'
-      );
-      const config = path.resolve(configPath);
-      const mainPath = path.resolve(configPath, 'main.cjs');
+      const config = path.resolve(this.configPath());
+
+      // Define the Storybook builder configuration as CommonJS module since Storybook
+      // currently doesn't support the implementation of ESM.
+      this.setupBuilder();
 
       // Define the Storybook configuration as CommonJS module since Storybook
       // currently doesn't support the implementation of ESM.
-      const template = this.setup(config);
-      fs.existsSync(mainPath) && fs.unlinkSync(mainPath);
-      mkdirp.sync(path.dirname(mainPath));
-      fs.writeFileSync(mainPath, template);
+      this.setupMain(config);
 
       // Extends the Storybook instance with the optional custom configuration.
       if (this.config.options.configDirectory) {
@@ -68,7 +65,7 @@ class StyleguideCompiler extends Plugin {
           customConfigurations.forEach((configuration) => {
             this.Console.log(`Extending configuration: ${configuration}`);
 
-            const destination = path.join(configPath, path.basename(configuration));
+            const destination = path.join(this.configPath(), path.basename(configuration));
 
             if (destination !== configuration) {
               fs.existsSync(destination) && fs.unlinkSync(destination);
@@ -111,11 +108,167 @@ class StyleguideCompiler extends Plugin {
   }
 
   /**
+   * Prepares the configuration for the Styleguide loader that should render the
+   * defined Twig templates.
+   */
+  setupBuilder() {
+    const cwd = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../builders/Twing');
+
+    const destination = path.resolve(this.configPath(), 'twing.cjs');
+
+    const queryEntry = (cwd, query) => glob.sync(path.join(cwd, query));
+
+    const defaultFilters = queryEntry(cwd, 'filters/**.cjs');
+    const customFilters = this.config.options.builderDirectory
+      ? queryEntry(this.config.options.builderDirectory, 'filters/**.cjs')
+      : [];
+
+    const defaultFunctions = queryEntry(cwd, 'functions/**.cjs');
+    const customFunctions = this.config.options.builderDirectory
+      ? queryEntry(this.config.options.builderDirectory, 'functions/**.cjs')
+      : [];
+
+    const definedFilters = this.extendBuilder(defaultFilters, customFilters);
+    const definedFunctions = this.extendBuilder(defaultFunctions, customFunctions);
+
+    const template = outdent`
+      const path = require('path');
+      const { TwingEnvironment, TwingLoaderFilesystem, TwingFilter, TwingFunction } = require('twing');
+
+      // Should contain the default & custom Twing filters to extend.
+      const filters = {};
+      ${definedFilters
+        .map(
+          (definedFilter) => outdent`
+            try {
+              filters['${this.defineBuilderExtensionName(
+                definedFilter
+              )}'] = require('${definedFilter}');
+            } catch (exception) {
+              throw Error(exception);
+            }`
+        )
+        .join('\n\n')}
+
+      // Should contain the default & custom Twing functions to extend.
+      const functions = {};
+      ${definedFunctions
+        .map(
+          (definedFunction) => outdent`
+            try {
+              functions['${this.defineBuilderExtensionName(
+                definedFunction
+              )}'] = require('${definedFunction}');
+            } catch (exception) {
+              throw Error(exception);
+            }`
+        )
+        .join('\n\n')}
+
+      // Defines the absolute path to the theme specific packages.
+      const theme = path.resolve('${process.cwd()}');
+
+      // Use the resolved paths as base path for the Twing Filesystem.
+      const loader = new TwingLoaderFilesystem([theme]);
+
+      // In storybook we get this returned as an instance of
+      // TWigLoaderNull, we need to avoid processing this.
+      // Use namespace to maintain the exact include paths for both Drupal and
+      // Storybook.
+      if (typeof loader.addPath === 'function') {
+        if (${this.config.options.alias !== undefined}) {
+          try {
+            const alias = ${JSON.stringify(this.config.options.alias)};
+
+            if (alias) {
+              Object.keys(alias).forEach((name) => {
+                loader.addPath(path.resolve(process.cwd(), alias[name]), name.replace('@', ''));
+              });
+            }
+          } catch (exception) {
+            throw new Error(exception);
+          }
+        }
+      }
+
+      const environment = new TwingEnvironment(loader, { autoescape: false });
+
+      if (Object.keys(filters).length) {
+        Object.keys(filters).forEach((filter) => {
+          try {
+            environment.addFilter(new TwingFilter(filter, filters[filter]));
+          } catch(error) {
+            console.error(error);
+          }
+        });
+      }
+
+      if (Object.keys(functions).length) {
+        Object.keys(functions).forEach((fn) => {
+          try {
+            const handler = (typeof functions[fn] === 'function') ? functions[fn] : (...args) => args;
+
+            environment.addFunction(new TwingFunction(fn, handler));
+          } catch(error) {
+            console.error(error);
+          }
+        });
+      }
+
+      module.exports = environment;
+    `;
+
+    fs.existsSync(destination) && fs.unlinkSync(destination);
+    mkdirp.sync(path.dirname(destination));
+    fs.writeFileSync(destination, template);
+  }
+
+  /**
+   * Defines the actual entry list from the given custom & default entries.
+   *
+   * @param {*} initial The default builder extensions that will be loaded.
+   * @param {*} proposal The custom builder extensions where the non-exsiting
+   * entry is merged.
+   *
+   * @returns {array} The entries to extend within the Builder instance.
+   */
+  extendBuilder(initial, proposal) {
+    return [
+      ...initial,
+      ...proposal.filter((commit) => {
+        const name = this.defineBuilderExtensionName(commit);
+
+        if (
+          !initial.map((initialItem) => this.defineBuilderExtensionName(initialItem)).includes(name)
+        ) {
+          return commit;
+        } else {
+          this.Console.warning(`Custom builder function '${name}' already exists.`);
+          this.Console.warning(
+            `Using ${
+              initial.filter((commit) => name === this.defineBuilderExtensionName(commit))[0]
+            } instead of: ${commit}`
+          );
+        }
+      }),
+    ];
+  }
+
+  /**
+   * Defines the actual name for the given Builder extension.
+   *
+   * @param {string} source Defines the name from the given source.
+   */
+  defineBuilderExtensionName(source) {
+    return snakeCase(path.basename(source, path.extname(source)));
+  }
+
+  /**
    * Generates the Storybook configuration with the defined Harbor configuration.
    * This ensures that the actual storybook instance is loaded as a CommonJS
    * module.
    */
-  setup(cwd) {
+  setupMain(cwd) {
     if (!this.config.entry instanceof Object) {
       return;
     }
@@ -132,6 +285,7 @@ class StyleguideCompiler extends Plugin {
       this.config.options && this.config.options.addons ? this.config.options.addons || [] : [];
 
     const previewMainTemplate = path.resolve(cwd, 'index.ejs');
+    const builderPath = path.resolve(this.configPath(), 'twing.cjs');
 
     const template = outdent`
       const fs = require('fs');
@@ -140,8 +294,8 @@ class StyleguideCompiler extends Plugin {
       const webpack = require('webpack');
       const YAML = require('yaml');
 
-      const addons = [${addons.map((p) => `"${p}"`).join(',')}]
-      const stories = [${stories.map((p) => `"${p}"`).join(',')}]
+      const addons = [${addons.map((p) => `'${p}'`).join(',')}]
+      const stories = [${stories.map((p) => `'${p}'`).join(',')}]
 
       const webpackFinal = (config) => {
         // Include the Twig loader to enable support from Drupal templates.
@@ -149,10 +303,7 @@ class StyleguideCompiler extends Plugin {
           test: /\.twig$/,
           loader: 'twing-loader',
           options: {
-            environmentModulePath: '${path.resolve(
-              path.dirname(fileURLToPath(import.meta.url)),
-              '../builders/Twing/index.cjs'
-            )}',
+            environmentModulePath: '${builderPath}',
           },
         });
 
@@ -243,7 +394,18 @@ class StyleguideCompiler extends Plugin {
       }
     `;
 
-    return template;
+    const mainPath = path.resolve(this.configPath(), 'main.cjs');
+
+    fs.existsSync(mainPath) && fs.unlinkSync(mainPath);
+    mkdirp.sync(path.dirname(mainPath));
+    fs.writeFileSync(mainPath, template);
+  }
+
+  /**
+   * Returns the path of the styleguide configuration directory.
+   */
+  configPath() {
+    return path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.storybook');
   }
 }
 

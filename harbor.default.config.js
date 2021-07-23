@@ -142,6 +142,7 @@ export default {
         },
         addons: ['@storybook/addon-essentials', '@storybook/addon-knobs', '@storybook/addon-links'],
         configDirectory: path.resolve(process.cwd(), '.storybook'),
+        builderDirectory: path.resolve(process.cwd(), '.twing'),
       },
     },
     Watcher: {
