@@ -1,6 +1,6 @@
 import chokidar from 'chokidar';
 import path from 'path';
-import WebSocket from 'ws';
+import WebSocket, { WebSocketServer } from 'ws';
 
 import ConfigManager from '../common/ConfigManager.js';
 import Plugin from './Plugin.js';
@@ -37,10 +37,10 @@ class Watcher extends Plugin {
 
     // Enables HMR within the styleguide for the generated assets.
     if (this.environment.THEME_WEBSOCKET_PORT) {
-      if (WebSocket) {
+      if (WebSocketServer) {
         this.Console.log(`Preparing Socket...`);
 
-        this.wss = new WebSocket.Server({
+        this.wss = new WebSocketServer({
           port: this.environment.THEME_WEBSOCKET_PORT,
         });
 
@@ -108,7 +108,7 @@ class Watcher extends Plugin {
 
                     await TaskManager.publish('workers', hook || worker);
 
-                    if (this.wss.clients) {
+                    if (this.wss && this.wss.clients) {
                       this.wss.clients.forEach((client) => {
                         if (client.readyState === WebSocket.OPEN) {
                           this.Console.info('Sending update state to Websocket Server');
