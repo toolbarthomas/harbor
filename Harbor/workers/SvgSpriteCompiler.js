@@ -12,10 +12,6 @@ import Worker from './Worker.js';
  * Create SVG sprites from the configured entries.
  */
 class SvgSpriteCompiler extends Worker {
-  constructor(services) {
-    super(services);
-  }
-
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
@@ -35,22 +31,20 @@ class SvgSpriteCompiler extends Worker {
     await Promise.all(
       entries.map(
         (name, index) =>
-          new Promise(async (cb) => {
+          new Promise((cb) => {
             const entry = this.entry[index];
 
             if (entry.length) {
-              await this.prepareCwd(entry, name);
-              await this.processCwd(entry, name);
+              this.prepareCwd(entry, name).then(() => this.processCwd(entry, name).then(cb));
             } else {
-              this.Console.warning(`Unable to find entry from: ${p}`);
+              this.Console.warning(`Unable to find entry from: ${entry}`);
+              cb();
             }
-
-            cb();
           })
       )
     );
 
-    super.resolve();
+    return super.resolve();
   }
 
   /**
@@ -140,7 +134,7 @@ class SvgSpriteCompiler extends Worker {
 
           this.Console.log(`Done generating: ${path.join(destination, name)}`);
 
-          done();
+          return done();
         });
       } else {
         done();
@@ -166,7 +160,7 @@ class SvgSpriteCompiler extends Worker {
       let result;
 
       try {
-        result = SVGO.optimize(buffer, this.config.options.svgo);
+        result = SVGO.optimize(b, this.config.options.svgo);
       } catch (exception) {
         this.Console.error(exception);
       }
