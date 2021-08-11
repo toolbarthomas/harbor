@@ -140,7 +140,7 @@ export default {
         alias: {
           '@theme': process.cwd(),
         },
-        addons: ['@storybook/addon-essentials', '@storybook/addon-knobs', '@storybook/addon-links'],
+        addons: ['@storybook/addon-essentials', '@storybook/addon-links'],
         configDirectory: path.resolve(process.cwd(), '.storybook'),
         builderDirectory: path.resolve(process.cwd(), '.twing'),
       },

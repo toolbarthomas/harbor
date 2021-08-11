@@ -281,8 +281,18 @@ class StyleguideCompiler extends Plugin {
       )
     );
 
-    const addons =
+    let addons =
       this.config.options && this.config.options.addons ? this.config.options.addons || [] : [];
+
+    // Restricts the following addons since they are included by the core
+    // Storybook package.
+    const restricedAddons = [
+      '@storybook/addon-actions',
+      '@storybook/addon-controls',
+      '@storybook/addon-viewport',
+    ];
+
+    addons = addons.filter((addon) => !restricedAddons.includes(addon));
 
     const previewMainTemplate = path.resolve(cwd, 'index.ejs');
     const environmentModulePath = path.resolve(this.configPath(), 'twing.cjs');
