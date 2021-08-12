@@ -1,3 +1,10 @@
+## 0.85.2 (August 12, 2021)
+
+### Maintenance
+
+- ConfigManager: Resolves Babel Eslint syntax issues.
+- EsLint: Fixes the Eslint configuration for Harbor internals.
+
 ## 0.85.1 (August 11, 2021)
 
 ### Features
