@@ -1,3 +1,17 @@
+## 0.85.3 (August 13, 2021)
+
+### Features
+
+- Storybook: Include `staticDirectory` option in order to define a custom destination for the static styleguide build.
+
+### Maintenance
+
+- Harbor: Removed `::` pattern for Plugin hooks since they should be Async only.
+- Harbor: Remove option to use multiple hooks for a single Plugin.
+- Harbor: Notify the user about unused command line arguments.
+- Websocket: Updates to 8.1.0
+- StyleguideCompiler: Resolve and Reject the static styleguide builds.
+
 ## 0.85.2 (August 12, 2021)
 
 ### Maintenance

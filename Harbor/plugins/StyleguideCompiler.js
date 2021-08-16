@@ -1,26 +1,19 @@
 import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
-import fs, { mkdir } from 'fs';
+import fs from 'fs';
 import glob from 'glob';
 import mkdirp from 'mkdirp';
 import outdent from 'outdent';
 import path from 'path';
-import webpack from 'webpack';
-import YAML from 'yaml';
 import { snakeCase } from 'snake-case';
 
 import Plugin from './Plugin.js';
-import FileSync from '../workers/FileSync.js';
 
 /**
  * Create a new Styleguide with the compiled assets from the destination
  * directory.
  */
 class StyleguideCompiler extends Plugin {
-  constructor(services, options, workers) {
-    super(services, options, workers);
-  }
-
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
@@ -34,6 +27,7 @@ class StyleguideCompiler extends Plugin {
         : path.resolve(`../../.bin/${bin}`);
 
       const config = path.resolve(this.configPath());
+      const { staticDirectory } = this.config.options;
 
       // Define the Storybook builder configuration as CommonJS module since Storybook
       // currently doesn't support the implementation of ESM.
@@ -79,10 +73,16 @@ class StyleguideCompiler extends Plugin {
       let command;
 
       if (this.environment.THEME_ENVIRONMENT === 'production') {
-        command = `node ${script} -c ${config} -o ${path.join(
-          this.environment.THEME_DIST,
-          'storybook-static'
-        )}`;
+        const staticBuildPath = path.join(this.environment.THEME_DIST, staticDirectory);
+
+        const previousBuild = glob.sync(`${staticBuildPath}/**/*`);
+
+        if (previousBuild.length === 0) {
+          this.Console.info(`Clearing previous styleguide build...`);
+          previousBuild.forEach((file) => fs.unlinkSync(file));
+        }
+
+        command = `node ${script} -c ${config} -o ${staticBuildPath}`;
       } else {
         command = `node ${script} -s ${process.cwd()} -c ${config} -p ${
           this.environment.THEME_PORT
@@ -95,8 +95,14 @@ class StyleguideCompiler extends Plugin {
         process.stdout.write(data);
       });
 
+      shell.on('exit', () => super.resolve());
+
       shell.stderr.on('data', (data) => {
         process.stdout.write(data);
+
+        if (this.environment.THEME_ENVIRONMENT === 'production') {
+          super.reject();
+        }
       });
 
       shell.on('error', (data) => {

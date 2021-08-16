@@ -60,6 +60,9 @@ class Harbor {
   async init() {
     const { task, ...args } = this.Argv.args;
     const { customArgs } = args;
+
+    // Keep track of the arguments that were not recognized by Harbor.
+    const unusedCustomArgs = customArgs;
     const config = await ConfigManager.load();
 
     this.Console.info(`Starting Harbor...`);
@@ -72,6 +75,9 @@ class Harbor {
       this.services.TaskManager.workerHooks().forEach((hook) => {
         if (Object.keys(customArgs).includes(hook.split('::')[0])) {
           tasks.push(hook.split('::')[0]);
+
+          // Mark the custom argument as valid task.
+          delete unusedCustomArgs[hook.split('::')[0]];
         }
       });
     }
@@ -120,6 +126,22 @@ class Harbor {
           );
 
           this.validateResult(pluginResult);
+        }
+
+        if (Object.keys(unusedCustomArgs).length) {
+          this.Console.warning(
+            `The given command line arguments are not recognized by Harbor: ${Object.keys(
+              unusedCustomArgs
+            ).join(', ')}`
+          );
+
+          Object.keys(unusedCustomArgs).forEach((unusedCustomArg) => {
+            if (Object.keys(args).includes(unusedCustomArg.split(':')[0])) {
+              this.Console.info(
+                `Did you mean: '${unusedCustomArg.split(':')[0]}' instead of ${unusedCustomArg}?`
+              );
+            }
+          });
         }
       }
     } catch (exception) {

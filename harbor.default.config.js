@@ -105,17 +105,14 @@ export default {
         main: '**/javascripts/**/*.js',
         modules: 'modules/*/*/*.js',
       },
-      hook: ['minify:js', 'minify', 'javascripts'],
+      hook: 'minify',
       options: {
         minify: {},
         bundle: true,
       },
     },
-    Server: {
-      options: {},
-    },
     StyleOptimizer: {
-      hook: ['minify:css', 'minify', 'stylesheets'],
+      hook: 'minify',
       plugins: {
         autoprefixer: autoprefixer(
           browserListConfig.length
@@ -132,7 +129,7 @@ export default {
       },
     },
     StyleguideCompiler: {
-      hook: ['storybook', 'styleguide'],
+      hook: 'styleguide',
       entry: {
         main: '**/*.stories.@(js|mdx)',
       },
@@ -143,6 +140,17 @@ export default {
         addons: ['@storybook/addon-essentials', '@storybook/addon-links'],
         configDirectory: path.resolve(process.cwd(), '.storybook'),
         builderDirectory: path.resolve(process.cwd(), '.twing'),
+        staticDirectory: 'storybook-static',
+      },
+    },
+    VisualTester: {
+      hook: 'test',
+      entry: {
+        static: 'storybook-static/**/*.html',
+      },
+      options: {
+        ignoredFiles: ['iframe.html'],
+        acceptedFileExtensions: ['html'],
       },
     },
     Watcher: {

@@ -4,12 +4,13 @@
 class Argv {
   constructor() {
     this.defaults = {
-      task: false,
-      watch: false,
-      styleguide: false,
       minify: false,
       serve: false,
+      styleguide: false,
+      task: false,
+      test: false,
       verbose: false,
+      watch: false,
     };
   }
 

@@ -38,7 +38,7 @@ class TaskManager {
       return [];
     }
 
-    const hooks = Object.keys(this.instances.workers)
+    const hooks = Object.keys(this.instances[type])
       .map((plugin) => this.instances.workers[plugin].hook)
       .filter((plugin) => plugin)
       .flat();
