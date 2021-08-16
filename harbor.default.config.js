@@ -1,4 +1,3 @@
-import { extendDefaultPlugins } from 'svgo';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import path from 'path';
@@ -67,29 +66,24 @@ export default {
       },
       options: {
         svgo: {
-          plugins: extendDefaultPlugins([
+          plugins: [
             {
-              name: 'convertPathData',
-              active: false,
-            },
-            {
-              name: 'removeViewBox',
-              active: false,
-            },
-            {
-              name: 'convertColors',
+              name: 'preset-default',
               params: {
-                currentColor: true,
+                overrides: {
+                  convertPathData: false,
+                  removeViewBox: false,
+                  convertColors: {
+                    currentColor: true,
+                  },
+                  removeAttrs: {
+                    preserveCurrentColor: true,
+                    attrs: '(stroke|fill)',
+                  },
+                },
               },
             },
-            {
-              name: 'removeAttrs',
-              params: {
-                preserveCurrentColor: true,
-                attrs: '(stroke|fill)',
-              },
-            },
-          ]),
+          ],
         },
       },
     },

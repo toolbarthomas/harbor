@@ -51,23 +51,24 @@ module.exports = (name) => {
           if (THEME_WEBSOCKET_PORT) {
             cssSnippets.push(
               `<script>
-                const sheets = document.querySelectorAll('link[href*="${file}"');
+                (function () {
+                  const sheets = document.querySelectorAll('link[href*="${file}"');
 
-                const socket = new WebSocket('ws://localhost:${String(THEME_WEBSOCKET_PORT)}');
+                  const socket = new WebSocket('ws://localhost:${String(THEME_WEBSOCKET_PORT)}');
 
-                for (let i = 0; i < sheets.length; i++) {
-                  socket.addEventListener('message', (event) => {
-                      console.log('Message from server ', event.data);
-                      const version = '?v=' + Date.now();
+                  for (let i = 0; i < sheets.length; i++) {
+                    socket.addEventListener('message', (event) => {
+                        console.log('Message from server ', event.data);
+                        const version = '?v=' + Date.now();
 
-                      sheets[i].href = '${file}' + version;
-                  });
+                        sheets[i].href = '${file}' + version;
+                    });
 
-                  socket.addEventListener('open', (event) => {
-                      socket.send('Connection established!');
-                  });
-                }
-
+                    socket.addEventListener('open', (event) => {
+                        socket.send('Connection established!');
+                    });
+                  }
+                }());
               </script>`
             );
           }
