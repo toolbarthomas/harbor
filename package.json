@@ -28,8 +28,7 @@
     "Harbor/",
     "harbor.config.js",
     "harbor.default.config.js",
-    ".storybook/index.ejs",
-    ". book"
+    ".env"
   ],
   "repository": {
     "type": "git",
