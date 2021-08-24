@@ -1,3 +1,9 @@
+## 0.85.4 (August 24, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
 ## 0.85.3 (August 13, 2021)
 
 ### Features
@@ -27,11 +33,8 @@
 
 ## 0.85.0 (August 11, 2021)
 
-### Features
-
-- Implements NPM package maintenance.
-
 ### Maintenance
 
+- Node: Implements NPM package maintenance.
 - Storybook: Use restricted addons to prevent duplicate addon configuration definitions.
 - Storybook: Updates Storybook dependencies prior to 6.3.7
