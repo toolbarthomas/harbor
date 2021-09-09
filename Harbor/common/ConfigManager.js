@@ -105,7 +105,7 @@ class ConfigManager {
           try {
             import(configPath).then((mm) => {
               customConfig =
-                mm.default && typeof mm.default === 'function' ? m.default() : m.default;
+                mm.default && typeof mm.default === 'function' ? mm.default() : mm.default;
 
               ConfigManager.define(
                 defaultConfig,
