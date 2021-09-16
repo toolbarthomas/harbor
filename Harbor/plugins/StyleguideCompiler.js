@@ -458,7 +458,7 @@ class StyleguideCompiler extends Plugin {
 
             mkdirp(path.dirname(alias)).then(() =>
               fs.copyFile(asset, alias, () => {
-                this.Console.info(`Sycnronized static asset: ${alias}`);
+                this.Console.log(`Sycnronized static asset: ${alias}`);
 
                 done();
               })
@@ -466,7 +466,7 @@ class StyleguideCompiler extends Plugin {
           })
       )
     ).then(() => {
-      this.Console.info(`Synchronized ${assets.length} static styleguide assets.`);
+      this.Console.log(`Synchronized ${assets.length} static styleguide assets.`);
     });
   }
 
