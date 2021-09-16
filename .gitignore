@@ -9,4 +9,5 @@ src
 .storybook/main.js
 .storybook/twing.cjs
 .storybook/twing.js
+storybook-static
 .twing

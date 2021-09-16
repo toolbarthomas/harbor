@@ -99,7 +99,8 @@ class Harbor {
           (arg) =>
             args[arg] &&
             Object.values(config.plugins).filter(({ hook }) => {
-              const h = hook ? (Array.isArray(hook) ? hook : [String(hook)]) : [];
+              const transformHook = Array.isArray(hook) ? hook : [hook && String(hook)];
+              const h = hook ? transformHook : [];
 
               if (!h.includes(String(arg).split('::')[0])) {
                 return false;
@@ -122,7 +123,7 @@ class Harbor {
 
           const pluginResult = await this.services.TaskManager.publishPlugins(
             plugins.join(','),
-            tasks
+            plugins
           );
 
           this.validateResult(pluginResult);
@@ -180,7 +181,7 @@ class Harbor {
    * final result of the running Harbor instance.
    */
   validateResult(results) {
-    if (results.exceptions && results.exceptions.length) {
+    if (results && results.exceptions && results.exceptions.length) {
       if (this.env.THEME_ENVIRONMENT !== 'development') {
         throw Error(
           `Not all tasks have been completed correctly: ${results.exceptions.join(', ')}`
@@ -188,11 +189,11 @@ class Harbor {
       }
     }
 
-    if (results.completed && results.completed.length) {
+    if (results && results.completed && results.completed.length) {
       if (results.exceptions && !results.exceptions.length) {
         this.Console.success(`Successfully completed: ${results.completed.join(', ')}`);
       }
-    } else if (results.exceptions && results.exceptions.length) {
+    } else if (results && results.exceptions && results.exceptions.length) {
       this.Console.warning(
         `The following task did not complete correctly: ${results.exceptions.join(', ')}`
       );

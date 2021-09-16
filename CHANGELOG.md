@@ -1,3 +1,10 @@
+## 0.86.0 (September 16, 2021)
+
+### Features
+
+- Storybook: Ensure processed assets are included within the static styleguide.
+- JSOptimizer: Minify bundle for production.
+
 ## 0.85.4 (August 24, 2021)
 
 ### Maintenance

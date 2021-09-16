@@ -18,98 +18,107 @@ class StyleguideCompiler extends Plugin {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    await new Promise((cb) => {
-      const bin =
-        this.environment.THEME_ENVIRONMENT === 'production' ? 'build-storybook' : 'start-storybook';
+    const bin =
+      this.environment.THEME_ENVIRONMENT === 'production' ? 'build-storybook' : 'start-storybook';
 
-      const script = fs.existsSync(path.resolve(`node_modules/.bin/${bin}`))
-        ? path.resolve(`node_modules/.bin/${bin}`)
-        : path.resolve(`../../.bin/${bin}`);
+    const script = fs.existsSync(path.resolve(`node_modules/.bin/${bin}`))
+      ? path.resolve(`node_modules/.bin/${bin}`)
+      : path.resolve(`../../.bin/${bin}`);
 
-      const config = path.resolve(this.configPath());
-      const { staticDirectory } = this.config.options;
+    const config = path.resolve(StyleguideCompiler.configPath());
+    const { staticDirectory } = this.config.options;
 
-      // Define the Storybook builder configuration as CommonJS module since Storybook
-      // currently doesn't support the implementation of ESM.
-      this.setupBuilder();
+    // Define the Storybook builder configuration as CommonJS module since Storybook
+    // currently doesn't support the implementation of ESM.
+    this.setupBuilder();
 
-      // Define the Storybook configuration as CommonJS module since Storybook
-      // currently doesn't support the implementation of ESM.
-      this.setupMain(config);
+    // Define the Storybook configuration as CommonJS module since Storybook
+    // currently doesn't support the implementation of ESM.
+    this.setupMain(config);
 
-      // Extends the Storybook instance with the optional custom configuration.
-      if (this.config.options.configDirectory) {
-        const customConfigurations = glob
-          .sync(path.join(this.config.options.configDirectory, '/**'))
-          .filter(
-            (configuration) =>
-              [
-                path.basename(this.config.options.configDirectory),
-                'index.ejs',
-                'main.js',
-                'main.cjs',
-              ].includes(path.basename(configuration)) === false
+    // Extends the Storybook instance with the optional custom configuration.
+    if (this.config.options.configDirectory) {
+      const customConfigurations = glob
+        .sync(path.join(this.config.options.configDirectory, '/**'))
+        .filter(
+          (configuration) =>
+            [
+              path.basename(this.config.options.configDirectory),
+              'index.ejs',
+              'main.js',
+              'main.cjs',
+            ].includes(path.basename(configuration)) === false
+        );
+
+      if (customConfigurations.length) {
+        this.Console.info(
+          `Using storybook configuration from: ${this.config.options.configDirectory}`
+        );
+
+        customConfigurations.forEach((configuration) => {
+          this.Console.log(`Extending configuration: ${configuration}`);
+
+          const destination = path.join(
+            StyleguideCompiler.configPath(),
+            path.basename(configuration)
           );
 
-        if (customConfigurations.length) {
-          this.Console.info(
-            `Using storybook configuration from: ${this.config.options.configDirectory}`
-          );
-
-          customConfigurations.forEach((configuration) => {
-            this.Console.log(`Extending configuration: ${configuration}`);
-
-            const destination = path.join(this.configPath(), path.basename(configuration));
-
-            if (destination !== configuration) {
-              fs.existsSync(destination) && fs.unlinkSync(destination);
-
-              fs.existsSync(configuration) && fs.copyFileSync(configuration, destination);
+          if (destination !== configuration) {
+            if (fs.existsSync(destination)) {
+              fs.unlinkSync(destination);
             }
-          });
-        }
-      }
 
-      let command;
+            if (fs.existsSync(configuration)) {
+              fs.copyFileSync(configuration, destination);
+            }
+          }
+        });
+      }
+    }
+
+    let command;
+
+    if (this.environment.THEME_ENVIRONMENT === 'production') {
+      const staticBuildPath = path.join(this.environment.THEME_DIST, staticDirectory);
+
+      const previousBuild = glob.sync(`${staticBuildPath}/**/*`);
+
+      if (previousBuild.length === 0) {
+        this.Console.info(`Clearing previous styleguide build...`);
+        previousBuild.forEach((file) => fs.unlinkSync(file));
+      }
+      command = `node ${script} -c ${config} -o ${staticBuildPath}`;
+    } else {
+      command = `node ${script} -s ${process.cwd()} -c ${config} -p ${this.environment.THEME_PORT}`;
+    }
+
+    const shell = exec(command);
+
+    shell.stdout.on('data', (data) => {
+      process.stdout.write(data);
+    });
+
+    shell.stderr.on('data', (data) => {
+      process.stdout.write(data);
+    });
+
+    shell.on('error', (data) => {
+      process.stdout.write(data);
 
       if (this.environment.THEME_ENVIRONMENT === 'production') {
-        const staticBuildPath = path.join(this.environment.THEME_DIST, staticDirectory);
-
-        const previousBuild = glob.sync(`${staticBuildPath}/**/*`);
-
-        if (previousBuild.length === 0) {
-          this.Console.info(`Clearing previous styleguide build...`);
-          previousBuild.forEach((file) => fs.unlinkSync(file));
-        }
-
-        command = `node ${script} -c ${config} -o ${staticBuildPath}`;
-      } else {
-        command = `node ${script} -s ${process.cwd()} -c ${config} -p ${
-          this.environment.THEME_PORT
-        }`;
-      }
-
-      const shell = exec(command);
-
-      shell.stdout.on('data', (data) => {
-        process.stdout.write(data);
-      });
-
-      shell.on('exit', () => super.resolve());
-
-      shell.stderr.on('data', (data) => {
-        process.stdout.write(data);
-
-        if (this.environment.THEME_ENVIRONMENT === 'production') {
-          super.reject();
-        }
-      });
-
-      shell.on('error', (data) => {
-        process.stdout.write(data);
-
         super.reject();
-      });
+      }
+    });
+
+    shell.on('exit', () => {
+      // Ensure the processed assets are available for the static build.
+      if (this.environment.THEME_ENVIRONMENT === 'production') {
+        this.synchronizeAssets().then(() => {
+          super.resolve();
+        });
+      } else {
+        super.resolve();
+      }
     });
   }
 
@@ -120,9 +129,9 @@ class StyleguideCompiler extends Plugin {
   setupBuilder() {
     const cwd = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../builders/Twing');
 
-    const destination = path.resolve(this.configPath(), 'twing.cjs');
+    const destination = path.resolve(StyleguideCompiler.configPath(), 'twing.cjs');
 
-    const queryEntry = (cwd, query) => glob.sync(path.join(cwd, query));
+    const queryEntry = (entry, query) => glob.sync(path.join(entry, query));
 
     const defaultFilters = queryEntry(cwd, 'filters/**.cjs');
     const customFilters = this.config.options.builderDirectory
@@ -147,7 +156,7 @@ class StyleguideCompiler extends Plugin {
         .map(
           (definedFilter) => outdent`
             try {
-              filters['${this.defineBuilderExtensionName(
+              filters['${StyleguideCompiler.defineBuilderExtensionName(
                 definedFilter
               )}'] = require('${definedFilter}');
             } catch (exception) {
@@ -162,7 +171,7 @@ class StyleguideCompiler extends Plugin {
         .map(
           (definedFunction) => outdent`
             try {
-              functions['${this.defineBuilderExtensionName(
+              functions['${StyleguideCompiler.defineBuilderExtensionName(
                 definedFunction
               )}'] = require('${definedFunction}');
             } catch (exception) {
@@ -224,8 +233,12 @@ class StyleguideCompiler extends Plugin {
       module.exports = environment;
     `;
 
-    fs.existsSync(destination) && fs.unlinkSync(destination);
+    if (fs.existsSync(destination)) {
+      fs.unlinkSync(destination);
+    }
+
     mkdirp.sync(path.dirname(destination));
+
     fs.writeFileSync(destination, template);
   }
 
@@ -242,20 +255,27 @@ class StyleguideCompiler extends Plugin {
     return [
       ...initial,
       ...proposal.filter((commit) => {
-        const name = this.defineBuilderExtensionName(commit);
+        const name = StyleguideCompiler.defineBuilderExtensionName(commit);
 
         if (
-          !initial.map((initialItem) => this.defineBuilderExtensionName(initialItem)).includes(name)
+          !initial
+            .map((initialItem) => StyleguideCompiler.defineBuilderExtensionName(initialItem))
+            .includes(name)
         ) {
           return commit;
-        } else {
-          this.Console.warning(`Custom builder function '${name}' already exists.`);
-          this.Console.warning(
-            `Using ${
-              initial.filter((commit) => name === this.defineBuilderExtensionName(commit))[0]
-            } instead of: ${commit}`
-          );
         }
+
+        this.Console.warning(`Custom builder function '${name}' already exists.`);
+        this.Console.warning(
+          `Using ${
+            initial.filter(
+              (initialExtension) =>
+                name === StyleguideCompiler.defineBuilderExtensionName(initialExtension)
+            )[0]
+          } instead of: ${commit}`
+        );
+
+        return null;
       }),
     ];
   }
@@ -265,7 +285,7 @@ class StyleguideCompiler extends Plugin {
    *
    * @param {string} source Defines the name from the given source.
    */
-  defineBuilderExtensionName(source) {
+  static defineBuilderExtensionName(source) {
     return snakeCase(path.basename(source, path.extname(source)));
   }
 
@@ -275,11 +295,12 @@ class StyleguideCompiler extends Plugin {
    * module.
    */
   setupMain(cwd) {
-    if (!this.config.entry instanceof Object) {
+    if (!(this.config.entry instanceof Object)) {
       return;
     }
 
     // Lookup any stories within the defined THEME_SRC environment variable.
+    // eslint-disable-next-line prefer-spread
     const stories = [].concat.apply(
       [],
       Object.values(this.config.entry).map((entry) =>
@@ -301,7 +322,7 @@ class StyleguideCompiler extends Plugin {
     addons = addons.filter((addon) => !restricedAddons.includes(addon));
 
     const previewMainTemplate = path.resolve(cwd, 'index.ejs');
-    const environmentModulePath = path.resolve(this.configPath(), 'twing.cjs');
+    const environmentModulePath = path.resolve(StyleguideCompiler.configPath(), 'twing.cjs');
 
     const template = outdent`
       const fs = require('fs');
@@ -361,13 +382,11 @@ class StyleguideCompiler extends Plugin {
 
         // Enable the sprite paths within the Styleguide as global context.
         const sprites = {};
-        const enableSprites = ${
+        const enableSprites = ${!!(
           this.workers &&
           this.workers.SvgSpriteCompiler &&
           this.workers.SvgSpriteCompiler.config.entry
-            ? true
-            : false
-        };
+        )};
         if (enableSprites) {
           try {
             const entry = ${JSON.stringify(this.workers.SvgSpriteCompiler.config.entry)};
@@ -409,17 +428,52 @@ class StyleguideCompiler extends Plugin {
       }
     `;
 
-    const mainPath = path.resolve(this.configPath(), 'main.cjs');
+    const mainPath = path.resolve(StyleguideCompiler.configPath(), 'main.cjs');
 
-    fs.existsSync(mainPath) && fs.unlinkSync(mainPath);
+    if (fs.existsSync(mainPath)) {
+      fs.unlinkSync(mainPath);
+    }
+
     mkdirp.sync(path.dirname(mainPath));
     fs.writeFileSync(mainPath, template);
   }
 
   /**
+   * Synchronizes the processed assets to the static stylguide directory.
+   */
+  async synchronizeAssets() {
+    const { staticDirectory } = this.config.options;
+    const staticBuildPath = path.join(this.environment.THEME_DIST, staticDirectory);
+
+    // Ensure the processed assets are also available for the static build.
+    const assets = glob
+      .sync(`${this.environment.THEME_DIST}/**/*`)
+      .filter((asset) => asset.indexOf(staticBuildPath) < 0);
+
+    await Promise.all(
+      assets.map(
+        (asset) =>
+          new Promise((done) => {
+            const alias = path.resolve(staticBuildPath, asset);
+
+            mkdirp(path.dirname(alias)).then(() =>
+              fs.copyFile(asset, alias, () => {
+                this.Console.info(`Sycnronized static asset: ${alias}`);
+
+                done();
+              })
+            );
+          })
+      )
+    ).then(() => {
+      this.Console.info(`Synchronized ${assets.length} static styleguide assets.`);
+    });
+  }
+
+  /**
    * Returns the path of the styleguide configuration directory.
    */
-  configPath() {
+  static configPath() {
     return path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.storybook');
   }
 }

@@ -87,10 +87,23 @@ class JsOptimizer extends Plugin {
         )
       );
 
-      this.Console.log(`Writing bundle: ${bundle}`);
-
       mkdirp.sync(path.dirname(bundle));
-      fs.writeFileSync(bundle, result);
+
+      try {
+        const minifiedResult = minify(result, this.config.options.minify || {});
+
+        if (minifiedResult.error || !minifiedResult.code) {
+          this.Console.log(`Writing bundle: ${bundle}`);
+
+          fs.writeFileSync(bundle, result);
+        } else {
+          this.Console.log(`Writing minified bundle: ${bundle}`);
+
+          fs.writeFileSync(bundle, minifiedResult.code);
+        }
+      } catch (error) {
+        this.Console.warning(`Unable to bundle: ${error}`);
+      }
     });
   }
 

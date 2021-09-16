@@ -146,7 +146,7 @@ class TaskManager {
             return;
           }
 
-          const triggers = task.hook.map((h) => h.split('::')[0]);
+          const triggers = task.hook.map((h) => h && h.split('::')[0]);
 
           if (!triggers.includes(item)) {
             return;
@@ -154,7 +154,9 @@ class TaskManager {
 
           const order =
             parseInt(
-              (task.hook.filter((h) => h.split('::') && h.split('::')[1])[0] || '').split('::')[1],
+              (task.hook.filter((h) => h && h.split('::') && h.split('::')[1])[0] || '').split(
+                '::'
+              )[1],
               10
             ) || 0;
 
@@ -212,17 +214,16 @@ class TaskManager {
     const completed = [];
     const exceptions = [];
 
-    const postRun = (exit, name) => {
+    const postRun = (exit, n) => {
       if (!exit) {
-        this.Console.info(`Done: ${name}`);
+        this.Console.info(`Done: ${n}`);
 
-        completed.push(name);
+        completed.push(n);
       } else {
-        exceptions.push(name);
+        exceptions.push(n);
       }
     };
 
-    // Ensures the parallel tasks within
     await jobs.reduce(
       (instance, job) =>
         instance.then(async () => {
@@ -270,9 +271,9 @@ class TaskManager {
 
           if (JIT.length) {
             await Promise.all(JIT);
-          }
 
-          this.Console.log(`Hook completed: ${hook}`);
+            this.Console.log(`Hook completed: ${hook}`);
+          }
         }),
       Promise.resolve()
     );
