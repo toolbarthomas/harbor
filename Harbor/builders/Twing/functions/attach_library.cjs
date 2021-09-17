@@ -48,7 +48,7 @@ module.exports = (name) => {
           );
 
           // Setup a new LiveReload websocket to reload the attached stylesheets.
-          if (THEME_WEBSOCKET_PORT) {
+          if (!Number.isNaN(THEME_WEBSOCKET_PORT) && THEME_ENVIRONMENT === 'development') {
             cssSnippets.push(
               `<script>
                 (function () {

@@ -408,7 +408,8 @@ class StyleguideCompiler extends Plugin {
         config.plugins.push(
           new webpack.DefinePlugin({
             THEME_LIBRARIES: JSON.stringify(libraries),
-            THEME_DIST: '${path.normalize(this.environment.THEME_DIST)}/',
+            THEME_DIST: '"${path.normalize(this.environment.THEME_DIST)}/"',
+            THEME_ENVIRONMENT: '"${this.environment.THEME_ENVIRONMENT}"',
             THEME_SPRITES: JSON.stringify(sprites),
             THEME_ALIAS: JSON.stringify(${JSON.stringify(this.config.options.alias)}),
             THEME_WEBSOCKET_PORT: '${this.environment.THEME_WEBSOCKET_PORT}',
