@@ -34,7 +34,7 @@ class SvgSpriteCompiler extends Worker {
           new Promise((cb) => {
             const entry = this.entry[index];
 
-            if (entry.length) {
+            if (entry && entry.length) {
               this.prepareCwd(entry, name).then(() => this.processCwd(entry, name).then(cb));
             } else {
               this.Console.warning(`Unable to find entry from: ${entry}`);

@@ -36,7 +36,7 @@ class StyleOptimizer extends Plugin {
       this.entry.map(
         (entry) =>
           new Promise((cb) => {
-            if (entry.length) {
+            if (entry && entry.length) {
               this.optimizeCwd(entry).then(cb);
             } else {
               this.Console.warning('Unable to find optimize stylesheet entry');

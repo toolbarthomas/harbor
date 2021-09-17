@@ -114,7 +114,7 @@ The following configuration can be adjusted, the default values will be used for
 | THEME_SRC            | ./src         | Defines the working source directory for all Worker entries.                                                                                                 |
 | THEME_DIST           | ./dist        | Defines the build directory for all Worker entries & the styleguide development server.                                                                      |
 | THEME_PORT           | 8080          | Defines the server port for the styleguide development server.                                                                                               |
-| THEME_ENVIRONMENT    | production    | Defines the server port for the styleguide development server.                                                                                               |
+| THEME_ENVIRONMENT    | production    | Enables environment specific Plugins to be used.                                                                                                             |
 | THEME_DEBUG          | false         | Includes sourcemaps if the defined entries support it.                                                                                                       |
 | THEME_WEBSOCKET_PORT | 35729         | Enables attached library stylesheets to be automatically refreshed within the styleguide, the websocket won't be created if there is no port number defined. |
 
@@ -212,7 +212,18 @@ The Resolver will resolve the defined packages from the node_modules to the envi
 
 ### StyleguideCompiler configuration
 
-The Styleguide Compiler will generate a new Storybook instance that can be accesed on the configured environment port.
+The Styleguide Compiler will generate a new Storybook instance for the defined `THEME_ENVIRONMENT` value.
+
+A Storybook development version can be launched by defining `THEME_ENVIRONMENT='development'` within your environment configuration.
+
+This will launch a new Storybook development server with the Storybook CLI.
+More information about the usage of this server can be found on [Storybook](https://storybook.js.org/docs)
+
+You can also create a static version of your Storybook instance by setting `THEME_ENVIRONMENT` to `production`.
+This static styleguide will be written to the defined `THEME_DEST` destination and will resolve the processed assets within the static package.
+Keep in mind that some assets cannot be displayed when viewing the static HTML document directly for security reasons.
+
+This can be resolved by viewing the actual result from a (local) webserver.
 
 | Option  | type                   | Description                                                          |
 | ------- | ---------------------- | -------------------------------------------------------------------- |
@@ -229,7 +240,7 @@ The Watcher will shutdown automatically if no event occured during the defined d
 | ------------------- | ---------------------- | --------------------------------------------------------------------------------------- |
 | options             | Object                 | Optional configuration for the Watcher class.                                           |
 | options.delay       | number                 | Creates a timeout before running the connected Workers after a Watch event has occured. |
-| options.duration    | number                 | Defines the lifetime of the spawned Watcher instances.                                  |
+| options.duration    | number                 | Defines the lifetime in miliseconds of the spawned Watcher instances.                   |
 | instances           | Object[string, object] | Spawns a Wacther instance for each defined entry.                                       |
 | instances[].event   | string                 | Defines the Event handler and will publish the defined hook with the TaskManager.       |
 | instances[].path    | string/string[]        | Watches the given paths for the spawned Watcher.                                        |
@@ -318,11 +329,11 @@ Harbor compiles the defined SVG images with the SVGSpriteCompiler and these can 
 You can easily include these paths with the `add_svg` Twig function. This will output the path of an inline SVG sprite that has been created by the SVGSpriteCompiler. This function accepts 3 arguments to output the path of your selection:
 
 ```twig
-{{ add_svg('chevron--down') }}
+{{ add_svg('svg--chevron--down') }}
 ```
 
 This will include the path of the SVG sprite based from the first inline svg that has been stored within the `THEME_SPRITES` storybook global.
-This would output `dist/main/images/svgsprite.svg#chevron--down` if the entry key would be defined as `svgsprite`...
+This would output `dist/main/images/svgsprite.svg#svg--chevron--down` if the entry key would be defined as `svgsprite`...
 
 You can use any entry key of the SVGSpriteCompiler configuration to use that specific sprite path instead:
 
@@ -334,8 +345,8 @@ You can use any entry key of the SVGSpriteCompiler configuration to use that spe
       SvgSpriteCompiler: {
         ...
         entry: {
-          common: 'main/images/common/*/**.svg',
-          icons: 'main/images/icons/*/**.svg',
+          common: 'main/images/common/**.svg',
+          icons: 'main/images/icons/**.svg',
         },
         ...
     ...
@@ -343,21 +354,35 @@ You can use any entry key of the SVGSpriteCompiler configuration to use that spe
 ```
 
 ```twig
-{{ add_svg('chevron--down', 'icons') }}
+{{ add_svg('svg--chevron--down', 'icons') }}
 ```
 
-This will output `dist/main/images/icons/icons.svg#chevron--down`.
+This will output `dist/main/images/icons.svg#svg--chevron--down`.
 
-It is also posible to output the basis SVG element if the second or third argument has been defined as `TRUE`:
+It is also possible to output the base SVG element when the second or third argument has been defined as `true`:
 
 ```twig
-{{ add_svg('chevron--down', true) }}
+{{ add_svg('svg--logo', true) }}
 ```
 
 Would output:
 
 ```html
 <svg aria-hidden="true" aria-focusable="false">
-  <use xlink:href="dist/main/images/icons.svg#chevron--down"></use>
+  <use xlink:href="dist/main/images/common.svg#svg--logo"></use>
+</svg>
+```
+
+And:
+
+```twig
+  {{ add_svg('svg--chevron--down', 'icons', true) }}
+```
+
+Will render:
+
+```html
+<svg aria-hidden="true" aria-focusable="false">
+  <use xlink:href="dist/main/images/icons.svg#svg--chevron--down"></use>
 </svg>
 ```

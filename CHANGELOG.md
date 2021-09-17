@@ -1,3 +1,20 @@
+## 0.86.3 (September 17, 2021)
+
+### Features
+
+- Storybook: Include and enable minify options for static styleguide.
+
+### Maintenance
+
+- Storybook: Minor glob fixes.
+
+## 0.86.2 (September 16, 2021)
+
+### Maintenance
+
+- Storybook: Ensure LiveReload functionality is disabled for static styleguide.
+- Storybook: Fixes DefinePlugin parsing error.
+
 ## 0.86.0 (September 16, 2021)
 
 ### Features
