@@ -416,6 +416,16 @@ class StyleguideCompiler extends Plugin {
           })
         );
 
+        config.mode = ${
+          this.environment.THEME_ENVIRONMENT !== 'development' ? '"production"' : 'config.mode'
+        };
+
+        config.optimization = ${
+          this.environment.THEME_ENVIRONMENT !== 'development'
+            ? JSON.stringify(this.config.options.optimization || {})
+            : 'config.optimization || false'
+        };
+
         process.env['THEME_ALIAS'] = JSON.stringify(${JSON.stringify(this.config.options.alias)});
 
         return config;

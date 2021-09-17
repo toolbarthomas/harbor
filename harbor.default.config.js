@@ -131,6 +131,9 @@ export default {
         alias: {
           '@theme': process.cwd(),
         },
+        optimization: {
+          minimize: true,
+        },
         addons: ['@storybook/addon-essentials', '@storybook/addon-links'],
         configDirectory: path.resolve(process.cwd(), '.storybook'),
         builderDirectory: path.resolve(process.cwd(), '.twing'),
