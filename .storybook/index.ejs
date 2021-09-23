@@ -14,8 +14,90 @@
       // Prepare the Drupal behaviors object in order to enable the logic within
       // storybook without using a different syntax.
       window.Drupal = {
+        /**
+         * The shared storage for the various module scripts.
+         */
         behaviors: {},
-        t: (str) => str
+
+        /**
+         * The displace method finds elements in the DOM marked with one of four
+         * attributes: data-offset-top, data-offset-right, data-offset-bottom
+         * or data-offset-left.
+         */
+        displace: (initial) => {
+          const targets = {
+            top: document.querySelector('[data-offset-top]') || document.body,
+            right: document.querySelector('[data-offset-right]') || document.body,
+            bottom: document.querySelector('[data-offset-bottom]') || document.body,
+            left: document.querySelector('[data-offset-left]') || document.body,
+          };
+
+          const offset = {
+            top: {
+              value: initial ? initial.top || 0 : 0,
+            },
+            right: {
+              value: initial ? initial.right || 0 : 0,
+            },
+            bottom: {
+              value: initial ? initial.bottom || 0 : 0,
+            },
+            left: {
+              value: initial ? initial.left || 0 : 0,
+            },
+          };
+
+          Object.keys(targets).forEach(target => {
+            let element = targets[target];
+
+            if (!element) {
+              return;
+            }
+
+            // Append the offset of each parent element.
+            while (element && !isNaN(element.offsetLeft || element.getBoundingClientRect().left) && !isNaN(element.offsetTop || element.getBoundingClientRect().top)) {
+              const top = !isNaN(parseFloat(element.offsetTop)) ? element.offsetTop : element.getBoundingClientRect().top;
+              const left = !isNaN (parseFloat(element.offsetLeft)) ? element.offsetTop : element.getBoundingClientRect().left;
+
+              if (!offset[target]) {
+                continue;
+              }
+
+              offset[target].position = {
+                x: 0,
+                y: 0,
+              };
+
+              console.log(top, left);
+
+              offset[target].position.x += left - element.scrollLeft;
+              offset[target].position.y += top - element.scrollTop;
+              element = element.offsetParent;
+            }
+
+            if (offset[target] && offset) {
+              const commit = {
+                value: offset[target].value,
+                position: offset[target].position,
+              }
+
+              offset[target] = commit;
+            }
+          });
+
+          return {
+            top: targets.top === document.body ? offset.top.value : offset.top.value + offset.top.position.y,
+            right: targets.right === document.body ? offset.right.value : offset.right.value + offset.right.position.x + (targets.right.scrollWidth || 0),
+            bottom: targets.bottom === document.body ? offset.bottom.value : offset.bottom.value + offset.bottom.position.y  + (targets.bottom.scrollHeight || 0),
+            left: targets.left === document.body ? offset.left.value : offset.left.value + offset.left.position.x,
+          };
+        },
+
+        /**
+         * Dummy translate function that would hook within the Drupal locale
+         * functionality.
+         */
+        t: (str) => str,
       }
 
       window.drupalSettings = {};
