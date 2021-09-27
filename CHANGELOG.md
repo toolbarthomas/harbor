@@ -1,3 +1,15 @@
+## 0.87.1 (September 27, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.87.0 (September 23, 2021)
+
+### Features
+
+- Storybook: Implements Drupal.displace javascript polyfill.
+
 ## 0.86.3 (September 17, 2021)
 
 ### Features
