@@ -1,3 +1,15 @@
+## 0.88.1 (October 1, 2021)
+
+### Maintenance
+
+- Improves command line interface behaviour.
+
+## 0.88.0 (October 1, 2021)
+
+### Features
+
+- General: Implements command line interface via `$ harbor`
+
 ## 0.87.1 (September 27, 2021)
 
 ### Maintenance
