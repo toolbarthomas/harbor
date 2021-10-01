@@ -27,12 +27,9 @@ class Argv {
         const value = String(arg.substring(arg.indexOf('=') + 1)).replace('--', '');
 
         if (key === value && Object.keys(this.defaults).includes(value)) {
-          if (key.startsWith('--')) {
+          // Only accept CLI arguments when defining the required plugins.
+          if (name.startsWith('--')) {
             args[key] = !this.defaults[key];
-          } else {
-            console.log(`Unable to load instance from argument: ${key}...`);
-
-            console.log(`Did you mean? --${key}`);
           }
 
           return;

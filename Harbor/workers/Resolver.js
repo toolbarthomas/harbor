@@ -10,15 +10,11 @@ import Worker from './Worker.js';
  * directory.
  */
 class Resolver extends Worker {
-  constructor(services) {
-    super(services);
-  }
-
   /**
    * Resolves the configured Resolver entries.
    */
   async init() {
-    if (!this.config.entry || !this.config.entry instanceof Object) {
+    if (!this.config.entry || !(this.config.entry instanceof Object)) {
       return super.resolve();
     }
 
@@ -75,7 +71,7 @@ class Resolver extends Worker {
       )
     );
 
-    super.resolve();
+    return super.resolve();
   }
 }
 

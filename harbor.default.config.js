@@ -14,10 +14,10 @@ const babelConfig = glob.sync('.babelrc*');
 export default {
   workers: {
     Cleaner: {
-      hook: ['clean', 'prepare::0'],
+      hook: ['clean', 'prepare::0', 'default::0'],
     },
     FileSync: {
-      hook: ['sync', 'prepare::1'],
+      hook: ['sync', 'prepare::1', 'default::1'],
       patterns: ['images', 'webfonts'],
     },
     JsCompiler: {
@@ -25,7 +25,7 @@ export default {
         main: '**/javascripts/**/*.js',
         modules: 'modules/*/*/*.js',
       },
-      hook: ['js', 'javascripts', 'compile'],
+      hook: ['js', 'javascripts', 'compile', 'default::1'],
       plugins: {
         transform: babelConfig.length
           ? null
@@ -40,7 +40,7 @@ export default {
       options: {
         outputStyle: 'compact',
       },
-      hook: ['sass', 'stylesheets', 'compile'],
+      hook: ['sass', 'stylesheets', 'compile', 'default::1'],
       plugins: {
         stylelint: {
           plugins: ['stylelint-scss'],
@@ -59,7 +59,7 @@ export default {
       },
     },
     SvgSpriteCompiler: {
-      hook: ['svg', 'images', 'compile'],
+      hook: ['svg', 'images', 'compile', 'default::1'],
       prefix: 'svg--',
       entry: {
         svgsprite: 'images/*/**.svg',
@@ -88,7 +88,7 @@ export default {
       },
     },
     Resolver: {
-      hook: ['resolve', 'prepare::2'],
+      hook: ['resolve', 'prepare::2', 'default::2'],
       cwd: 'vendors',
       entry: {},
     },

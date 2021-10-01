@@ -116,6 +116,8 @@ class TaskManager {
 
     const list = String(name)
       .split(',')
+      .filter((t) => t.toLowerCase() !== 'true' && t.toLowerCase() !== 'false')
+      .filter((t) => typeof t === 'string')
       .map((t) => t.trim());
 
     if (!list.length) {

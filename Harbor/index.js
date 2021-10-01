@@ -82,9 +82,27 @@ class Harbor {
       });
     }
 
+    // Load the required plugins.
+    const plugins = Object.keys(args).filter(
+      (arg) =>
+        args[arg] &&
+        Object.values(config.plugins).filter(({ hook }) => {
+          const transformHook = Array.isArray(hook) ? hook : [hook && String(hook)];
+          const h = hook ? transformHook : [];
+
+          if (!h.includes(String(arg).split('::')[0])) {
+            return false;
+          }
+
+          return true;
+        }).length
+    );
+
     try {
-      if (tasks && tasks.length) {
-        const workerResult = await this.services.TaskManager.publishWorkers(tasks);
+      if (tasks.length || !plugins.length) {
+        const workerResult = await this.services.TaskManager.publishWorkers(
+          tasks.length ? tasks : ['default']
+        );
 
         // Output the result of the initial build and throw an exception for the
         // production environment.
@@ -93,57 +111,39 @@ class Harbor {
         this.Console.warning('Nothing has been processed for this current build!');
       }
 
-      if (args) {
-        // Only use the configured plugins for the defined plugin arguments.
-        const plugins = Object.keys(args).filter(
-          (arg) =>
-            args[arg] &&
-            Object.values(config.plugins).filter(({ hook }) => {
-              const transformHook = Array.isArray(hook) ? hook : [hook && String(hook)];
-              const h = hook ? transformHook : [];
+      // Mount the actual plugins when all workers are completed to ensure
+      // the plugin entries are defined correctly.
+      if (plugins.length) {
+        Harbor.mount(this.plugins, config);
 
-              if (!h.includes(String(arg).split('::')[0])) {
-                return false;
-              }
-
-              return true;
-            }).length
+        this.Console.log(
+          `Using ${plugins.length} ${plugins.length === 1 ? 'plugin' : 'plugins'} for ${
+            this.env.THEME_ENVIRONMENT
+          }...`
         );
 
-        if (plugins.length) {
-          // Mount the actual plugins when all workers are completed to ensure
-          // the plugin entries are defined correctly.
-          Harbor.mount(this.plugins, config);
+        const pluginResult = await this.services.TaskManager.publishPlugins(
+          plugins.join(','),
+          plugins
+        );
 
-          this.Console.log(
-            `Using ${plugins.length} ${plugins.length === 1 ? 'plugin' : 'plugins'} for ${
-              this.env.THEME_ENVIRONMENT
-            }...`
-          );
+        this.validateResult(pluginResult);
+      }
 
-          const pluginResult = await this.services.TaskManager.publishPlugins(
-            plugins.join(','),
-            plugins
-          );
+      if (Object.keys(unusedCustomArgs).length) {
+        this.Console.warning(
+          `The given command line arguments are not recognized by Harbor: ${Object.keys(
+            unusedCustomArgs
+          ).join(', ')}`
+        );
 
-          this.validateResult(pluginResult);
-        }
-
-        if (Object.keys(unusedCustomArgs).length) {
-          this.Console.warning(
-            `The given command line arguments are not recognized by Harbor: ${Object.keys(
-              unusedCustomArgs
-            ).join(', ')}`
-          );
-
-          Object.keys(unusedCustomArgs).forEach((unusedCustomArg) => {
-            if (Object.keys(args).includes(unusedCustomArg.split(':')[0])) {
-              this.Console.info(
-                `Did you mean: '${unusedCustomArg.split(':')[0]}' instead of ${unusedCustomArg}?`
-              );
-            }
-          });
-        }
+        Object.keys(unusedCustomArgs).forEach((unusedCustomArg) => {
+          if (Object.keys(args).includes(unusedCustomArg.split(':')[0])) {
+            this.Console.info(
+              `Did you mean: '${unusedCustomArg.split(':')[0]}' instead of ${unusedCustomArg}?`
+            );
+          }
+        });
       }
     } catch (exception) {
       if (exception) {

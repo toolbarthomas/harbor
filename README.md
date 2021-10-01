@@ -18,26 +18,34 @@ $ npm install @toolbarthomas/harbor
 
 Then you can start Harbor by simply running:
 
-```
+```sh
+$ harbor
+
+# or
+
 $ node node_modules/@toolbarthomas/harbor/index.js
 ```
 
-Additional CLI arguments can be defined to customize the build process:
+Harbor will run the default tasks when there are no CLI arguments defined for the initial command.
+The following CLI arguments can be used in order to customize the build process.
 
-| Argument   | Description                                                  |
-| ---------- | ------------------------------------------------------------ |
-| task       | Starts one or more worker tasks to compile the theme assets. |
-| styleguide | Starts the Storybook builder.                                |
-| watch      | Observes for file changes for the running tasks.             |
-| minify     | Minifies the processed assets.                               |
+| Argument     | Description                                                  |
+| ------------ | ------------------------------------------------------------ |
+| --task       | Starts one or more worker tasks to compile the theme assets. |
+| --verbose    | Writes extended console messages within the command line.    |
+| --styleguide | Starts the styleguide builder.                               |
+| --watch      | Observes for file changes for the initiated tasks.           |
+| --minify     | Minifies the processed assets.                               |
 
 ## Workers
 
 A worker provides the core tasks for Harbor and can be adjusted within the configuration.
 Workers can be initiated during a Harbor process by calling the defined hook within the command or as CLI argument.
 
-```shell
+```sh
 # Starts the workers that have the stylesheets hook from the configuration.
+$ harbor stylesheets
+$ harbor --task=stylesheets
 $ node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets
 $ node node_modules/@toolbarthomas/harbor/index.js stylesheets
 ```
@@ -61,29 +69,30 @@ FileSync: {
 ...
 ```
 
-The actual workers that share the same hook without the double colon flag will run in a parallel order:
+Workers that share the same hook without the double colons will run in a parallel order:
 
-```shell
+```sh
+# Should initiate the compile workers in a parallel order:
 $ node node_modules/@toolbarthomas/harbor/index.js --task=compile
 ```
 
 The following workers are configured within the default configuration:
 
-| Worker           | Description                                                                     | Hook(s)                                       |
-| ---------------- | ------------------------------------------------------------------------------- | --------------------------------------------- |
-| Cleaner          | Cleans the defined THEME_DIST environment directory.                            | `Cleaner` `clean` `prepare`                   |
-| FileSync         | Synchronizes the defined entry files to the THEME_DIST environment directory.   | `FilSync` `sync` `prepare`                    |
-| JsCompiler       | Transforms the defined entry javascript files with Babel.                       | `JSCompiler` `js` `javascripts` `compile`     |
-| Resolver         | Resolves NPM installed vendor pacakges to the THEME_DIST environment directory. | `Resolver` `resolve` `prepare`                |
-| SassCompiler     | Compiles the defined entry Sass files with Node Sass.                           | `SassCompiler` `sass` `stylesheets` `compile` |
-| SVSpriteCompiler | Creates one or more inline SVG sprites based from the configured entries.       | `SVGSpriteCompiler` `svg` `images` `compile`  |
+| Worker           | Description                                                                     | Hook(s)                                                 |
+| ---------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| Cleaner          | Cleans the defined THEME_DIST environment directory.                            | `Cleaner` `clean` `prepare` `default`                   |
+| FileSync         | Synchronizes the defined entry files to the THEME_DIST environment directory.   | `FilSync` `sync` `prepare` `default`                    |
+| JsCompiler       | Transforms the defined entry javascript files with Babel.                       | `JSCompiler` `js` `javascripts` `compile` `default`     |
+| Resolver         | Resolves NPM installed vendor pacakges to the THEME_DIST environment directory. | `Resolver` `resolve` `prepare` `default`                |
+| SassCompiler     | Compiles the defined entry Sass files with Node Sass.                           | `SassCompiler` `sass` `stylesheets` `compile` `default` |
+| SVSpriteCompiler | Creates one or more inline SVG sprites based from the configured entries.       | `SVGSpriteCompiler` `svg` `images` `compile` `default`  |
 
 ## Plugins
 
 Plugins are used to run post-process tasks like starting the storybook development server, optimizing the assets or include a file watcher.
 These can be defined by adding the given CLI argument hooks within your command:
 
-```shell
+```sh
 $ node node_modules/@toolbarthomas/harbor/index.js --task=javascripts --minify
 ```
 
@@ -100,7 +109,7 @@ More plugins can be included within a single command, the following plugins are 
 This will only generate the actual assets that should be compatible for the Drupal environment.
 Keep in mind that this command will only run the configured Harbor workers, the actual development tools can be included with extra CLI arguments:
 
-```shell
+```sh
 $ node node_modules/@toolbarthomas/harbor/index.js --task=javascripts --minify --watch
 ```
 
@@ -252,17 +261,15 @@ You can assign the following NPM script entries when using the default hook conf
 
 ```js
   {
-    "preproduction": "node node_modules/@toolbarthomas/harbor/index.js --task=prepare",
-    "production": "node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets,javascripts,images",
+    "production": "node node_modules/@toolbarthomas/harbor/index.js --task=prepare,compile --minify",
     "predevelopment": "npm run production",
-    "development": "node node_modules/@toolbarthomas/harbor/index.js watch --task=styleguide",
+    "development": "node node_modules/@toolbarthomas/harbor/index.js --watch --styleguide",
     "images": "node node_modules/@toolbarthomas/harbor/index.js --task=images",
     "javascripts": "node node_modules/@toolbarthomas/harbor/index.js --task=javascripts",
     "resolve": "node node_modules/@toolbarthomas/harbor/index.js --task=resolve",
-    "serve": "node node_modules/@toolbarthomas/harbor/index.js --task=serve",
-    "styleguide": "node node_modules/@toolbarthomas/harbor/index.js --task=styleguide",
+    "serve": "node node_modules/@toolbarthomas/harbor/index.js --serve",
+    "styleguide": "node node_modules/@toolbarthomas/harbor/index.js --styleguide",
     "stylesheets": "node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets",
-    "test": "echo \"Error: no test specified\" && exit 1"
   }
 ```
 
