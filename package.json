@@ -1,9 +1,12 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.87.1",
+  "version": "0.88.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
+  "bin": {
+    "harbor": "./index.js"
+  },
   "node": "^12.20.0 || ^14.13.1 || >=16.0.0",
   "scripts": {
     "production": "node ./index.js --task=prepare,compile --minify",
@@ -24,7 +27,7 @@
     ".eslintrc",
     ".prettierrc",
     ".stylelintrc",
-    "index.js",
+    "./index.js",
     "Harbor/",
     ".storybook/index.ejs",
     "harbor.config.js",

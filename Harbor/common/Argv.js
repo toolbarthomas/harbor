@@ -5,7 +5,6 @@ class Argv {
   constructor() {
     this.defaults = {
       minify: false,
-      serve: false,
       styleguide: false,
       task: false,
       test: false,
@@ -23,11 +22,18 @@ class Argv {
 
     if (argv.length > 2) {
       argv.slice(2).forEach((arg) => {
-        const key = String(arg.split('=')[0]).replace('--', '');
+        const name = String(arg.split('=')[0]);
+        const key = name.replace('--', '');
         const value = String(arg.substring(arg.indexOf('=') + 1)).replace('--', '');
 
-        if (key === value) {
-          args[key] = !this.defaults[key];
+        if (key === value && Object.keys(this.defaults).includes(value)) {
+          if (key.startsWith('--')) {
+            args[key] = !this.defaults[key];
+          } else {
+            console.log(`Unable to load instance from argument: ${key}...`);
+
+            console.log(`Did you mean? --${key}`);
+          }
 
           return;
         }
@@ -54,7 +60,10 @@ class Argv {
       });
 
     const customArgs = {};
-    Object.keys(args)
+
+    const initialArgs = [].concat(...Object.keys(args).map((a) => a.split(','))).filter((b) => b);
+
+    initialArgs
       .filter((arg) => !Object.keys(this.defaults).includes(arg))
       .forEach((arg) => {
         customArgs[arg] = args[arg];

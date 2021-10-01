@@ -24,7 +24,7 @@ class Cleaner extends Worker {
           super.resolve();
         });
       } else {
-        this.Console.warning(`${this.path} does not exist and will not be cleared.`);
+        this.Console.log(`${this.path} does not exist and will not be cleared.`);
 
         super.resolve();
       }

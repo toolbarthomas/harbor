@@ -90,7 +90,7 @@ class Harbor {
         // production environment.
         this.validateResult(workerResult);
       } else if (!Environment.hasBuild(this.env)) {
-        this.Console.warning('The defined build folder is empty!');
+        this.Console.warning('Nothing has been processed for this current build!');
       }
 
       if (args) {

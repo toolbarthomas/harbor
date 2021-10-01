@@ -1,11 +1,13 @@
+#!/usr/bin/env node
+
 import Harbor from './Harbor/index.js';
 
-(async () => {
-  const instance = new Harbor();
+const instance = new Harbor();
 
-  await instance.init();
-})().catch((exception) => {
-  console.error(exception);
+try {
+  instance.init();
+} catch (exception) {
+  console.log(exception);
 
   process.exit(1);
-});
+}
