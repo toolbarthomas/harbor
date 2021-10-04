@@ -102,15 +102,24 @@
     </script>
 
     <script>
+      // Prevent callStacks for the runOnPageChange handler.
+      let refresh;
+
       // https://github.com/storybookjs/storybook/issues/6113#issuecomment-473965255
       function runOnPageChange() {
-        // Enables the required script logic from Drupal by calling the defined
-        // attach Drupal handlers.
-        Object.values(window.Drupal.behaviors).forEach(function(handler) {
-          if (handler.attach) {
-            handler.attach();
-          }
-        });
+        if (refresh) {
+          clearTimeout(refresh);
+        }
+
+        refresh = setTimeout(() => {
+          // Enables the required script logic from Drupal by calling the defined
+          // attach Drupal handlers.
+          Object.values(window.Drupal.behaviors).forEach(function(handler) {
+            if (handler.attach) {
+              handler.attach();
+            }
+          });
+        }, 200);
       }
 
       document.addEventListener(

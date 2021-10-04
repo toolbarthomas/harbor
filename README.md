@@ -19,10 +19,6 @@ $ npm install @toolbarthomas/harbor
 Then you can start Harbor by simply running:
 
 ```sh
-$ harbor
-
-# or
-
 $ node node_modules/@toolbarthomas/harbor/index.js
 ```
 
@@ -44,8 +40,6 @@ Workers can be initiated during a Harbor process by calling the defined hook wit
 
 ```sh
 # Starts the workers that have the stylesheets hook from the configuration.
-$ harbor stylesheets
-$ harbor --task=stylesheets
 $ node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets
 $ node node_modules/@toolbarthomas/harbor/index.js stylesheets
 ```
