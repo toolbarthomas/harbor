@@ -104,6 +104,8 @@
     <script>
       // Prevent callStacks for the runOnPageChange handler.
       let refresh;
+      let throttle = false;
+      let awaitVendors;
 
       // https://github.com/storybookjs/storybook/issues/6113#issuecomment-473965255
       function runOnPageChange() {
@@ -112,6 +114,12 @@
         }
 
         refresh = setTimeout(() => {
+          if (throttle) {
+            return;
+          }
+
+          throttle = true;
+
           // Enables the required script logic from Drupal by calling the defined
           // attach Drupal handlers.
           Object.values(window.Drupal.behaviors).forEach(function(handler) {
@@ -119,6 +127,17 @@
               handler.attach();
             }
           });
+
+          // We need to await a moment to let other local scripts use
+          // the DomContentLoaded Event.
+          if (awaitVendors) {
+            clearTimeout(awaitVendors);
+          }
+
+          awaitVendors = setTimeout(() => {
+            throttle = false;
+          }, 2000);
+
         }, 200);
       }
 
