@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.88.1",
+  "version": "0.88.2",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -52,12 +52,12 @@
     "@babel/cli": "^7.15.7",
     "@babel/core": "^7.15.5",
     "@babel/preset-env": "^7.15.6",
-    "@storybook/addon-actions": "^6.3.8",
-    "@storybook/addon-controls": "^6.3.8",
-    "@storybook/addon-essentials": "^6.3.8",
-    "@storybook/addon-links": "^6.3.8",
-    "@storybook/addon-viewport": "^6.3.8",
-    "@storybook/html": "^6.3.8",
+    "@storybook/addon-actions": "^6.3.9",
+    "@storybook/addon-controls": "^6.3.9",
+    "@storybook/addon-essentials": "^6.3.9",
+    "@storybook/addon-links": "^6.3.9",
+    "@storybook/addon-viewport": "^6.3.9",
+    "@storybook/html": "^6.3.9",
     "autoprefixer": "^10.3.6",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.2",
@@ -97,7 +97,7 @@
     "twing-loader": "2.0.2",
     "type-name": "^2.0.2",
     "uglify-js": "^3.14.2",
-    "ws": "^8.2.2",
+    "ws": "^8.2.3",
     "yaml": "^1.10.2"
   }
 }
