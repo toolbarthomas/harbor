@@ -1,3 +1,10 @@
+## 0.88.4 (October 4, 2021)
+
+### Maintenance
+
+- Fixes DomContentLoaded Stacking issue.
+- Implements NPM package maintenance.
+
 ## 0.88.1 (October 1, 2021)
 
 ### Maintenance
