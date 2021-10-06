@@ -7,12 +7,9 @@ module.exports = (name) => {
     return null;
   }
 
-  // Stores all required library entries.
-  const jsSnippets = [];
-  const cssSnippets = [];
-
   // Nesting utility that returns the required scripts, styles and dependencies.
   const assign = (library, context) => {
+    const { head } = document;
     const n = context.split('/')[0];
     const key = context.split('/')[1];
 
@@ -40,51 +37,75 @@ module.exports = (name) => {
       Object.keys(css).forEach((section) => {
         Object.keys(css[section]).forEach((file) => {
           const { media } = css[section][file];
+          const link = document.createElement('link');
 
-          cssSnippets.push(
-            `<link rel="stylesheet" href="${file}" media="${
-              typeof media === 'string' ? media : 'all'
-            }" />`
-          );
+          link.type = 'text/css';
+          link.rel = 'stylesheet';
+          link.href = file;
+          link.media = typeof media === 'string' ? media : 'all';
+
+          const links = head.querySelectorAll(`link[href="${file}"]`);
+          if (links.length) {
+            links.forEach((l) => l.remove());
+          }
+
+          head.appendChild(link);
 
           // Setup a new LiveReload websocket to reload the attached stylesheets.
           if (!Number.isNaN(THEME_WEBSOCKET_PORT) && THEME_ENVIRONMENT === 'development') {
-            cssSnippets.push(
-              `<script>
-                (function () {
-                  const sheets = document.querySelectorAll('link[href*="${file}"');
+            const ws = `ws-${file.substring(file.lastIndexOf('/') + 1)}`;
 
-                  const socket = new WebSocket('ws://localhost:${String(THEME_WEBSOCKET_PORT)}');
+            if (head.querySelector(`#${ws}`)) {
+              head.querySelector(`#${ws}`).remove();
+            }
 
-                  for (let i = 0; i < sheets.length; i++) {
-                    socket.addEventListener('message', (event) => {
-                        console.log('Message from server ', event.data);
-                        const version = '?v=' + Date.now();
+            const script = document.createElement('script');
+            script.id = ws;
+            script.innerHTML = `
+              (function () {
+                const sheets = document.querySelectorAll('link[href*="${file}"');
 
-                        sheets[i].href = '${file}' + version;
-                    });
+                const socket = new WebSocket('ws://localhost:${String(THEME_WEBSOCKET_PORT)}');
 
-                    socket.addEventListener('open', (event) => {
-                        socket.send('Connection established!');
-                    });
-                  }
-                }());
-              </script>`
-            );
+                for (let i = 0; i < sheets.length; i++) {
+                  socket.addEventListener('message', (event) => {
+                      console.log('Message from server ', event.data);
+                      const version = '?v=' + Date.now();
+
+                      sheets[i].href = '${file}' + version;
+                  });
+
+                  socket.addEventListener('open', (event) => {
+                      socket.send('Connection established!');
+                  });
+                }
+              }());
+            `;
+
+            head.appendChild(script);
           }
         });
       });
     }
 
-    if (js) {
+    if (head && js) {
       Object.keys(js).forEach((file) => {
-        jsSnippets.push(`<script type="text/javascript" src="${file}"></script>`);
+        const scripts = head.querySelectorAll(`script[src="${file}"]`);
+
+        if (scripts.length) {
+          scripts.forEach((s) => s.remove());
+        }
+
+        const script = document.createElement('script');
+
+        script.type = 'text/javascript';
+        script.src = file;
+
+        head.appendChild(script);
       });
     }
   };
 
   // Assign the initial Library.
   Object.keys(THEME_LIBRARIES).forEach((library) => assign(library, name));
-
-  return [cssSnippets, jsSnippets].map((s) => s.join('')).join('');
 };

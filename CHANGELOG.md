@@ -1,3 +1,15 @@
+## 0.89.0 (October 6, 2021)
+
+### Features
+
+- Append attached libraries to the head instead.
+
+## 0.88.5 (October 5, 2021)
+
+### Maintenance
+
+- Fixes DomContentLoaded Stacking issue.
+
 ## 0.88.4 (October 4, 2021)
 
 ### Maintenance
