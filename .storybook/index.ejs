@@ -104,7 +104,7 @@
     <script>
       // Prevent callStacks for the runOnPageChange handler.
       let refresh;
-      let throttle = false;
+      window.throttle = window.throttle || false;
       let awaitVendors;
 
       // https://github.com/storybookjs/storybook/issues/6113#issuecomment-473965255
@@ -114,11 +114,11 @@
         }
 
         refresh = setTimeout(() => {
-          if (throttle) {
+          if (window.throttle) {
             return;
           }
 
-          throttle = true;
+          window.throttle = true;
 
           // Enables the required script logic from Drupal by calling the defined
           // attach Drupal handlers.
@@ -135,8 +135,8 @@
           }
 
           awaitVendors = setTimeout(() => {
-            throttle = false;
-          }, 2000);
+            window.throttle = false;
+          }, 500);
 
         }, 200);
       }
