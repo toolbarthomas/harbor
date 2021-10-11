@@ -1,3 +1,10 @@
+## 0.89.2 (October 6, 2021)
+
+### Maintenance
+
+- Simplify Drupal behaviors.
+- Implements NPM package maintenance.
+
 ## 0.89.0 (October 6, 2021)
 
 ### Features

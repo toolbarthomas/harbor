@@ -5,3 +5,15 @@ base:
       dist/main/stylesheets/index.css: {}
   js:
     dist/main/javascripts/base.js: {}
+
+vue-framework:
+  version: 2.x
+  js:
+    https://cdn.jsdelivr.net/npm/vue@2: {}
+
+vue:
+  version: 1.x
+  js:
+    dist/main/javascripts/vue.js: {}
+  dependencies:
+    - harbor/vue-framework

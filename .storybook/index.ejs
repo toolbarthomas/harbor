@@ -160,6 +160,12 @@
         },
         false
       );
+
+      window.addEventListener('load', () => {
+        window.throttle = false;
+
+        runOnPageChange()
+      });
     </script>
 
     <% if (typeof headHtmlSnippet !== 'undefined') { %>

@@ -102,28 +102,6 @@ module.exports = (name) => {
         script.src = file;
         head.appendChild(script);
       });
-
-      const init = document.createElement('script');
-      init.type = 'text/javascript';
-      init.innerHTML = `
-          (() => {
-            if (window.drupalCallback) {
-              clearTimeout(window.drupalCallback);
-            }
-
-            window.drupalCallback = setTimeout(() => {
-              if (Drupal.behaviors) {
-                Object.keys(Drupal.behaviors).forEach(b => {
-                  if (Drupal.behaviors[b].attach) {
-                    Drupal.behaviors[b].attach();
-                  }
-                })
-              }
-            }, 500);
-          })();
-        `;
-
-      head.appendChild(init);
     }
   };
 
