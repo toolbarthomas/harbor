@@ -4,13 +4,13 @@ Harbor is an asset builder that fits within the theme architecture of [Drupal](h
 It can create [Drupal](https://drupal.org/) compatible themes without the need to install the actual CMS.
 With the help of [Storybook](https://storybookjs.org/) it can generate the Twig templates that are used by Drupal themes.
 
-The assets are processed on a very basic level, stylesheets files can be compiled with the included compiler and Babel will transform the defined javascript files to enable JS compatibility for older browsers.
+The assets are processed on a very basic level, stylesheets can be compiled with the included compiler and Babel will transform the defined javascript files to enable JS compatibility for older browsers.
 
-It does not care about any frameworks and you can include additional plugins for the configured workers.
+It is optional to use the bundled workers but they ensure that they work correctly within Drupal and your styleguide. It is possible to include other frameworks within the environment by simply adding it within a compatible theme library configuration.
 
 ## Setup
 
-You can install Harbor via NPM (we assume you have installed [Nodejs](https://nodejs.org):
+You can install Harbor via NPM ([Nodejs](https://nodejs.org) is required in order to do this.):
 
 ```
 $ npm install @toolbarthomas/harbor
@@ -32,6 +32,24 @@ The following CLI arguments can be used in order to customize the build process.
 | --styleguide | Starts the styleguide builder.                               |
 | --watch      | Observes for file changes for the initiated tasks.           |
 | --minify     | Minifies the processed assets.                               |
+
+You can also use the `harbor` command instead if you installed it globally:
+This will only run the default workers but you can use additional parameters like the local commands.
+Keep in mind that you need to be in the correct working directory in order to run
+it correctly.
+
+```sh
+$ npm install -g @toolbarthomas/harbor
+```
+
+Installing Harbor globally will lock you in a specific version so keep in mind
+it can break your workflow if you installed the newest version without fixing the breaking-changes.
+
+```sh
+$ harbor
+# or
+$ harbor --styleguide --watch
+```
 
 ## Workers
 
