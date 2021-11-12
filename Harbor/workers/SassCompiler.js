@@ -114,6 +114,7 @@ class SassCompiler extends Worker {
       .lint(
         Object.assign(this.config.plugins.stylelint, {
           files: glob.sync(path.join(path.dirname(entry), '**/*.scss')),
+          customSyntax: 'postcss-scss',
         })
       )
       .then((result) => {

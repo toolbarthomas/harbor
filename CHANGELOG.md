@@ -1,3 +1,15 @@
+## 0.89.5 (November 12, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.89.4 (November 4, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
 ## 0.89.3 (October 19, 2021)
 
 ### Maintenance
