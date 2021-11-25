@@ -29,39 +29,57 @@ class Resolver extends Worker {
         (name) =>
           new Promise((done) => {
             try {
-              const vendor = this.config.entry[name];
+              let vendor = Array.isArray(this.config.entry[name])
+                ? this.config.entry[name]
+                : [this.config.entry[name]];
+              vendor = vendor.filter((v) => v);
+
               const require = createRequire(import.meta.url);
 
-              const cwd = path.dirname(require.resolve(`${name}/package.json`));
-              const p = path.join(cwd, vendor);
+              if (vendor.length) {
+                let queue = 0;
 
-              if (!fs.existsSync(p)) {
-                this.Console.warning(
-                  `Unable to resolve package: ${name}`,
-                  `Package does not exist ${p}`
-                );
+                vendor.forEach((v) => {
+                  const cwd = path.dirname(require.resolve(`${name}/package.json`));
+                  const p = path.join(cwd, v);
 
+                  if (!fs.existsSync(p)) {
+                    this.Console.warning(
+                      `Unable to resolve package: ${name}`,
+                      `Package does not exist ${p}`
+                    );
+
+                    done();
+                  }
+
+                  // Define the destination path for the current module.
+                  const dest = path.resolve(
+                    this.environment.THEME_DIST,
+                    this.config.cwd || 'vendors',
+                    name,
+                    path.basename(p)
+                  );
+
+                  mkdirp.sync(path.dirname(dest));
+
+                  // Stream the actual contents in order to resolve each module faster.
+                  fs.createReadStream(p).pipe(
+                    fs.createWriteStream(dest).on('close', () => {
+                      this.Console.log(`Source resolved: ${p}`);
+
+                      queue += 1;
+
+                      if (queue >= vendor.length) {
+                        this.Console.info(`Package resolved: ${name}`);
+
+                        done();
+                      }
+                    })
+                  );
+                });
+              } else {
                 done();
               }
-
-              // Define the destination path for the current module.
-              const dest = path.resolve(
-                this.environment.THEME_DIST,
-                this.config.cwd || 'vendors',
-                name,
-                path.basename(p)
-              );
-
-              mkdirp.sync(path.dirname(dest));
-
-              // Stream the actual contents in order to resolve each module faster.
-              fs.createReadStream(p).pipe(
-                fs.createWriteStream(dest).on('close', () => {
-                  this.Console.success(`Package resolved: ${name}`);
-
-                  done();
-                })
-              );
             } catch (exception) {
               this.Console.error(`Unable to resolve package: ${name}`, exception);
 
