@@ -141,9 +141,15 @@
         }, 200);
       }
 
+      let DOMReady = false;
+
       document.addEventListener(
         'DOMContentLoaded',
         function () {
+          if (!DOMReady) {
+            return;
+          }
+
           const callback = function (mutationsList) {
             for (let i = 0, len = mutationsList.length; i < len; i++) {
               if (mutationsList[i].type == 'childList') {
@@ -164,7 +170,9 @@
       window.addEventListener('load', () => {
         window.throttle = false;
 
-        runOnPageChange()
+        runOnPageChange();
+
+        DOMReady = true;
       });
     </script>
 
