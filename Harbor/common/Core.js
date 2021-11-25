@@ -112,7 +112,7 @@ class Core {
           ? this.config.entry[name]
           : [this.config.entry[name]];
 
-        if (!source.length) {
+        if (!sources.length) {
           return [];
         }
 

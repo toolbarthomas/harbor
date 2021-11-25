@@ -76,13 +76,13 @@
     "eslint-plugin-prettier": "^4.0.0",
     "html-escaper": "^3.0.3",
     "imagemin": "^8.0.1",
-    "is-svg": "^4.3.1",
+    "is-svg": "^4.3.2",
     "log-symbols": "^5.0.0",
     "mkdirp": "^1.0.4",
     "node-sass": "^6.0.1",
     "node-sass-glob-importer": "^5.3.2",
     "outdent": "^0.8.0",
-    "postcss": "^8.3.11",
+    "postcss": "^8.4.1",
     "postcss-combine-duplicated-selectors": "^10.0.3",
     "postcss-scss": "^4.0.2",
     "prettier": "^2.4.1",
@@ -98,7 +98,7 @@
     "twing-loader": "2.0.2",
     "type-name": "^2.0.2",
     "uglify-js": "^3.14.3",
-    "ws": "^8.2.3",
+    "ws": "^8.3.0",
     "yaml": "^1.10.2"
   }
 }

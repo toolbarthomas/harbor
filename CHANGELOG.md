@@ -1,3 +1,15 @@
+## 0.90.1 (November 25, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.90.0 (October 25, 2021)
+
+### Features
+
+- Include support for multiple entry sources.
+
 ## 0.89.6 (November 23, 2021)
 
 ### Maintenance
