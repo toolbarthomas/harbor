@@ -60,7 +60,7 @@ class SassCompiler extends Worker {
       }
     }
 
-    await import(this.config.useLegacyCompiler ? 'node-sass' : 'sass').then((m) => {
+    await import(this.config.useLegacyCompiler ? 'node-sass/lib/index.js' : 'sass').then((m) => {
       // Should update as legacy warning in the future.
       this.Console.info(`Using Sass compiler "${m.default.info}"`);
 

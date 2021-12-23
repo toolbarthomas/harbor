@@ -1,3 +1,9 @@
+## 0.93.2 (December 14, 2021)
+
+### Maintenance
+
+- Fixes an issue where Node Sass was missing during the initial setup.
+
 ## 0.93.1 (December 14, 2021)
 
 ### Maintenance
