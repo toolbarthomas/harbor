@@ -1,10 +1,16 @@
-## 0.93.2 (December 14, 2021)
+## 0.93.3 (December 23, 2021)
+
+### Maintenance
+
+- Adjust Sass Compiler logging.
+
+## 0.93.2 (December 23, 2021)
 
 ### Maintenance
 
 - Fixes an issue where Node Sass was missing during the initial setup.
 
-## 0.93.1 (December 14, 2021)
+## 0.93.1 (December 23, 2021)
 
 ### Maintenance
 
