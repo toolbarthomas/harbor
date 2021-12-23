@@ -200,13 +200,14 @@ The result will be written relative to the configured environment destination di
 The SassCompiler renders & prepares the defined entries with Node Sass & Postcss.
 The result will be written relative to the configured environment destination directory.
 
-| Option          | type                   | Description                                                          |
-| --------------- | ---------------------- | -------------------------------------------------------------------- |
-| options         | Object                 | Optional configuration for the Node Sass compiler.                   |
-| hook            | string                 | Runs the worker if the given hook is subscribed to the Task Manager. |
-| plugins         | Object                 | Optional plugins that will be assigned to the Postcss plugin.        |
-| plugins.postcss | Object                 | The optional Postcss plugin(configuration).                          |
-| entry           | Object[string, string] | Renders & lints the given entries with Node Sass & Postcss.          |
+| Option            | type                   | Description                                                                 |
+| ----------------- | ---------------------- | --------------------------------------------------------------------------- |
+| options           | Object                 | Optional configuration for the Node Sass compiler.                          |
+| useLegacyCompiler | boolean                | Flag that enables the Node Sass compiler instead of the Dart Sass compiler. |
+| hook              | string                 | Runs the worker if the given hook is subscribed to the Task Manager.        |
+| plugins           | Object                 | Optional plugins that will be assigned to the Postcss plugin.               |
+| plugins.postcss   | Object                 | The optional Postcss plugin(configuration).                                 |
+| entry             | Object[string, string] | Renders & lints the given entries with Node Sass & Postcss.                 |
 
 ### SvgSpriteCompiler configuration
 

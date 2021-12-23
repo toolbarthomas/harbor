@@ -37,10 +37,8 @@ export default {
       },
     },
     SassCompiler: {
-      options: {
-        outputStyle: 'compact',
-      },
       hook: ['sass', 'stylesheets', 'compile', 'default::1'],
+      options: {},
       plugins: {
         stylelint: {
           plugins: ['stylelint-scss'],
