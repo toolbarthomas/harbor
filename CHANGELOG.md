@@ -1,3 +1,14 @@
+## 0.93.1 (December 14, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+### Features
+
+- Use the Dart Sass compiler by default, Node Sass can be installed during the initial setup.
+- Include option to use the legacy Node Sass Compiler within the configuration: `useLegacyCompiler`
+
 ## 0.92.0 (December 14, 2021)
 
 ### Maintenance
