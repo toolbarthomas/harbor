@@ -1,3 +1,5 @@
+import branchy from 'branchy';
+
 import Environment from '../common/Environment.js';
 import Logger from '../common/Logger.js';
 
@@ -254,11 +256,13 @@ class TaskManager {
               } else {
                 JIT.push(
                   new Promise((cc) =>
-                    task.fn().then((exit) => {
-                      postRun(exit, task.hook[0]);
+                    branchy(
+                      task.fn().then((exit) => {
+                        postRun(exit, task.hook[0]);
 
-                      cc();
-                    })
+                        cc();
+                      })
+                    )()
                   )
                 );
               }

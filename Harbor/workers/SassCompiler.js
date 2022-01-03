@@ -41,10 +41,12 @@ class SassCompiler extends Worker {
       return super.resolve();
     }
 
+    const nodeSassPath = 'node-sass/lib/index.js';
+
     // Select the defined Sass compiler: Dart Sass or Node Sass.
     if (this.config.useLegacyCompiler) {
       try {
-        await import('node-sass');
+        await import(nodeSassPath);
       } catch (error) {
         if (error) {
           this.Console.warning(`The legacy Node Sass compiler is missing and will be installed.`);
@@ -52,15 +54,15 @@ class SassCompiler extends Worker {
           await import('child_process').then((m) => {
             this.Console.info(`Installing legacy Node Sass compiler, please wait...`);
 
-            m.default.execSync('npm install node-sass --quiet --no-progress', {
-              stdio: [0, 1, 2],
+            m.default.execSync('npm install node-sass --quiet --no-progress --no-save', {
+              stdio: 'inherit',
             });
           });
         }
       }
     }
 
-    await import(this.config.useLegacyCompiler ? 'node-sass/lib/index.js' : 'sass').then((m) => {
+    await import(this.config.useLegacyCompiler ? nodeSassPath : 'sass').then((m) => {
       // Should update as legacy warning in the future.
       this.Console.log(`Using Sass compiler "${m.default.info}"`);
 

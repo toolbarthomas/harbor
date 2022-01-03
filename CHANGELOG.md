@@ -1,3 +1,16 @@
+## 0.94.1 (January 3, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.94.0 (December 23, 2021)
+
+### Features
+
+- Use child_process within concurrent tasks.
+- Dont' save the Node Sass compiler to the package.json since it will be installed on the fly.
+
 ## 0.93.3 (December 23, 2021)
 
 ### Maintenance
