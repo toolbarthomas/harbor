@@ -129,6 +129,7 @@ export default {
         alias: {
           '@theme': process.cwd(),
         },
+        globalMode: 'strict',
         optimization: {
           minimize: true,
         },

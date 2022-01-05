@@ -14,6 +14,13 @@ import Plugin from './Plugin.js';
  * directory.
  */
 class StyleguideCompiler extends Plugin {
+  constructor(services, options, workers) {
+    super(services, options, workers);
+
+    // Contains the value storage for the template variables.
+    this.renderContext = {};
+  }
+
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
@@ -89,7 +96,7 @@ class StyleguideCompiler extends Plugin {
       }
       command = `node ${script} -c ${config} -o ${staticBuildPath}`;
     } else {
-      command = `node ${script} -s ${process.cwd()} -c ${config} -p ${this.environment.THEME_PORT}`;
+      command = `node ${script} -c ${config} -p ${this.environment.THEME_PORT}`;
     }
 
     const shell = exec(command);
@@ -298,11 +305,84 @@ class StyleguideCompiler extends Plugin {
   }
 
   /**
+   * Creates the Twing Data Object that can be used within the templates.
+   *
+   * @param {string} name
+   * @param {string} sourcePath
+   * @param {boolean} initial
+   * @returns
+   */
+  async setupDataEntry(name, sourcePath, context) {
+    return new Promise((cb) => {
+      if (!this.renderContext[name]) {
+        this.renderContext[name] = {};
+      }
+
+      if (context) {
+        if (!this.renderContext[name]['_context'] instanceof Object) {
+          this.renderContext[name]['_context'] = {};
+        }
+      }
+
+      if (['.js', '.cjs'].includes(path.extname(sourcePath))) {
+        try {
+          import(sourcePath).then((m) => {
+            if (m && m.default) {
+              this.Console.info(`Loading data for: ${name} from ${sourcePath}`);
+              this.renderContext[name] = Object.assign(this.renderContext[name], m.default);
+
+              if (this.config.options.globalMode) {
+                Object.keys(m.default).forEach((option) => {
+                  // @todo Validate sensitivity of errors for this option.
+                  if (this.config.options.globalMode !== 'strict') {
+                    this.renderContext[option] = `%${option}%`;
+                  } else if (!this.renderContext[option]) {
+                    this.renderContext[option] = `%${option}%`;
+                  }
+                });
+              }
+
+              return cb();
+            }
+          });
+        } catch (exception) {
+          this.Console.warning(exception);
+        }
+      } else {
+        fs.readFile(sourcePath, (exception, result) => {
+          try {
+            const proposal = JSON.parse(result.toString());
+
+            if (proposal) {
+              this.renderContext[name] = Object.assign(this.renderContext[name], proposal);
+
+              if (this.config.options.globalMode) {
+                Object.keys(proposal).forEach((option) => {
+                  // @todo Validate sensitivity of errors for this option.
+                  if (this.config.options.globalMode !== 'strict') {
+                    this.renderContext[option] = `%${option}%`;
+                  } else if (!this.renderContext[option]) {
+                    this.renderContext[option] = `%${option}%`;
+                  }
+                });
+              }
+            }
+          } catch (exception) {
+            this.Console.warning(exception);
+          }
+
+          return cb();
+        });
+      }
+    });
+  }
+
+  /**
    * Generates the Storybook configuration with the defined Harbor configuration.
    * This ensures that the actual storybook instance is loaded as a CommonJS
    * module.
    */
-  setupMain(cwd) {
+  async setupMain(cwd) {
     if (!(this.config.entry instanceof Object)) {
       return;
     }
@@ -331,6 +411,34 @@ class StyleguideCompiler extends Plugin {
 
     const previewMainTemplate = path.resolve(cwd, 'index.ejs');
     const environmentModulePath = path.resolve(StyleguideCompiler.configPath(), 'twing.cjs');
+
+    // Implements the render Context for each storybook story.
+    if (stories.length) {
+      await Promise.all(
+        stories.map(
+          (story) =>
+            new Promise(async (cc) => {
+              const dirname = path.dirname(story);
+              let name = path.basename(story);
+              name = name.substring(0, name.indexOf('.'));
+              const sources = [
+                ...glob.sync(path.join(dirname, `**/${name}.data.js`)),
+                ...glob.sync(path.join(dirname, `**/${name}.data.json`)),
+              ];
+
+              if (!sources.length) {
+                cc();
+              }
+
+              await Promise.all(
+                sources.map((sourcePath, index) => this.setupDataEntry(name, sourcePath, index > 0))
+              );
+
+              cc();
+            })
+        )
+      );
+    }
 
     const template = outdent`
       const fs = require('fs');
@@ -396,7 +504,7 @@ class StyleguideCompiler extends Plugin {
           loader: 'twing-loader',
           options: {
             environmentModulePath: '${environmentModulePath}',
-            renderContext: {},
+            renderContext: ${JSON.stringify(this.renderContext)},
           },
         });
 
@@ -453,6 +561,9 @@ class StyleguideCompiler extends Plugin {
       module.exports = {
         stories,
         addons,
+        staticDirs: [${
+          this.environment.THEME_ENVIRONMENT !== 'production' && '"' + process.cwd() + '"'
+        }],
         webpackFinal,
         previewMainTemplate: '${previewMainTemplate}',
       }
