@@ -58,7 +58,7 @@ export default {
     },
     SvgSpriteCompiler: {
       hook: ['svg', 'images', 'compile', 'default::1'],
-      prefix: 'svg--',
+      prefix: '',
       entry: {
         svgsprite: 'images/*/**.svg',
       },

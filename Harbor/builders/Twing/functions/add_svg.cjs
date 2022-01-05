@@ -2,29 +2,40 @@
  * Return an Inline SVG element or the source path
  */
 module.exports = (...args) => {
-  if (!THEME_SPRITES || !Object.values(THEME_SPRITES).length) {
-    return;
+  let themeSprites;
+
+  try {
+    themeSprites = JSON.parse(process.env.THEME_SPRITES);
+  } catch (error) {
+    if (error) {
+      return Promise.resolve(error);
+    }
+  }
+
+  if (!themeSprites || !Object.values(themeSprites).length) {
+    return Promise.resolve();
   }
 
   try {
     const [key, sprite, withElement] = args;
     const path =
       sprite && sprite !== true
-        ? THEME_SPRITES[sprite] || Object.values(THEME_SPRITES)[0]
-        : Object.values(THEME_SPRITES)[0];
+        ? themeSprites[sprite] || Object.values(themeSprites)[0]
+        : Object.values(themeSprites)[0];
 
     const p = `${path}${key ? `#${key}` : ''}`;
 
     if ((!sprite && withElement) || sprite === true || withElement) {
-      return `
+      return Promise.resolve(`
         <svg aria-hidden="true" aria-focusable="false">
-          <use xlink:href="${p}"></use>
+          <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="${p}"></use>
         </svg>
-      `;
+
+      `);
     } else {
-      return p;
+      return Promise.resolve(p);
     }
   } catch (error) {
-    console.error(error);
+    return Promise.resolve(error);
   }
 };

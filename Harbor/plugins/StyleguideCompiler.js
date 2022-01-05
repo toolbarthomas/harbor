@@ -133,12 +133,20 @@ class StyleguideCompiler extends Plugin {
 
     const queryEntry = (entry, query) => glob.sync(path.join(entry, query));
 
-    const defaultFilters = queryEntry(cwd, 'filters/**.cjs');
+    const initialFilters = ['_date', '_escape'];
+    const defaultFilters = queryEntry(cwd, 'filters/**.cjs').filter(
+      (m) => !initialFilters.includes(path.basename(m, '.cjs'))
+    );
+
     const customFilters = this.config.options.builderDirectory
       ? queryEntry(this.config.options.builderDirectory, 'filters/**.cjs')
       : [];
 
-    const defaultFunctions = queryEntry(cwd, 'functions/**.cjs');
+    const initialFunctions = ['dump'];
+    const defaultFunctions = queryEntry(cwd, 'functions/**.cjs').filter(
+      (m) => !initialFunctions.includes(path.basename(m, '.cjs'))
+    );
+
     const customFunctions = this.config.options.builderDirectory
       ? queryEntry(this.config.options.builderDirectory, 'functions/**.cjs')
       : [];
@@ -334,6 +342,53 @@ class StyleguideCompiler extends Plugin {
       const addons = [${addons.map((p) => `'${p}'`).join(',')}]
       const stories = [${stories.map((p) => `'${p}'`).join(',')}]
 
+      // Include the Drupal library context within the Storybook instance that
+      // can be used for the Drupal related Twig extensions.
+      const libraryPaths = [${glob
+        .sync('*.libraries.yml')
+        .map((p) => `'${p}'`)
+        .join(',')}];
+      const libraries = {};
+      if (libraryPaths.length) {
+        libraryPaths.forEach((l) => {
+          const c = fs.readFileSync(l).toString();
+          console.log('Reading library: ' + l);
+
+          if (c && c.length) {
+            try {
+              libraries[path.basename(l)] = YAML.parse(c);
+            } catch (exception) {
+              console.log(exception);
+            }
+          }
+        });
+      }
+
+      // Enable the sprite paths within the Styleguide as global context.
+      const sprites = {};
+      const enableSprites = ${!!(
+        this.workers &&
+        this.workers.SvgSpriteCompiler &&
+        this.workers.SvgSpriteCompiler.config.entry
+      )};
+      if (enableSprites) {
+        try {
+          const entry = ${JSON.stringify(this.workers.SvgSpriteCompiler.config.entry)};
+
+          Object.keys(entry).forEach((n) => {
+            let p = path.normalize(path.dirname(entry[n])).replace('*', '');
+            p = path.join('${this.environment.THEME_DIST}', p, n + '.svg');
+
+            if (fs.existsSync(path.resolve(p))) {
+              sprites[n] = p;
+            }
+
+          });
+        } catch (exception) {
+          console.log('Unable to expose compiled inline SVG sprites:' + exception);
+        }
+      }
+
       const webpackFinal = (config) => {
         // Include the Twig loader to enable support from Drupal templates.
         config.module.rules.push({
@@ -341,6 +396,7 @@ class StyleguideCompiler extends Plugin {
           loader: 'twing-loader',
           options: {
             environmentModulePath: '${environmentModulePath}',
+            renderContext: {},
           },
         });
 
@@ -358,63 +414,17 @@ class StyleguideCompiler extends Plugin {
           )}, config.resolve.alias);
         }
 
-        // Include the Drupal library context within the Storybook instance that
-        // can be used for the Drupal related Twig extensions.
-        const libraryPaths = [${glob
-          .sync('*.libraries.yml')
-          .map((p) => `'${p}'`)
-          .join(',')}];
-        const libraries = {};
-        if (libraryPaths.length) {
-          libraryPaths.forEach((l) => {
-            const c = fs.readFileSync(l).toString();
-            console.log('Reading library: ' + l);
-
-            if (c && c.length) {
-              try {
-                libraries[path.basename(l)] = YAML.parse(c);
-              } catch (exception) {
-                console.log(exception);
-              }
-            }
-          });
-        }
-
-        // Enable the sprite paths within the Styleguide as global context.
-        const sprites = {};
-        const enableSprites = ${!!(
-          this.workers &&
-          this.workers.SvgSpriteCompiler &&
-          this.workers.SvgSpriteCompiler.config.entry
-        )};
-        if (enableSprites) {
-          try {
-            const entry = ${JSON.stringify(this.workers.SvgSpriteCompiler.config.entry)};
-
-            Object.keys(entry).forEach((n) => {
-              let p = path.normalize(path.dirname(entry[n])).replace('*', '');
-              p = path.join('${this.environment.THEME_DIST}', p, n + '.svg');
-
-              if (fs.existsSync(path.resolve(p))) {
-                sprites[n] = p;
-              }
-
-            });
-          } catch (exception) {
-            console.log('Unable to expose compiled inline SVG sprites:' + exception);
-          }
-        }
-
-        config.plugins.push(
-          new webpack.DefinePlugin({
-            THEME_LIBRARIES: JSON.stringify(libraries),
-            THEME_DIST: '"${path.normalize(this.environment.THEME_DIST)}/"',
-            THEME_ENVIRONMENT: '"${this.environment.THEME_ENVIRONMENT}"',
-            THEME_SPRITES: JSON.stringify(sprites),
-            THEME_ALIAS: JSON.stringify(${JSON.stringify(this.config.options.alias)}),
-            THEME_WEBSOCKET_PORT: '${this.environment.THEME_WEBSOCKET_PORT}',
-          })
-        );
+        // @TODO should be removed, is replaced by enforced process env overrides.
+        // config.plugins.push(
+        //   new webpack.DefinePlugin({
+        //     THEME_LIBRARIES: JSON.stringify(libraries),
+        //     THEME_DIST: '"${path.normalize(this.environment.THEME_DIST)}/"',
+        //     THEME_ENVIRONMENT: '"${this.environment.THEME_ENVIRONMENT}"',
+        //     THEME_SPRITES: JSON.stringify(sprites),
+        //     THEME_ALIAS: JSON.stringify(${JSON.stringify(this.config.options.alias)}),
+        //     THEME_WEBSOCKET_PORT: '${this.environment.THEME_WEBSOCKET_PORT}',
+        //   })
+        // );
 
         config.mode = ${
           this.environment.THEME_ENVIRONMENT !== 'development' ? '"production"' : 'config.mode'
@@ -430,6 +440,15 @@ class StyleguideCompiler extends Plugin {
 
         return config;
       }
+
+      // Enforce the Harbor environment within the Webpack instance.
+      // DefinePlugin does not give the desired result withing the Twing Builder.
+      process.env.THEME_LIBRARIES = JSON.stringify(libraries);
+      process.env.THEME_DIST = '"${path.normalize(this.environment.THEME_DIST)}/"';
+      process.env.THEME_ENVIRONMENT = '"${this.environment.THEME_ENVIRONMENT}"';
+      process.env.THEME_SPRITES = JSON.stringify(sprites);
+      process.env.THEME_ALIAS = JSON.stringify(${JSON.stringify(this.config.options.alias)});
+      process.env.THEME_WEBSOCKET_PORT = '${this.environment.THEME_WEBSOCKET_PORT}';
 
       module.exports = {
         stories,
