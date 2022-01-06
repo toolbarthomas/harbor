@@ -5,7 +5,7 @@ module.exports = (...args) => {
   let themeSprites;
 
   try {
-    themeSprites = JSON.parse(process.env.THEME_SPRITES);
+    themeSprites = typeof THEME_SPRITES === 'string' ? JSON.parse(THEME_SPRITES) : THEME_SPRITES;
   } catch (error) {
     if (error) {
       return Promise.resolve(error);

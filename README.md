@@ -342,84 +342,36 @@ The actual javascript can be created like the following and should be compliant 
   })(Drupal, drupalSettings);
 ```
 
-### Implementing data as of V1.0.0
+### Implementing templates since >=1.0.0
 
-Since v1.0.0 Twing uses a synchronized renderContext. This means that the actual variables are defined during the compilation of the templates. The actual templates are already compiled as HTML output and you need to replace the parts that you want to adjust with dynamic data (e.g. Addon Knobs/Controls).
-
-Harbor will construct the data for each story in the global renderContext, `index.stories.js` will be stored as `index` within the global scope. This means that you can use this data in all other templates but you need to use the prefix key in order to use the actual value:
-
-```twig
-# index.twig
-<h2>{{ index.title }}</h2>
-```
+As of version 1.0.0 you need to define your Twing templates within the Storybook `loaders` configuration. This is required in order to display the actual templates; since they are rendered in asynchronous order:
 
 ```js
-// index.data.js
-export default {
-  title: 'Example title',
-};
-```
+// example.stories.js
 
-The above example will output `Example title` within the Twig template, you don't have to import any data within the Storybook definition:
-
-```js
-// index.stories.js
-import Template from 'index.twig';
+import Template from 'template.twig';
 
 export default {
-  title: 'Styleguide',
+  title: 'Asynchronous story',
+  loaders: [
+    async ({ args }) => {
+      Template: await Template(args); // Keyname can be anything.
+    },
+  ],
 };
 
-export const Default = (args) => Template;
-```
+// loaded.Templates is defined within the default default export.
+export const Default = (args, { loaded }) = > loaded.Template;
 
-The defined keys within the `renderContext` storage will also be exposed as global variable in order to adjust them dynamically. You can turn this off by setting the `StyleguideCompiler.option.globalMode` to `false`.
-This feature is enabled by default but will only create a new renderContext entry if it does not exists; since it is defined in `strict` mode. You can set the configuration option to `true` in order override already defined renderContext values; this is handy if you only want to use dynamic data for the actual stories:
-
-```twig
-# dynamic.twig
-# We don't need to use the prefix of the story since we want to replace the initial value anyhow.
-<h2>{{ title }}</h2>
-<img src="{{ image }}'/>
-```
-
-```js
-// dynamic.data.js
-// We don't need to define any value but it can be used as default value:
-export default {
-  title: 'Some title',
-  image: 'https://picsum.photos/id/237/200/300',
-};
-```
-
-```js
-// dynamic.stories.js
-import Template from 'dynamic.twig';
-
-// We can import some data for the default values:
-import props from 'dynamic';
-
-// Define the dynamic data controls for the template:
-export default {
-  title: 'Dynamic',
-  argTypes: {
-    title: { control: 'text' },
-    image: { control: 'text' },
-  },
-};
-
-// Setup the template:
-export const Default = (args) =>
-  Template.replace('%title%', args.title).replace('%image%', args.image);
-
-// Will define some default values for the actual template:
+// Define the actual arguments
 Default.args = {
-  title: props.title,
-  image: props.image,
+  title: 'Foo',
 };
 ```
 
-The global variables are actually used prefixed keys so its value is easier to replace within the rendered template: `key => %key%`.
+```twig
+{{ title }}
+```
 
 ### Usage of SVG Inline Sprites
 

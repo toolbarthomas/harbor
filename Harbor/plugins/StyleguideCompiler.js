@@ -504,7 +504,7 @@ class StyleguideCompiler extends Plugin {
           loader: 'twing-loader',
           options: {
             environmentModulePath: '${environmentModulePath}',
-            renderContext: ${JSON.stringify(this.renderContext)},
+            // renderContext: ${JSON.stringify(this.renderContext)},
           },
         });
 
@@ -523,16 +523,16 @@ class StyleguideCompiler extends Plugin {
         }
 
         // @TODO should be removed, is replaced by enforced process env overrides.
-        // config.plugins.push(
-        //   new webpack.DefinePlugin({
-        //     THEME_LIBRARIES: JSON.stringify(libraries),
-        //     THEME_DIST: '"${path.normalize(this.environment.THEME_DIST)}/"',
-        //     THEME_ENVIRONMENT: '"${this.environment.THEME_ENVIRONMENT}"',
-        //     THEME_SPRITES: JSON.stringify(sprites),
-        //     THEME_ALIAS: JSON.stringify(${JSON.stringify(this.config.options.alias)}),
-        //     THEME_WEBSOCKET_PORT: '${this.environment.THEME_WEBSOCKET_PORT}',
-        //   })
-        // );
+        config.plugins.push(
+          new webpack.DefinePlugin({
+            THEME_LIBRARIES: JSON.stringify(libraries),
+            THEME_DIST: '"${path.normalize(this.environment.THEME_DIST)}/"',
+            THEME_ENVIRONMENT: '"${this.environment.THEME_ENVIRONMENT}"',
+            THEME_SPRITES: JSON.stringify(sprites),
+            THEME_ALIAS: JSON.stringify(${JSON.stringify(this.config.options.alias)}),
+            THEME_WEBSOCKET_PORT: '${this.environment.THEME_WEBSOCKET_PORT}',
+          })
+        );
 
         config.mode = ${
           this.environment.THEME_ENVIRONMENT !== 'development' ? '"production"' : 'config.mode'
