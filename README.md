@@ -352,7 +352,7 @@ As of version 1.0.0 you need to define your Twing templates within the Storybook
 import Template from 'template.twig';
 
 export default {
-  title: 'Asynchronous story',
+  title: 'Example template',
   loaders: [
     async ({ args }) => {
       Template: await Template(args); // Keyname can be anything.
