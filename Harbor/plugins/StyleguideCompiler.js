@@ -17,6 +17,7 @@ class StyleguideCompiler extends Plugin {
   constructor(services, options, workers) {
     super(services, options, workers);
 
+    // @TODO can be removed since we can dynamically define this.
     // Contains the value storage for the template variables.
     this.renderContext = {};
   }
@@ -504,7 +505,6 @@ class StyleguideCompiler extends Plugin {
           loader: 'twing-loader',
           options: {
             environmentModulePath: '${environmentModulePath}',
-            // renderContext: ${JSON.stringify(this.renderContext)},
           },
         });
 
