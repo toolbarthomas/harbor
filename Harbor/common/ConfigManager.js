@@ -20,6 +20,7 @@ class ConfigManager {
   static merge(state, commit) {
     const proposal = {};
 
+    // @TODO prevent case sensitive errors within key values.
     if (state && commit && commit instanceof Object && state instanceof Object) {
       Object.keys(commit).forEach((key) => {
         if (key === 'entry' && commit[key] instanceof Object) {
