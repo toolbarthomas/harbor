@@ -1,3 +1,15 @@
+## 0.100.0 (January 7, 2022)
+
+### Features
+
+- Implements async Storybook loaders to compile with the async Twing Loader.
+- Updates to latest Twing Compiler & Twing Loader.
+
+### Maintenance
+
+- Implements NPM package maintenance.
+- Fixes staticDir Storybook CLI deprecation warning.
+
 ## 0.94.1 (January 3, 2022)
 
 ### Maintenance

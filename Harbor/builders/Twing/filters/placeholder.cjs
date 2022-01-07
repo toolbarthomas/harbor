@@ -1,3 +1,3 @@
 const { escape } = require('html-escaper');
 
-module.exports = (context) => `<em>${escape(context)}</em>`;
+module.exports = (context) => Promise.resolve(context && `<em>${escape(context)}</em>`);

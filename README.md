@@ -342,6 +342,37 @@ The actual javascript can be created like the following and should be compliant 
   })(Drupal, drupalSettings);
 ```
 
+### Implementing templates since >=1.0.0
+
+As of version 1.0.0 you need to define your Twing templates within the Storybook `loaders` configuration. This is required in order to display the actual templates; since they are rendered in asynchronous order:
+
+```js
+// example.stories.js
+
+import Template from 'template.twig';
+
+export default {
+  title: 'Example template',
+  loaders: [
+    async ({ args }) => {
+      Template: await Template(args); // Keyname can be anything.
+    },
+  ],
+};
+
+// loaded.Templates is defined within the default default export.
+export const Default = (args, { loaded }) = > loaded.Template;
+
+// Define the actual arguments
+Default.args = {
+  title: 'Foo',
+};
+```
+
+```twig
+{{ title }}
+```
+
 ### Usage of SVG Inline Sprites
 
 Harbor compiles the defined SVG images with the SVGSpriteCompiler and these can be used within the Twig templates. The sprites are available as a Storybook Global that can be accessed within the styleguide.
