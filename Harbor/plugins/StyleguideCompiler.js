@@ -414,7 +414,7 @@ class StyleguideCompiler extends Plugin {
     const environmentModulePath = path.resolve(StyleguideCompiler.configPath(), 'twing.cjs');
 
     // Implements the render Context for each storybook story.
-    if (stories.length) {
+    if (stories.length && this.config.options && this.config.options.globalMode) {
       await Promise.all(
         stories.map(
           (story) =>

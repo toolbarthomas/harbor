@@ -24,11 +24,6 @@ class Harbor {
   constructor() {
     this.Argv = new Argv();
 
-    const Env = new Environment();
-    this.env = Env.define();
-
-    this.Console = new Logger(this.env);
-
     this.services = {
       TaskManager: new TaskManager(),
     };
@@ -61,14 +56,23 @@ class Harbor {
     const { task, ...args } = this.Argv.args;
     const { customArgs } = args;
 
+    const Env = new Environment();
+    this.env = await Env.define();
+
+    this.Console = new Logger(this.env);
+
     // Keep track of the arguments that were not recognized by Harbor.
     const unusedCustomArgs = customArgs;
     const config = await ConfigManager.load();
 
     this.Console.info(`Starting Harbor...`);
 
+    // Assign the defined Console & environment to the TaskManager service.
+    this.services.TaskManager.mount('Console', this.Console);
+    this.services.TaskManager.mount('environment', this.env);
+
     // Ensure the configuration is defined before mounting anything.
-    Harbor.mount(this.workers, config);
+    this.mount(this.workers, config);
 
     const tasks = [task].filter((t) => t);
     if (!tasks || !tasks.length) {
@@ -114,7 +118,7 @@ class Harbor {
       // Mount the actual plugins when all workers are completed to ensure
       // the plugin entries are defined correctly.
       if (plugins.length) {
-        Harbor.mount(this.plugins, config);
+        this.mount(this.plugins, config);
 
         this.Console.log(
           `Using ${plugins.length} ${plugins.length === 1 ? 'plugin' : 'plugins'} for ${
@@ -157,12 +161,15 @@ class Harbor {
   /**
    * Defines the required properties for the defined Harbor worker or plugin.
    */
-  static mount(instances, config) {
+  mount(instances, config) {
     if (instances instanceof Object) {
       Object.keys(instances).forEach((name) => {
         const handler = instances[name];
         const { hook } = config[handler.type][name];
         const h = Array.isArray(hook) ? hook : [hook];
+
+        // Define the environment for the current name.
+        handler.defineEnvironment(this.env || {});
 
         // Define the configuration for the current name.
         handler.defineConfig(config[handler.type][name]);

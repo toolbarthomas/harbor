@@ -86,12 +86,13 @@ class ConfigManager {
       );
       const configPath = path.resolve(process.cwd(), 'harbor.config.js');
 
-      import(defaultConfigPath).then((m) => {
+      import(defaultConfigPath).then(async (m) => {
         const defaultConfig =
           m.default && typeof m.default === 'function' ? m.default() : m.default;
 
-        const environment = new Environment().define();
-        const Console = new Logger(environment);
+        const environment = new Environment();
+        const env = await environment.define();
+        const Console = new Logger(env);
 
         // Check if the defined configuration key has already been defined within
         // the current Node instance in order to prevent the confiuration from

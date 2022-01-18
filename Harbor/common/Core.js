@@ -17,7 +17,6 @@ class Core {
   constructor(services, options, type) {
     this.name = this.constructor.name;
 
-    this.environment = this.defineEnvironment();
     this.Console = new Logger(this.environment);
     this.type = type;
 
@@ -80,10 +79,14 @@ class Core {
       : [options.acceptedEnvironments];
   }
 
-  defineEnvironment() {
-    const Env = new Environment();
-
-    return this.environment instanceof Object ? this.environment : Env.define();
+  /**
+   * Assigns the environment Object to the current Service or Plugin.
+   * @param {Object} environment The parsed environment configuration to use.
+   */
+  defineEnvironment(environment) {
+    if (environment instanceof Object) {
+      this.environment = environment;
+    }
   }
 
   /**

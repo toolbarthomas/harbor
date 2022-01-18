@@ -10,10 +10,19 @@ class TaskManager {
       workers: {},
     };
 
-    const Env = new Environment();
-    this.environment = Env.define();
+    this.acceptedServices = ['Console', 'environment'];
+  }
 
-    this.Console = new Logger(this.environment);
+  /**
+   * Mounts the defined service to the current TaskManager.
+   *
+   * @param {String} name The name of the mounted service.
+   * @param {any} instance The handler of the mounted service.
+   */
+  mount(name, service) {
+    if (name && !this[name] && this.acceptedServices.includes(name)) {
+      this[name] = service;
+    }
   }
 
   /**

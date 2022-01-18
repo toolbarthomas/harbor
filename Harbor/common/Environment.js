@@ -1,4 +1,4 @@
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 
@@ -26,15 +26,18 @@ class Environment {
   /**
    * Loads the environment configuration from the optional environment file.
    */
-  define() {
+  async define() {
     const source = path.resolve(process.cwd(), '.env');
-    const env = fs.existsSync(source) ? dotenv.config({ path: source }) : {};
-
-    if (env.error) {
-      throw env.error;
+    if (fs.existsSync(source)) {
+      process.env.DOTENV_CONFIG_PATH = source;
+      await new Promise((done) => {
+        import('dotenv/config').then((result) => {
+          done(process.env);
+        });
+      });
     }
 
-    const parsed = env.parsed || {};
+    const parsed = process.env || {};
 
     // Inherit any missing option from the defaults Object.
     Object.keys(this.defaults).forEach((defaultOption) => {
