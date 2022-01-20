@@ -1,3 +1,9 @@
+## 0.103.1 (January 20, 2022)
+
+### Maintenance
+
+- Fixes configuration exception for Stylelint.
+
 ## 0.103.0 (January 20, 2022)
 
 ### Maintenance

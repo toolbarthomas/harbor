@@ -41,14 +41,10 @@ export default {
       options: {},
       plugins: {
         stylelint: {
+          configFile: styleLintConfig.length
+            ? styleLintConfig[0]
+            : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.stylelintrc'),
           plugins: ['stylelint-scss'],
-          rules: styleLintConfig.length
-            ? {}
-            : {
-                'selector-max-compound-selectors': 3,
-                'no-duplicate-selectors': null,
-                'no-descending-specificity': null,
-              },
           extends: 'stylelint-config-recommended-scss',
         },
       },
