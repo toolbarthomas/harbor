@@ -55,35 +55,39 @@ module.exports = (name) => {
 
             document.head.appendChild(link);
 
-            // Setup the LiveReload functionality.
-            const ws = `ws-${file.substring(file.lastIndexOf('/') + 1)}`;
+            if (typeof THEME_WEBSOCKET_PORT !== 'undefined') {
+              // Setup the LiveReload functionality.
+              const ws = `ws-${file.substring(file.lastIndexOf('/') + 1)}`;
 
-            if (document.head.querySelector(`#${ws}`)) {
-              document.head.querySelector(`#${ws}`).remove();
+              if (document.head.querySelector(`#${ws}`)) {
+                document.head.querySelector(`#${ws}`).remove();
+              }
+
+              const script = document.createElement('script');
+              script.id = ws;
+              script.innerHTML = `
+                ((function () {
+                  const sheets = document.querySelectorAll('link[href*="${file}"');
+
+                  const socket = new WebSocket('ws://localhost:${parseInt(THEME_WEBSOCKET_PORT)}');
+
+                  for (let i = 0; i < sheets.length; i++) {
+                    socket.addEventListener('message', (event) => {
+                      console.log('Message from server: ', event.data);
+                      const version = '?v=' + Date.now();
+
+                      sheets[i].href = '${file}' + version;
+                    });
+
+                    socket.addEventListener('open', (event) => {
+                      socket.send('Connection established!');
+                    });
+                  }
+                })());
+              `;
+
+              document.head.appendChild(script);
             }
-
-            const script = document.createElement('script');
-            script.id = ws;
-            script.innerHTML = `
-              ((function () {
-                const sheets = document.querySelectorAll('link[href*="${file}"');
-
-                const socket = new WebSocket('ws://localhost:${parseInt(THEME_WEBSOCKET_PORT)}');
-
-                for (let i = 0; i < sheets.length; i++) {
-                  socket.addEventListener('message', (event) => {
-                    console.log('Message from server ', event.data);
-                    const version = '?v=' + Date.now();
-
-                    sheets[i].href = '${file}' + version;
-                  });
-
-                  socket.addEventListener('open', (event) => {
-                    socket.send('Connection established!');
-                  });
-                }
-              })());
-            `;
           });
         });
       }
