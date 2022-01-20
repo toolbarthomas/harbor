@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.102.0",
+  "version": "0.103.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -50,16 +50,12 @@
   "homepage": "https://github.com/toolbarthomas/harbor#readme",
   "dependencies": {
     "@babel/cli": "^7.16.8",
-    "@babel/core": "^7.16.7",
-    "@babel/preset-env": "^7.16.8",
-    "@storybook/addon-actions": "^6.4.13",
-    "@storybook/addon-controls": "^6.4.13",
+    "@babel/core": "^7.16.10",
+    "@babel/eslint-parser": "^7.16.5",
+    "@babel/preset-env": "^7.16.10",
     "@storybook/addon-essentials": "^6.4.13",
-    "@storybook/addon-links": "^6.4.13",
-    "@storybook/addon-viewport": "^6.4.13",
     "@storybook/html": "^6.4.13",
     "autoprefixer": "^10.4.2",
-    "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.3",
     "babel-plugin-module-resolver": "^4.1.0",
     "branchy": "^1.0.0",
@@ -87,7 +83,7 @@
     "postcss-scss": "^4.0.3",
     "prettier": "^2.5.1",
     "rimraf": "^3.0.2",
-    "sass": "^1.48.0",
+    "sass": "^1.49.0",
     "snake-case": "^3.0.4",
     "stylelint": "^14.2.0",
     "stylelint-config-recommended-scss": "^5.0.2",
@@ -98,7 +94,6 @@
     "twing-loader": "4.0.0",
     "type-name": "^2.0.2",
     "uglify-js": "^3.14.5",
-    "ws": "^8.4.2",
-    "yaml": "^1.10.2"
+    "ws": "^8.4.2"
   }
 }

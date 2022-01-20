@@ -400,15 +400,24 @@ class StyleguideCompiler extends Plugin {
     let addons =
       this.config.options && this.config.options.addons ? this.config.options.addons || [] : [];
 
-    // Restricts the following addons since they are included by the core
-    // Storybook package.
+    // Ensure the following addons are excluded since they will be imported by
+    // @storybook/addon-essentials.
     const restricedAddons = [
       '@storybook/addon-actions',
+      '@storybook/addon-backgrounds',
       '@storybook/addon-controls',
+      '@storybook/addon-docs',
+      '@storybook/addon-essentials',
+      '@storybook/addon-measure',
+      '@storybook/addon-outline',
+      '@storybook/addon-toolbars',
       '@storybook/addon-viewport',
     ];
 
     addons = addons.filter((addon) => !restricedAddons.includes(addon));
+
+    // Ensure @storybook/addon-essentials is included.
+    addons.push('@storybook/addon-essentials');
 
     const previewMainTemplate = path.resolve(cwd, 'index.ejs');
     const environmentModulePath = path.resolve(StyleguideCompiler.configPath(), 'twing.cjs');
@@ -562,7 +571,7 @@ class StyleguideCompiler extends Plugin {
         stories,
         addons,
         staticDirs: [${
-          this.environment.THEME_ENVIRONMENT !== 'production' && '"' + process.cwd() + '"'
+          this.environment.THEME_ENVIRONMENT !== 'production' ? `"${process.cwd()}"` : ''
         }],
         webpackFinal,
         previewMainTemplate: '${previewMainTemplate}',

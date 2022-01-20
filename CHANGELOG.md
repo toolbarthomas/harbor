@@ -1,3 +1,19 @@
+## 0.103.0 (January 20, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+- Exclude addons from current @storybook/addon-essentials.
+- Fixes staticDirectory error during the Storybook static build.
+- Removed duplicate Storybook addon packages, you should install them within your project and define it within the `harbor.config.js`.
+- Fixed Stylesheet Watcher within the Storybook development environment.
+
+## 0.102.0 (January 18, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
 ## 0.101.0 (January 10, 2022)
 
 ### Maintenance

@@ -133,7 +133,7 @@ export default {
         optimization: {
           minimize: true,
         },
-        addons: ['@storybook/addon-essentials', '@storybook/addon-links'],
+        addons: [],
         configDirectory: path.resolve(process.cwd(), '.storybook'),
         builderDirectory: path.resolve(process.cwd(), '.twing'),
         staticDirectory: 'storybook-static',
