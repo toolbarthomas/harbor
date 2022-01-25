@@ -4,6 +4,7 @@
  */
 module.exports = (name) => {
   function attach() {
+    const fragment = new DocumentFragment();
     let libraries = {};
 
     try {
@@ -14,7 +15,7 @@ module.exports = (name) => {
       console.error(`Unable to attach library: ${exception}`);
     }
 
-    const assign = (library, context) => {
+    const assign = (library, context, defer) => {
       const n = context.split('/')[0];
       const key = context.split('/')[1];
 
@@ -33,7 +34,7 @@ module.exports = (name) => {
         // Include the dependencies for the current library assignment.
         dependencies.forEach((dependency) => {
           Object.keys(libraries).forEach((dependencyLibrary) =>
-            assign(dependencyLibrary, dependency)
+            assign(dependencyLibrary, dependency, true)
           );
         });
       }
@@ -54,7 +55,7 @@ module.exports = (name) => {
               links.forEach((l) => l.remove());
             }
 
-            document.head.appendChild(link);
+            fragment.appendChild(link);
 
             if (typeof THEME_WEBSOCKET_PORT !== 'undefined') {
               // Setup the LiveReload functionality.
@@ -90,7 +91,7 @@ module.exports = (name) => {
                 })());
               `;
 
-              document.head.appendChild(script);
+              fragment.appendChild(script);
             }
           });
         });
@@ -107,12 +108,21 @@ module.exports = (name) => {
 
           script.type = 'text/javascript';
           script.src = file;
-          document.head.appendChild(script);
+
+          if (js[file].attributes instanceof Object) {
+            Object.entries(js[file].attributes).forEach(([attribute, value]) => {
+              script[attribute] = value;
+            });
+          }
+
+          fragment.appendChild(script);
         });
       }
     };
 
     Object.keys(libraries).forEach((library) => assign(library, name));
+
+    document.head.appendChild(fragment);
   }
 
   return Promise.resolve(attach());

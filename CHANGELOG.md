@@ -1,3 +1,15 @@
+## 0.103.4 (January 25, 2022)
+
+### Maintenance
+
+- Use correct attributes key for script libraries
+
+## 0.103.3 (January 25, 2022)
+
+### Maintenance
+
+- Include attribute support for theme libraries within the styleguide.
+
 ## 0.103.2 (January 24, 2022)
 
 ### Maintenance
