@@ -127,7 +127,9 @@ class SassCompiler extends Worker {
     await Promise.all(
       cwd.map(
         (entry) =>
-          new Promise((cb) => this.lintFile(entry).then(() => this.renderFile(entry).then(cb)))
+          new Promise((cb) => {
+            this.lintFile(entry).then(() => this.renderFile(entry).then(cb));
+          })
       )
     );
   }

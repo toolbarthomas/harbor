@@ -1,8 +1,5 @@
 import branchy from 'branchy';
 
-import Environment from '../common/Environment.js';
-import Logger from '../common/Logger.js';
-
 class TaskManager {
   constructor() {
     this.instances = {
@@ -84,7 +81,7 @@ class TaskManager {
         return new Promise((resolve) => {
           this.instances[type][name].resolve = resolve;
 
-          return handler(args);
+          handler(args);
         });
       } catch (exception) {
         this.Console.error(exception);
@@ -264,15 +261,15 @@ class TaskManager {
                 task.fn().then((exit) => postRun(exit, task.hook[0]));
               } else {
                 JIT.push(
-                  new Promise((cc) =>
+                  new Promise((cc) => {
                     branchy(
                       task.fn().then((exit) => {
                         postRun(exit, task.hook[0]);
 
                         cc();
                       })
-                    )()
-                  )
+                    )();
+                  })
                 );
               }
             } else {

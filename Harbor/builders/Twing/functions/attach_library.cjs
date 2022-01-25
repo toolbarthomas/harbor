@@ -10,6 +10,7 @@ module.exports = (name) => {
       libraries =
         typeof THEME_LIBRARIES === 'string' ? JSON.parse(THEME_LIBRARIES) : THEME_LIBRARIES;
     } catch (exception) {
+      // eslint-disable-next-line no-console
       console.error(`Unable to attach library: ${exception}`);
     }
 
@@ -69,7 +70,10 @@ module.exports = (name) => {
                 ((function () {
                   const sheets = document.querySelectorAll('link[href*="${file}"');
 
-                  const socket = new WebSocket('ws://localhost:${parseInt(THEME_WEBSOCKET_PORT)}');
+                  const socket = new WebSocket('ws://localhost:${parseInt(
+                    THEME_WEBSOCKET_PORT,
+                    10
+                  )}');
 
                   for (let i = 0; i < sheets.length; i++) {
                     socket.addEventListener('message', (event) => {
@@ -106,8 +110,6 @@ module.exports = (name) => {
           document.head.appendChild(script);
         });
       }
-
-      return;
     };
 
     Object.keys(libraries).forEach((library) => assign(library, name));

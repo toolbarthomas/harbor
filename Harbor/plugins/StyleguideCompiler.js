@@ -1,3 +1,4 @@
+/* eslint-disable no-unsafe-negation */
 import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -320,8 +321,8 @@ class StyleguideCompiler extends Plugin {
       }
 
       if (context) {
-        if (!this.renderContext[name]['_context'] instanceof Object) {
-          this.renderContext[name]['_context'] = {};
+        if (!this.renderContext[name]._context instanceof Object) {
+          this.renderContext[name]._context = {};
         }
       }
 
@@ -342,9 +343,9 @@ class StyleguideCompiler extends Plugin {
                   }
                 });
               }
-
-              return cb();
             }
+
+            return cb();
           });
         } catch (exception) {
           this.Console.warning(exception);
@@ -368,8 +369,8 @@ class StyleguideCompiler extends Plugin {
                 });
               }
             }
-          } catch (exception) {
-            this.Console.warning(exception);
+          } catch (fileException) {
+            this.Console.warning(fileException);
           }
 
           return cb();
@@ -427,7 +428,7 @@ class StyleguideCompiler extends Plugin {
       await Promise.all(
         stories.map(
           (story) =>
-            new Promise(async (cc) => {
+            new Promise((cc) => {
               const dirname = path.dirname(story);
               let name = path.basename(story);
               name = name.substring(0, name.indexOf('.'));
@@ -440,11 +441,9 @@ class StyleguideCompiler extends Plugin {
                 cc();
               }
 
-              await Promise.all(
+              Promise.all(
                 sources.map((sourcePath, index) => this.setupDataEntry(name, sourcePath, index > 0))
-              );
-
-              cc();
+              ).then(cc);
             })
         )
       );

@@ -32,9 +32,9 @@ module.exports = (...args) => {
         </svg>
 
       `);
-    } else {
-      return Promise.resolve(p);
     }
+
+    return Promise.resolve(p);
   } catch (error) {
     return Promise.resolve(error);
   }
