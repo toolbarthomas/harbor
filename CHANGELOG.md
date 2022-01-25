@@ -2,7 +2,7 @@
 
 ### Maintenance
 
-- Use correct attributes key for script libraries
+- Fix attributes usage for script libraries.
 
 ## 0.103.3 (January 25, 2022)
 
