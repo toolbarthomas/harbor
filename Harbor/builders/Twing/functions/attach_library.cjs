@@ -59,7 +59,9 @@ module.exports = (name) => {
 
             if (typeof THEME_WEBSOCKET_PORT !== 'undefined') {
               // Setup the LiveReload functionality.
-              const ws = `ws-${file.substring(file.lastIndexOf('/') + 1)}`;
+              const ws = `ws-${encodeURIComponent(
+                file.substring(file.lastIndexOf('/') + 1)
+              ).replaceAll('%', '')}`;
 
               if (document.head.querySelector(`#${ws}`)) {
                 document.head.querySelector(`#${ws}`).remove();
