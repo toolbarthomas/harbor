@@ -6,6 +6,7 @@
         "corejs": {
           "version": 2
         },
+        "modules": false,
         "useBuiltIns": "entry"
       }
     ]

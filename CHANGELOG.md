@@ -1,3 +1,9 @@
+## 0.103.5 (January 25, 2022)
+
+### Maintenance
+
+- Disable Babel module transpiler.
+
 ## 0.103.4 (January 25, 2022)
 
 ### Maintenance
