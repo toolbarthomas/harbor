@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.103.7",
+  "version": "0.104.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -53,8 +53,8 @@
     "@babel/core": "^7.16.12",
     "@babel/eslint-parser": "^7.16.5",
     "@babel/preset-env": "^7.16.11",
-    "@storybook/addon-essentials": "^6.4.14",
-    "@storybook/html": "^6.4.14",
+    "@storybook/addon-essentials": "^6.4.15",
+    "@storybook/html": "^6.4.15",
     "autoprefixer": "^10.4.2",
     "babel-loader": "^8.2.3",
     "babel-plugin-module-resolver": "^4.1.0",

@@ -534,6 +534,9 @@ class StyleguideCompiler extends Plugin {
         config.plugins.push(
           new webpack.DefinePlugin({
             THEME_LIBRARIES: JSON.stringify(libraries),
+            THEME_LIBRARIES_OVERRIDES: JSON.stringify(${JSON.stringify(
+              this.config.options.librariesOverride || {}
+            )}),
             THEME_DIST: '"${path.normalize(this.environment.THEME_DIST)}/"',
             THEME_ENVIRONMENT: '"${this.environment.THEME_ENVIRONMENT}"',
             THEME_SPRITES: JSON.stringify(sprites),
@@ -560,6 +563,9 @@ class StyleguideCompiler extends Plugin {
       // Enforce the Harbor environment within the Webpack instance.
       // DefinePlugin does not give the desired result withing the Twing Builder.
       process.env.THEME_LIBRARIES = JSON.stringify(libraries);
+      process.env.THEME_LIBRARIES_OVERRIDES = JSON.stringify(${JSON.stringify(
+        this.config.options.librariesOverride || {}
+      )});
       process.env.THEME_DIST = '"${path.normalize(this.environment.THEME_DIST)}/"';
       process.env.THEME_ENVIRONMENT = '"${this.environment.THEME_ENVIRONMENT}"';
       process.env.THEME_SPRITES = JSON.stringify(sprites);

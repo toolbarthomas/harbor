@@ -23,6 +23,7 @@
     "THEME_PORT": "readonly",
     "THEME_DEBUG": "readonly",
     "THEME_LIBRARIES": "readonly",
+    "THEME_LIBRARIES_OVERRIDES": "readonly",
     "THEME_ENVIRONMENT": "readonly",
     "THEME_WEBSOCKET_PORT": "readonly",
     "THEME_SPRITES": "readonly",

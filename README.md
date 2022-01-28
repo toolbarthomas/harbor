@@ -247,11 +247,18 @@ Keep in mind that some assets cannot be displayed when viewing the static HTML d
 
 This can be resolved by viewing the actual result from a (local) webserver.
 
-| Option  | type                   | Description                                                          |
-| ------- | ---------------------- | -------------------------------------------------------------------- |
-| entry   | Object[string, string] | Compiles the given entries with Storybook.                           |
-| options | Object                 | Optional configuration for the Storybook compiler.                   |
-| hook    | string                 | Runs the worker if the given hook is subscribed to the Task Manager. |
+| Option                   | type                   | Description                                                                                                    |
+| ------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| entry                    | Object[string, string] | Compiles the given entries with Storybook.                                                                     |
+| options                  | Object                 | Optional configuration for the Storybook compiler.                                                             |
+| options.alias            | Object                 | Assigns Babel module-resolver aliases to the Storybook instance.                                               |
+| options.globalMode       | Boolean/String         | `experimental` This will use a global render context for Twig.                                                 |
+| options.optimization     | Object                 | Defines the [Webpack optimization](https://webpack.js.org/configuration/optimization/) configuration.          |
+| options.addons           | Array                  | Should contain the [Storybook addon](https://storybook.js.org/docs/react/addons/install-addons) configuration. |
+| options.configDirectory  | String                 | Defines the Storybook instance directory for your theme: `./.storybook`.                                       |
+| options.builderDirectory | String                 | Defines the Twing instance directory `.twing` that can be used to include custom Twing functionality.          |
+| options.staticDirectory  | String                 | Defines the destination path for the `production` build of the Storybook styleguide `storybook-static`.        |
+| hook                     | string                 | Runs the worker if the given hook is subscribed to the Task Manager.                                           |
 
 ### Watcher configuration
 

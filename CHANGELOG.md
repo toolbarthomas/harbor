@@ -1,3 +1,13 @@
+## 0.104.0 (January 28, 2022)
+
+### Features
+
+- Implements `librariesOverrides` option for `StyleguideCompiler` plugin to resolve library sources to another file.
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
 ## 0.103.7 (January 28, 2022)
 
 ### Maintenance

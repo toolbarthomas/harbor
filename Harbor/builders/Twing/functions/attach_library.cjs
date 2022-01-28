@@ -52,7 +52,23 @@ module.exports = (name) => {
 
             link.type = 'text/css';
             link.rel = 'stylesheet';
-            link.href = file;
+
+            // Try to override the defined library with the configured
+            // librariesOverride option.
+            try {
+              if (THEME_LIBRARIES_OVERRIDES instanceof Object) {
+                if (Object.keys(THEME_LIBRARIES_OVERRIDES).includes(file)) {
+                  link.href = THEME_LIBRARIES_OVERRIDES[file];
+                }
+              }
+            } catch (error) {
+              console.log(error);
+            }
+
+            if (!link.href) {
+              link.href = file;
+            }
+
             link.media = typeof media === 'string' ? media : 'all';
 
             const links = document.head.querySelectorAll(`link[href="${file}"]`);
@@ -117,7 +133,22 @@ module.exports = (name) => {
           const script = document.createElement('script');
 
           script.type = 'text/javascript';
-          script.src = file;
+
+          // Try to override the defined library with the configured
+          // librariesOverride option.
+          try {
+            if (THEME_LIBRARIES_OVERRIDES instanceof Object) {
+              if (Object.keys(THEME_LIBRARIES_OVERRIDES).includes(file)) {
+                script.src = THEME_LIBRARIES_OVERRIDES[file];
+              }
+            }
+          } catch (error) {
+            console.log(error);
+          }
+
+          if (!script.src) {
+            script.src = file;
+          }
 
           if (js[file].attributes instanceof Object) {
             Object.entries(js[file].attributes).forEach(([attribute, value]) => {

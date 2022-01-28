@@ -126,6 +126,7 @@ export default {
           '@theme': process.cwd(),
         },
         globalMode: false,
+        librariesOverride: {},
         optimization: {
           minimize: true,
         },
