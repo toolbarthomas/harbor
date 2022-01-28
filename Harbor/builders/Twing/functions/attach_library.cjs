@@ -7,6 +7,10 @@ module.exports = (name) => {
     const fragment = new DocumentFragment();
     let libraries = {};
 
+    // Loads the defined library scripts within a synchronous order after the
+    // initial fragment insertion.
+    const postRender = [];
+
     try {
       libraries =
         typeof THEME_LIBRARIES === 'string' ? JSON.parse(THEME_LIBRARIES) : THEME_LIBRARIES;
@@ -15,7 +19,7 @@ module.exports = (name) => {
       console.error(`Unable to attach library: ${exception}`);
     }
 
-    const assign = (library, context, defer) => {
+    const assign = (library, context) => {
       const n = context.split('/')[0];
       const key = context.split('/')[1];
 
@@ -34,11 +38,12 @@ module.exports = (name) => {
         // Include the dependencies for the current library assignment.
         dependencies.forEach((dependency) => {
           Object.keys(libraries).forEach((dependencyLibrary) =>
-            assign(dependencyLibrary, dependency, true)
+            assign(dependencyLibrary, dependency)
           );
         });
       }
 
+      const attachedCss = [];
       if (css) {
         Object.keys(css).forEach((section) => {
           Object.keys(css[section]).forEach((file) => {
@@ -54,6 +59,8 @@ module.exports = (name) => {
             if (links.length) {
               links.forEach((l) => l.remove());
             }
+
+            attachedCss.push(link);
 
             fragment.appendChild(link);
 
@@ -99,6 +106,7 @@ module.exports = (name) => {
         });
       }
 
+      const attachedScripts = [];
       if (js) {
         Object.keys(js).forEach((file) => {
           const scripts = document.head.querySelectorAll(`script[src="${file}"]`);
@@ -117,14 +125,46 @@ module.exports = (name) => {
             });
           }
 
-          fragment.appendChild(script);
+          // We don't add it to the render fragment since the actual script will
+          // be inserted after the initial has been rendered.
+          attachedScripts.push(script);
         });
       }
+
+      const commit = {
+        scripts: attachedScripts,
+        css: attachedCss,
+      };
+
+      postRender.push(commit);
     };
 
     Object.keys(libraries).forEach((library) => assign(library, name));
 
     document.head.appendChild(fragment);
+
+    if (postRender.length) {
+      const queue = [];
+      postRender.forEach(
+        ({ scripts }) =>
+          scripts.length &&
+          scripts.forEach((script) => {
+            queue.push(script);
+          })
+      );
+
+      if (queue.length) {
+        const awaitLoad = (index) => {
+          if (queue[index + 1]) {
+            queue[index].addEventListener('load', () => awaitLoad(index + 1));
+          }
+
+          document.head.appendChild(queue[index]);
+        };
+
+        awaitLoad(0);
+      }
+    }
   }
 
   return Promise.resolve(attach());

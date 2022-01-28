@@ -1,3 +1,15 @@
+## 0.103.7 (January 28, 2022)
+
+### Maintenance
+
+- Load library scripts in synchronous order to ensure correct dependency behaviors.
+
+## 0.103.6 (January 26, 2022)
+
+### Maintenance
+
+- Fixes issue for created Websocket id, ensure invalid characters are filtered.
+
 ## 0.103.5 (January 25, 2022)
 
 ### Maintenance
