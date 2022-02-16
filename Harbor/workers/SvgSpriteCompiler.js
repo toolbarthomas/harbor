@@ -20,7 +20,7 @@ class SvgSpriteCompiler extends Worker {
       return super.resolve();
     }
 
-    this.prefix = this.config.prefix || 'svg--';
+    this.prefix = typeof this.config.prefix === 'string' ? this.config.prefix : 'svg--';
 
     const entries = Object.keys(this.config.entry);
 

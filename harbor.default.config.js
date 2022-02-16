@@ -37,20 +37,14 @@ export default {
       },
     },
     SassCompiler: {
-      options: {
-        outputStyle: 'compact',
-      },
       hook: ['sass', 'stylesheets', 'compile', 'default::1'],
+      options: {},
       plugins: {
         stylelint: {
+          configFile: styleLintConfig.length
+            ? styleLintConfig[0]
+            : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.stylelintrc'),
           plugins: ['stylelint-scss'],
-          rules: styleLintConfig.length
-            ? {}
-            : {
-                'selector-max-compound-selectors': 3,
-                'no-duplicate-selectors': null,
-                'no-descending-specificity': null,
-              },
           extends: 'stylelint-config-recommended-scss',
         },
       },
@@ -60,7 +54,7 @@ export default {
     },
     SvgSpriteCompiler: {
       hook: ['svg', 'images', 'compile', 'default::1'],
-      prefix: 'svg--',
+      prefix: '',
       entry: {
         svgsprite: 'images/*/**.svg',
       },
@@ -131,10 +125,12 @@ export default {
         alias: {
           '@theme': process.cwd(),
         },
+        globalMode: false,
+        librariesOverride: {},
         optimization: {
           minimize: true,
         },
-        addons: ['@storybook/addon-essentials', '@storybook/addon-links'],
+        addons: [],
         configDirectory: path.resolve(process.cwd(), '.storybook'),
         builderDirectory: path.resolve(process.cwd(), '.twing'),
         staticDirectory: 'storybook-static',

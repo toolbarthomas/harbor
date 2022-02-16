@@ -3,3 +3,14 @@ base:
   css:
     theme:
       dist/main/stylesheets/index.css: {}
+  js:
+    dist/main/javascripts/base.js: { attributes: { defer: true } }
+  dependencies:
+    - harbor/font-ibm-plex-sans
+
+font-ibm-plex-sans:
+  remote: https://fonts.google.com/specimen/IBM+Plex+Sans
+  css:
+    theme:
+      //fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap:
+        { type: external }

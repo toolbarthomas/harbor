@@ -4,13 +4,13 @@ Harbor is an asset builder that fits within the theme architecture of [Drupal](h
 It can create [Drupal](https://drupal.org/) compatible themes without the need to install the actual CMS.
 With the help of [Storybook](https://storybookjs.org/) it can generate the Twig templates that are used by Drupal themes.
 
-The assets are processed on a very basic level, stylesheets files can be compiled with the included compiler and Babel will transform the defined javascript files to enable JS compatibility for older browsers.
+The assets are processed on a very basic level, stylesheets can be compiled with the included compiler and Babel will transform the defined javascript files to enable JS compatibility for older browsers.
 
-It does not care about any frameworks and you can include additional plugins for the configured workers.
+It is optional to use the bundled workers but they ensure that they work correctly within Drupal and your styleguide. It is possible to include other frameworks within the environment by simply adding it within a compatible theme library configuration.
 
 ## Setup
 
-You can install Harbor via NPM (we assume you have installed [Nodejs](https://nodejs.org):
+You can install Harbor via NPM ([Nodejs](https://nodejs.org) is required in order to do this.):
 
 ```
 $ npm install @toolbarthomas/harbor
@@ -19,10 +19,6 @@ $ npm install @toolbarthomas/harbor
 Then you can start Harbor by simply running:
 
 ```sh
-$ harbor
-
-# or
-
 $ node node_modules/@toolbarthomas/harbor/index.js
 ```
 
@@ -37,6 +33,24 @@ The following CLI arguments can be used in order to customize the build process.
 | --watch      | Observes for file changes for the initiated tasks.           |
 | --minify     | Minifies the processed assets.                               |
 
+You can also use the `harbor` command instead if you installed it globally:
+This will only run the default workers but you can use additional parameters like the local commands.
+Keep in mind that you need to be in the correct working directory in order to run
+it correctly.
+
+```sh
+$ npm install -g @toolbarthomas/harbor
+```
+
+Installing Harbor globally will lock you in a specific version so keep in mind
+it can break your workflow if you installed the newest version without fixing the breaking-changes.
+
+```sh
+$ harbor
+# or
+$ harbor --styleguide --watch
+```
+
 ## Workers
 
 A worker provides the core tasks for Harbor and can be adjusted within the configuration.
@@ -44,8 +58,6 @@ Workers can be initiated during a Harbor process by calling the defined hook wit
 
 ```sh
 # Starts the workers that have the stylesheets hook from the configuration.
-$ harbor stylesheets
-$ harbor --task=stylesheets
 $ node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets
 $ node node_modules/@toolbarthomas/harbor/index.js stylesheets
 ```
@@ -188,13 +200,14 @@ The result will be written relative to the configured environment destination di
 The SassCompiler renders & prepares the defined entries with Node Sass & Postcss.
 The result will be written relative to the configured environment destination directory.
 
-| Option          | type                   | Description                                                          |
-| --------------- | ---------------------- | -------------------------------------------------------------------- |
-| options         | Object                 | Optional configuration for the Node Sass compiler.                   |
-| hook            | string                 | Runs the worker if the given hook is subscribed to the Task Manager. |
-| plugins         | Object                 | Optional plugins that will be assigned to the Postcss plugin.        |
-| plugins.postcss | Object                 | The optional Postcss plugin(configuration).                          |
-| entry           | Object[string, string] | Renders & lints the given entries with Node Sass & Postcss.          |
+| Option            | type                   | Description                                                                 |
+| ----------------- | ---------------------- | --------------------------------------------------------------------------- |
+| options           | Object                 | Optional configuration for the Node Sass compiler.                          |
+| useLegacyCompiler | boolean                | Flag that enables the Node Sass compiler instead of the Dart Sass compiler. |
+| hook              | string                 | Runs the worker if the given hook is subscribed to the Task Manager.        |
+| plugins           | Object                 | Optional plugins that will be assigned to the Postcss plugin.               |
+| plugins.postcss   | Object                 | The optional Postcss plugin(configuration).                                 |
+| entry             | Object[string, string] | Renders & lints the given entries with Node Sass & Postcss.                 |
 
 ### SvgSpriteCompiler configuration
 
@@ -234,11 +247,18 @@ Keep in mind that some assets cannot be displayed when viewing the static HTML d
 
 This can be resolved by viewing the actual result from a (local) webserver.
 
-| Option  | type                   | Description                                                          |
-| ------- | ---------------------- | -------------------------------------------------------------------- |
-| entry   | Object[string, string] | Compiles the given entries with Storybook.                           |
-| options | Object                 | Optional configuration for the Storybook compiler.                   |
-| hook    | string                 | Runs the worker if the given hook is subscribed to the Task Manager. |
+| Option                   | type                   | Description                                                                                                    |
+| ------------------------ | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
+| entry                    | Object[string, string] | Compiles the given entries with Storybook.                                                                     |
+| options                  | Object                 | Optional configuration for the Storybook compiler.                                                             |
+| options.alias            | Object                 | Assigns Babel module-resolver aliases to the Storybook instance.                                               |
+| options.globalMode       | Boolean/String         | `experimental` This will use a global render context for Twig.                                                 |
+| options.optimization     | Object                 | Defines the [Webpack optimization](https://webpack.js.org/configuration/optimization/) configuration.          |
+| options.addons           | Array                  | Should contain the [Storybook addon](https://storybook.js.org/docs/react/addons/install-addons) configuration. |
+| options.configDirectory  | String                 | Defines the Storybook instance directory for your theme: `./.storybook`.                                       |
+| options.builderDirectory | String                 | Defines the Twing instance directory `.twing` that can be used to include custom Twing functionality.          |
+| options.staticDirectory  | String                 | Defines the destination path for the `production` build of the Storybook styleguide `storybook-static`.        |
+| hook                     | string                 | Runs the worker if the given hook is subscribed to the Task Manager.                                           |
 
 ### Watcher configuration
 
@@ -327,6 +347,37 @@ The actual javascript can be created like the following and should be compliant 
       }
     }
   })(Drupal, drupalSettings);
+```
+
+### Implementing templates since >=1.0.0
+
+As of version 1.0.0 you need to define your Twing templates within the Storybook `loaders` configuration. This is required in order to display the actual templates; since they are rendered in asynchronous order:
+
+```js
+// example.stories.js
+
+import Template from 'template.twig';
+
+export default {
+  title: 'Example template',
+  loaders: [
+    async ({ args }) => {
+      Template: await Template(args); // Keyname can be anything.
+    },
+  ],
+};
+
+// loaded.Templates is defined within the default default export.
+export const Default = (args, { loaded }) = > loaded.Template;
+
+// Define the actual arguments
+Default.args = {
+  title: 'Foo',
+};
+```
+
+```twig
+{{ title }}
 ```
 
 ### Usage of SVG Inline Sprites

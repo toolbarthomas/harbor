@@ -31,7 +31,12 @@ class JsCompiler extends Worker {
       return super.resolve();
     }
 
-    const queue = this.entry.map((entry) => new Promise((done) => this.transpileCwd(entry, done)));
+    const queue = this.entry.map(
+      (entry) =>
+        new Promise((done) => {
+          this.transpileCwd(entry, done);
+        })
+    );
 
     await Promise.all(queue);
 

@@ -1,3 +1,4 @@
+/* eslint-disable no-unsafe-negation */
 import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
@@ -14,6 +15,14 @@ import Plugin from './Plugin.js';
  * directory.
  */
 class StyleguideCompiler extends Plugin {
+  constructor(services, options, workers) {
+    super(services, options, workers);
+
+    // @TODO can be removed since we can dynamically define this.
+    // Contains the value storage for the template variables.
+    this.renderContext = {};
+  }
+
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
@@ -89,7 +98,7 @@ class StyleguideCompiler extends Plugin {
       }
       command = `node ${script} -c ${config} -o ${staticBuildPath}`;
     } else {
-      command = `node ${script} -s ${process.cwd()} -c ${config} -p ${this.environment.THEME_PORT}`;
+      command = `node ${script} -c ${config} -p ${this.environment.THEME_PORT}`;
     }
 
     const shell = exec(command);
@@ -133,12 +142,20 @@ class StyleguideCompiler extends Plugin {
 
     const queryEntry = (entry, query) => glob.sync(path.join(entry, query));
 
-    const defaultFilters = queryEntry(cwd, 'filters/**.cjs');
+    const initialFilters = ['_date', '_escape'];
+    const defaultFilters = queryEntry(cwd, 'filters/**.cjs').filter(
+      (m) => !initialFilters.includes(path.basename(m, '.cjs'))
+    );
+
     const customFilters = this.config.options.builderDirectory
       ? queryEntry(this.config.options.builderDirectory, 'filters/**.cjs')
       : [];
 
-    const defaultFunctions = queryEntry(cwd, 'functions/**.cjs');
+    const initialFunctions = ['dump'];
+    const defaultFunctions = queryEntry(cwd, 'functions/**.cjs').filter(
+      (m) => !initialFunctions.includes(path.basename(m, '.cjs'))
+    );
+
     const customFunctions = this.config.options.builderDirectory
       ? queryEntry(this.config.options.builderDirectory, 'functions/**.cjs')
       : [];
@@ -290,11 +307,84 @@ class StyleguideCompiler extends Plugin {
   }
 
   /**
+   * Creates the Twing Data Object that can be used within the templates.
+   *
+   * @param {string} name
+   * @param {string} sourcePath
+   * @param {boolean} initial
+   * @returns
+   */
+  async setupDataEntry(name, sourcePath, context) {
+    return new Promise((cb) => {
+      if (!this.renderContext[name]) {
+        this.renderContext[name] = {};
+      }
+
+      if (context) {
+        if (!this.renderContext[name]._context instanceof Object) {
+          this.renderContext[name]._context = {};
+        }
+      }
+
+      if (['.js', '.cjs'].includes(path.extname(sourcePath))) {
+        try {
+          import(sourcePath).then((m) => {
+            if (m && m.default) {
+              this.Console.info(`Loading data for: ${name} from ${sourcePath}`);
+              this.renderContext[name] = Object.assign(this.renderContext[name], m.default);
+
+              if (this.config.options.globalMode) {
+                Object.keys(m.default).forEach((option) => {
+                  // @todo Validate sensitivity of errors for this option.
+                  if (this.config.options.globalMode !== 'strict') {
+                    this.renderContext[option] = `%${option}%`;
+                  } else if (!this.renderContext[option]) {
+                    this.renderContext[option] = `%${option}%`;
+                  }
+                });
+              }
+            }
+
+            return cb();
+          });
+        } catch (exception) {
+          this.Console.warning(exception);
+        }
+      } else {
+        fs.readFile(sourcePath, (exception, result) => {
+          try {
+            const proposal = JSON.parse(result.toString());
+
+            if (proposal) {
+              this.renderContext[name] = Object.assign(this.renderContext[name], proposal);
+
+              if (this.config.options.globalMode) {
+                Object.keys(proposal).forEach((option) => {
+                  // @todo Validate sensitivity of errors for this option.
+                  if (this.config.options.globalMode !== 'strict') {
+                    this.renderContext[option] = `%${option}%`;
+                  } else if (!this.renderContext[option]) {
+                    this.renderContext[option] = `%${option}%`;
+                  }
+                });
+              }
+            }
+          } catch (fileException) {
+            this.Console.warning(fileException);
+          }
+
+          return cb();
+        });
+      }
+    });
+  }
+
+  /**
    * Generates the Storybook configuration with the defined Harbor configuration.
    * This ensures that the actual storybook instance is loaded as a CommonJS
    * module.
    */
-  setupMain(cwd) {
+  async setupMain(cwd) {
     if (!(this.config.entry instanceof Object)) {
       return;
     }
@@ -311,18 +401,53 @@ class StyleguideCompiler extends Plugin {
     let addons =
       this.config.options && this.config.options.addons ? this.config.options.addons || [] : [];
 
-    // Restricts the following addons since they are included by the core
-    // Storybook package.
+    // Ensure the following addons are excluded since they will be imported by
+    // @storybook/addon-essentials.
     const restricedAddons = [
       '@storybook/addon-actions',
+      '@storybook/addon-backgrounds',
       '@storybook/addon-controls',
+      '@storybook/addon-docs',
+      '@storybook/addon-essentials',
+      '@storybook/addon-measure',
+      '@storybook/addon-outline',
+      '@storybook/addon-toolbars',
       '@storybook/addon-viewport',
     ];
 
     addons = addons.filter((addon) => !restricedAddons.includes(addon));
 
+    // Ensure @storybook/addon-essentials is included.
+    addons.push('@storybook/addon-essentials');
+
     const previewMainTemplate = path.resolve(cwd, 'index.ejs');
     const environmentModulePath = path.resolve(StyleguideCompiler.configPath(), 'twing.cjs');
+
+    // Implements the render Context for each storybook story.
+    if (stories.length && this.config.options && this.config.options.globalMode) {
+      await Promise.all(
+        stories.map(
+          (story) =>
+            new Promise((cc) => {
+              const dirname = path.dirname(story);
+              let name = path.basename(story);
+              name = name.substring(0, name.indexOf('.'));
+              const sources = [
+                ...glob.sync(path.join(dirname, `**/${name}.data.js`)),
+                ...glob.sync(path.join(dirname, `**/${name}.data.json`)),
+              ];
+
+              if (!sources.length) {
+                cc();
+              }
+
+              Promise.all(
+                sources.map((sourcePath, index) => this.setupDataEntry(name, sourcePath, index > 0))
+              ).then(cc);
+            })
+        )
+      );
+    }
 
     const template = outdent`
       const fs = require('fs');
@@ -333,6 +458,53 @@ class StyleguideCompiler extends Plugin {
 
       const addons = [${addons.map((p) => `'${p}'`).join(',')}]
       const stories = [${stories.map((p) => `'${p}'`).join(',')}]
+
+      // Include the Drupal library context within the Storybook instance that
+      // can be used for the Drupal related Twig extensions.
+      const libraryPaths = [${glob
+        .sync('*.libraries.yml')
+        .map((p) => `'${p}'`)
+        .join(',')}];
+      const libraries = {};
+      if (libraryPaths.length) {
+        libraryPaths.forEach((l) => {
+          const c = fs.readFileSync(l).toString();
+          console.log('Reading library: ' + l);
+
+          if (c && c.length) {
+            try {
+              libraries[path.basename(l)] = YAML.parse(c);
+            } catch (exception) {
+              console.log(exception);
+            }
+          }
+        });
+      }
+
+      // Enable the sprite paths within the Styleguide as global context.
+      const sprites = {};
+      const enableSprites = ${!!(
+        this.workers &&
+        this.workers.SvgSpriteCompiler &&
+        this.workers.SvgSpriteCompiler.config.entry
+      )};
+      if (enableSprites) {
+        try {
+          const entry = ${JSON.stringify(this.workers.SvgSpriteCompiler.config.entry)};
+
+          Object.keys(entry).forEach((n) => {
+            let p = path.normalize(path.dirname(entry[n])).replace('*', '');
+            p = path.join('${this.environment.THEME_DIST}', p, n + '.svg');
+
+            if (fs.existsSync(path.resolve(p))) {
+              sprites[n] = p;
+            }
+
+          });
+        } catch (exception) {
+          console.log('Unable to expose compiled inline SVG sprites:' + exception);
+        }
+      }
 
       const webpackFinal = (config) => {
         // Include the Twig loader to enable support from Drupal templates.
@@ -358,56 +530,13 @@ class StyleguideCompiler extends Plugin {
           )}, config.resolve.alias);
         }
 
-        // Include the Drupal library context within the Storybook instance that
-        // can be used for the Drupal related Twig extensions.
-        const libraryPaths = [${glob
-          .sync('*.libraries.yml')
-          .map((p) => `'${p}'`)
-          .join(',')}];
-        const libraries = {};
-        if (libraryPaths.length) {
-          libraryPaths.forEach((l) => {
-            const c = fs.readFileSync(l).toString();
-            console.log('Reading library: ' + l);
-
-            if (c && c.length) {
-              try {
-                libraries[path.basename(l)] = YAML.parse(c);
-              } catch (exception) {
-                console.log(exception);
-              }
-            }
-          });
-        }
-
-        // Enable the sprite paths within the Styleguide as global context.
-        const sprites = {};
-        const enableSprites = ${!!(
-          this.workers &&
-          this.workers.SvgSpriteCompiler &&
-          this.workers.SvgSpriteCompiler.config.entry
-        )};
-        if (enableSprites) {
-          try {
-            const entry = ${JSON.stringify(this.workers.SvgSpriteCompiler.config.entry)};
-
-            Object.keys(entry).forEach((n) => {
-              let p = path.normalize(path.dirname(entry[n])).replace('*', '');
-              p = path.join('${this.environment.THEME_DIST}', p, n + '.svg');
-
-              if (fs.existsSync(path.resolve(p))) {
-                sprites[n] = p;
-              }
-
-            });
-          } catch (exception) {
-            console.log('Unable to expose compiled inline SVG sprites:' + exception);
-          }
-        }
-
+        // @TODO should be removed, is replaced by enforced process env overrides.
         config.plugins.push(
           new webpack.DefinePlugin({
             THEME_LIBRARIES: JSON.stringify(libraries),
+            THEME_LIBRARIES_OVERRIDES: JSON.stringify(${JSON.stringify(
+              this.config.options.librariesOverride || {}
+            )}),
             THEME_DIST: '"${path.normalize(this.environment.THEME_DIST)}/"',
             THEME_ENVIRONMENT: '"${this.environment.THEME_ENVIRONMENT}"',
             THEME_SPRITES: JSON.stringify(sprites),
@@ -431,9 +560,24 @@ class StyleguideCompiler extends Plugin {
         return config;
       }
 
+      // Enforce the Harbor environment within the Webpack instance.
+      // DefinePlugin does not give the desired result withing the Twing Builder.
+      process.env.THEME_LIBRARIES = JSON.stringify(libraries);
+      process.env.THEME_LIBRARIES_OVERRIDES = JSON.stringify(${JSON.stringify(
+        this.config.options.librariesOverride || {}
+      )});
+      process.env.THEME_DIST = '"${path.normalize(this.environment.THEME_DIST)}/"';
+      process.env.THEME_ENVIRONMENT = '"${this.environment.THEME_ENVIRONMENT}"';
+      process.env.THEME_SPRITES = JSON.stringify(sprites);
+      process.env.THEME_ALIAS = JSON.stringify(${JSON.stringify(this.config.options.alias)});
+      process.env.THEME_WEBSOCKET_PORT = '${this.environment.THEME_WEBSOCKET_PORT}';
+
       module.exports = {
         stories,
         addons,
+        staticDirs: [${
+          this.environment.THEME_ENVIRONMENT !== 'production' ? `"${process.cwd()}"` : ''
+        }],
         webpackFinal,
         previewMainTemplate: '${previewMainTemplate}',
       }

@@ -17,7 +17,6 @@ class Core {
   constructor(services, options, type) {
     this.name = this.constructor.name;
 
-    this.environment = this.defineEnvironment();
     this.Console = new Logger(this.environment);
     this.type = type;
 
@@ -80,10 +79,14 @@ class Core {
       : [options.acceptedEnvironments];
   }
 
-  defineEnvironment() {
-    const Env = new Environment();
-
-    return this.environment instanceof Object ? this.environment : Env.define();
+  /**
+   * Assigns the environment Object to the current Service or Plugin.
+   * @param {Object} environment The parsed environment configuration to use.
+   */
+  defineEnvironment(environment) {
+    if (environment instanceof Object) {
+      this.environment = environment;
+    }
   }
 
   /**
@@ -106,18 +109,34 @@ class Core {
 
     this.entry = entries
       .map((name) => {
-        const p = path.join(
-          useDestination ? this.environment.THEME_DIST : this.environment.THEME_SRC,
-          this.config.entry[name]
-        );
+        // Ensure the sources for the current entry are flattened.
+        const map = [];
+        const sources = Array.isArray(this.config.entry[name])
+          ? this.config.entry[name]
+          : [this.config.entry[name]];
 
-        return glob.sync(p).filter((e) => {
-          if (!fs.statSync(e).size) {
-            this.Console.log(`Skipping empty entry: ${e}`);
-          }
+        if (!sources.length) {
+          return [];
+        }
 
-          return fs.statSync(e).size > 0 ? e : null;
+        sources.forEach((source) => {
+          const p = path.join(
+            useDestination ? this.environment.THEME_DIST : this.environment.THEME_SRC,
+            source
+          );
+
+          map.push(
+            ...glob.sync(p).filter((e) => {
+              if (!fs.statSync(e).size) {
+                this.Console.log(`Skipping empty entry: ${e}`);
+              }
+
+              return fs.statSync(e).size > 0 ? e : null;
+            })
+          );
         });
+
+        return map.length ? map : [];
       })
       .filter((entry) => entry.length);
   }

@@ -2,10 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title><%= options.title || 'Storybook'%></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
-    <% if (files.favicon) { %>
-    <link rel="shortcut icon" href="<%= files.favicon%>" />
+    <title><%= htmlWebpackPlugin.options.title || 'Storybook'%></title>
+
+    <% if (htmlWebpackPlugin.files.favicon) { %>
+    <link rel="shortcut icon" href="<%= htmlWebpackPlugin.files.favicon%>" />
     <% } %>
 
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -102,20 +104,54 @@
     </script>
 
     <script>
+      // Prevent callStacks for the runOnPageChange handler.
+      let refresh;
+      window.throttle = window.throttle || false;
+      let awaitVendors;
+
       // https://github.com/storybookjs/storybook/issues/6113#issuecomment-473965255
       function runOnPageChange() {
-        // Enables the required script logic from Drupal by calling the defined
-        // attach Drupal handlers.
-        Object.values(window.Drupal.behaviors).forEach(function(handler) {
-          if (handler.attach) {
-            handler.attach();
+        if (refresh) {
+          clearTimeout(refresh);
+        }
+
+        refresh = setTimeout(() => {
+          if (window.throttle) {
+            return;
           }
-        });
+
+          window.throttle = true;
+
+          // Enables the required script logic from Drupal by calling the defined
+          // attach Drupal handlers.
+          Object.values(window.Drupal.behaviors).forEach(function(handler) {
+            if (handler.attach) {
+              handler.attach();
+            }
+          });
+
+          // We need to await a moment to let other local scripts use
+          // the DomContentLoaded Event.
+          if (awaitVendors) {
+            clearTimeout(awaitVendors);
+          }
+
+          awaitVendors = setTimeout(() => {
+            window.throttle = false;
+          }, 500);
+
+        }, 200);
       }
+
+      let DOMReady = false;
 
       document.addEventListener(
         'DOMContentLoaded',
         function () {
+          if (!DOMReady) {
+            return;
+          }
+
           const callback = function (mutationsList) {
             for (let i = 0, len = mutationsList.length; i < len; i++) {
               if (mutationsList[i].type == 'childList') {
@@ -132,13 +168,21 @@
         },
         false
       );
+
+      window.addEventListener('load', () => {
+        window.throttle = false;
+
+        runOnPageChange();
+
+        DOMReady = true;
+      });
     </script>
 
     <% if (typeof headHtmlSnippet !== 'undefined') { %>
       <%= headHtmlSnippet %>
     <% } %>
 
-    <% files.css.forEach(file => { %>
+    <% htmlWebpackPlugin.files.css.forEach(file => { %>
     <link href="<%= file %>" rel="stylesheet" />
     <% }); %>
 
@@ -167,7 +211,7 @@
       </script>
     <% } %>
 
-    <% files.js.forEach(file => { %>
+    <% htmlWebpackPlugin.files.js.forEach(file => { %>
       <script src="<%= file %>"></script>
     <% }); %>
   </body>

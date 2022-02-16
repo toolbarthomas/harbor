@@ -1,4 +1,3 @@
-import { render } from 'node-sass';
 import fs from 'fs';
 import glob from 'glob';
 import globImporter from 'node-sass-glob-importer';
@@ -27,6 +26,11 @@ class SassCompiler extends Worker {
      * file has any Sass errors.
      */
     this.sassExceptions = [];
+
+    /**
+     * Should contain the selected Sass compiler to use within the instance.
+     */
+    this.compiler = null;
   }
 
   /**
@@ -36,6 +40,34 @@ class SassCompiler extends Worker {
     if (!this.entry || !this.entry.length) {
       return super.resolve();
     }
+
+    const nodeSassPath = 'node-sass/lib/index.js';
+
+    // Select the defined Sass compiler: Dart Sass or Node Sass.
+    if (this.config.useLegacyCompiler) {
+      try {
+        await import(nodeSassPath);
+      } catch (error) {
+        if (error) {
+          this.Console.warning(`The legacy Node Sass compiler is missing and will be installed.`);
+
+          await import('child_process').then((m) => {
+            this.Console.info(`Installing legacy Node Sass compiler, please wait...`);
+
+            m.default.execSync('npm install node-sass --quiet --no-progress --no-save', {
+              stdio: 'inherit',
+            });
+          });
+        }
+      }
+    }
+
+    await import(this.config.useLegacyCompiler ? nodeSassPath : 'sass').then((m) => {
+      // Should update as legacy warning in the future.
+      this.Console.log(`Using Sass compiler "${m.default.info}"`);
+
+      this.compiler = m.default;
+    });
 
     await Promise.all(
       this.entry.map(
@@ -95,7 +127,9 @@ class SassCompiler extends Worker {
     await Promise.all(
       cwd.map(
         (entry) =>
-          new Promise((cb) => this.lintFile(entry).then(() => this.renderFile(entry).then(cb)))
+          new Promise((cb) => {
+            this.lintFile(entry).then(() => this.renderFile(entry).then(cb));
+          })
       )
     );
   }
@@ -114,6 +148,7 @@ class SassCompiler extends Worker {
       .lint(
         Object.assign(this.config.plugins.stylelint, {
           files: glob.sync(path.join(path.dirname(entry), '**/*.scss')),
+          customSyntax: 'postcss-scss',
         })
       )
       .then((result) => {
@@ -160,8 +195,8 @@ class SassCompiler extends Worker {
 
       this.Console.log(`Compiling: ${entry}`);
 
-      render(
-        Object.assign(this.config.options, {
+      this.compiler.render(
+        Object.assign(this.config.options || {}, {
           file: entry,
           includePaths: [this.environment.THEME_SRC],
           sourceMap: this.environment.THEME_DEBUG,

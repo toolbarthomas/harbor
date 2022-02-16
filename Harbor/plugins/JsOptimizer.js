@@ -20,12 +20,22 @@ class JsOptimizer extends Plugin {
 
     if (this.config.options && this.config.options.bundle) {
       await Promise.all(
-        this.entry.map((name, index) => new Promise((cb) => this.bundleCwd(name, index).then(cb)))
+        this.entry.map(
+          (name, index) =>
+            new Promise((cb) => {
+              this.bundleCwd(name, index).then(cb);
+            })
+        )
       );
     }
 
     await Promise.all(
-      this.entry.map((name) => new Promise((cb) => this.optimizeCwd(name).then(cb)))
+      this.entry.map(
+        (name) =>
+          new Promise((cb) => {
+            this.optimizeCwd(name).then(cb);
+          })
+      )
     );
 
     return super.resolve();

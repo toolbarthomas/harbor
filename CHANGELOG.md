@@ -1,3 +1,211 @@
+## 0.105.1 (February 16, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.105.0 (February 14, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.104.0 (January 28, 2022)
+
+### Features
+
+- Implements `librariesOverrides` option for `StyleguideCompiler` plugin to resolve library sources to another file.
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.103.7 (January 28, 2022)
+
+### Maintenance
+
+- Load library scripts in synchronous order to ensure correct dependency behaviors.
+
+## 0.103.6 (January 26, 2022)
+
+### Maintenance
+
+- Fixes issue for created Websocket id, ensure invalid characters are filtered.
+
+## 0.103.5 (January 25, 2022)
+
+### Maintenance
+
+- Disable Babel module transpiler.
+
+## 0.103.4 (January 25, 2022)
+
+### Maintenance
+
+- Fix attributes usage for script libraries.
+
+## 0.103.3 (January 25, 2022)
+
+### Maintenance
+
+- Include attribute support for theme libraries within the styleguide.
+
+## 0.103.2 (January 24, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.103.1 (January 20, 2022)
+
+### Maintenance
+
+- Fixes configuration exception for Stylelint.
+
+## 0.103.0 (January 20, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+- Exclude addons from current @storybook/addon-essentials.
+- Fixes staticDirectory error during the Storybook static build.
+- Removed duplicate Storybook addon packages, you should install them within your project and define it within the `harbor.config.js`.
+- Fixed Stylesheet Watcher within the Storybook development environment.
+
+## 0.102.0 (January 18, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.101.0 (January 10, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.100.0 (January 7, 2022)
+
+### Features
+
+- Implements async Storybook loaders to compile with the async Twing Loader.
+- Updates to latest Twing Compiler & Twing Loader.
+
+### Maintenance
+
+- Implements NPM package maintenance.
+- Fixes staticDir Storybook CLI deprecation warning.
+
+## 0.94.1 (January 3, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.94.0 (December 23, 2021)
+
+### Features
+
+- Use child_process within concurrent tasks.
+- Dont' save the Node Sass compiler to the package.json since it will be installed on the fly.
+
+## 0.93.3 (December 23, 2021)
+
+### Maintenance
+
+- Adjust Sass Compiler logging.
+
+## 0.93.2 (December 23, 2021)
+
+### Maintenance
+
+- Fixes an issue where Node Sass was missing during the initial setup.
+
+## 0.93.1 (December 23, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+### Features
+
+- Use the Dart Sass compiler by default, Node Sass can be installed during the initial setup.
+- Include option to use the legacy Node Sass Compiler within the configuration: `useLegacyCompiler`
+
+## 0.92.0 (December 14, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.91.0 (December 2, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.90.1 (November 25, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.90.0 (October 25, 2021)
+
+### Features
+
+- Include support for multiple entry sources.
+
+## 0.89.6 (November 23, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.89.5 (November 12, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.89.4 (November 4, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.89.3 (October 19, 2021)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.89.2 (October 6, 2021)
+
+### Maintenance
+
+- Simplify Drupal behaviors.
+- Implements NPM package maintenance.
+
+## 0.89.0 (October 6, 2021)
+
+### Features
+
+- Append attached libraries to the head instead.
+
+## 0.88.5 (October 5, 2021)
+
+### Maintenance
+
+- Fixes DomContentLoaded Stacking issue.
+
+## 0.88.4 (October 4, 2021)
+
+### Maintenance
+
+- Fixes DomContentLoaded Stacking issue.
+- Implements NPM package maintenance.
+
 ## 0.88.1 (October 1, 2021)
 
 ### Maintenance

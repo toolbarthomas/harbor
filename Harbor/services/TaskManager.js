@@ -1,5 +1,4 @@
-import Environment from '../common/Environment.js';
-import Logger from '../common/Logger.js';
+import branchy from 'branchy';
 
 class TaskManager {
   constructor() {
@@ -8,10 +7,19 @@ class TaskManager {
       workers: {},
     };
 
-    const Env = new Environment();
-    this.environment = Env.define();
+    this.acceptedServices = ['Console', 'environment'];
+  }
 
-    this.Console = new Logger(this.environment);
+  /**
+   * Mounts the defined service to the current TaskManager.
+   *
+   * @param {String} name The name of the mounted service.
+   * @param {any} instance The handler of the mounted service.
+   */
+  mount(name, service) {
+    if (name && !this[name] && this.acceptedServices.includes(name)) {
+      this[name] = service;
+    }
   }
 
   /**
@@ -73,7 +81,7 @@ class TaskManager {
         return new Promise((resolve) => {
           this.instances[type][name].resolve = resolve;
 
-          return handler(args);
+          handler(args);
         });
       } catch (exception) {
         this.Console.error(exception);
@@ -253,13 +261,15 @@ class TaskManager {
                 task.fn().then((exit) => postRun(exit, task.hook[0]));
               } else {
                 JIT.push(
-                  new Promise((cc) =>
-                    task.fn().then((exit) => {
-                      postRun(exit, task.hook[0]);
+                  new Promise((cc) => {
+                    branchy(
+                      task.fn().then((exit) => {
+                        postRun(exit, task.hook[0]);
 
-                      cc();
-                    })
-                  )
+                        cc();
+                      })
+                    )();
+                  })
                 );
               }
             } else {

@@ -1,4 +1,6 @@
 /**
- * Default return function as a valid Twig filter.
+ * Defines a theme path at runtime.
  */
-module.exports = (context) => context;
+const mock = require('./_mock.cjs');
+
+module.exports = mock;
