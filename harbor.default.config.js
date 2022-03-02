@@ -60,11 +60,11 @@ export default {
         backstopJS: {
           id: 'styleguide',
           paths: {
-            bitmaps_reference: 'backstopReference/bitmapsReference',
-            bitmaps_test: 'backstopTests/bitmapTests',
-            engine_scripts: 'backstopEngine/engineScripts',
-            html_report: 'backstopHTMLReport/HTMLreports',
-            ci_report: 'backstopCIReport/CIreports',
+            bitmaps_reference: 'backstopJS/backstopReference/bitmapsReference',
+            bitmaps_test: 'backstopJS/backstopTests/bitmapTests',
+            engine_scripts: 'backstopJS/backstopEngine/engineScripts',
+            html_report: 'backstopJS/backstopHTMLReport/HTMLreports',
+            ci_report: 'backstopJS/backstopCIReport/CIreports',
           },
           viewports: [
             {

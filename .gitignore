@@ -13,8 +13,4 @@ src
 storybook-static
 .twing
 
-backstopReference
-backstopTests
-backstopEngine
-backstopHTMLReport
-backstopCIReport
+backstopJS

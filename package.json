@@ -18,7 +18,9 @@
     "serve": "node ./index.js --serve",
     "styleguide": "node ./index.js --styleguide",
     "stylesheets": "node ./index.js --task=stylesheets",
-    "test": "node ./index.js --test"
+    "test": "node ./index.js --task=test",
+    "test:reference": "node ./index.js --test=reference",
+    "test:approve": "node ./index.js --test=approve"
   },
   "files": [
     ".babelrc",
