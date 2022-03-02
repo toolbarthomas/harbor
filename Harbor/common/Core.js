@@ -2,7 +2,6 @@ import path from 'path';
 import fs from 'fs';
 import glob from 'glob';
 
-import Environment from './Environment.js';
 import Logger from './Logger.js';
 
 /**
@@ -192,7 +191,7 @@ class Core {
         `Unable to resolve ${this.name}, TaskManager has not been defined.`
       );
     }
-    this.Console.log(`Resolving ${this.type}: ${this.name}`);
+    this.Console.log(`${exit ? 'Rejecting' : 'Resolving'} ${this.type}: ${this.name}`);
 
     return TaskManager.resolve(this.type, this.name, exit);
   }

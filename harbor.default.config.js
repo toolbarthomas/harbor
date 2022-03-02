@@ -52,6 +52,55 @@ export default {
         main: '**/stylesheets/**/**.scss',
       },
     },
+    StyleguideTester: {
+      hook: ['test', 'backstop'],
+      options: {
+        staticDirectory: 'storybook-snapshot',
+        outputPath: 'styleguide.snapshot.json',
+        backstopJS: {
+          id: 'styleguide',
+          paths: {
+            bitmaps_reference: 'backstopReference/bitmapsReference',
+            bitmaps_test: 'backstopTests/bitmapTests',
+            engine_scripts: 'backstopEngine/engineScripts',
+            html_report: 'backstopHTMLReport/HTMLreports',
+            ci_report: 'backstopCIReport/CIreports',
+          },
+          viewports: [
+            {
+              name: 'default',
+              width: 800,
+              height: 600,
+            },
+          ],
+          report: ['browser', 'ci'],
+          engine: 'puppeteer',
+          engineOptions: {
+            args: ['--no-sandbox'],
+          },
+          asyncCaptureLimit: 8,
+          asyncCompareLimit: 32,
+          debug: false,
+          debugWindow: false,
+          excludeScenarios: [
+            'components-video-block--default',
+            'components-video-block--small',
+            'components-video-block--large',
+            'components-video-block--red',
+            'components-video-block--green',
+            'components-video-block--white',
+          ],
+          scenarioDefaults: {
+            hideSelectors: [],
+            removeSelectors: ['iframe'],
+            selectors: ['document'],
+            postInteractionWait: 1000,
+            delay: 1000,
+            misMatchThreshold: 0,
+          },
+        },
+      },
+    },
     SvgSpriteCompiler: {
       hook: ['svg', 'images', 'compile', 'default::1'],
       prefix: '',
@@ -134,16 +183,6 @@ export default {
         configDirectory: path.resolve(process.cwd(), '.storybook'),
         builderDirectory: path.resolve(process.cwd(), '.twing'),
         staticDirectory: 'storybook-static',
-      },
-    },
-    VisualTester: {
-      hook: 'test',
-      entry: {
-        static: 'storybook-static/**/*.html',
-      },
-      options: {
-        ignoredFiles: ['iframe.html'],
-        acceptedFileExtensions: ['html'],
       },
     },
     Watcher: {

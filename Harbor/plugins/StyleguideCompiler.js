@@ -35,7 +35,11 @@ class StyleguideCompiler extends Plugin {
       : path.resolve(`../../.bin/${bin}`);
 
     const config = path.resolve(StyleguideCompiler.configPath());
-    const { staticDirectory } = this.config.options;
+    let { staticDirectory } = this.config.options;
+
+    if (this.environment.RENDER_DIRECTORY) {
+      staticDirectory = this.environment.RENDER_DIRECTORY;
+    }
 
     // Define the Storybook builder configuration as CommonJS module since Storybook
     // currently doesn't support the implementation of ESM.
@@ -98,7 +102,9 @@ class StyleguideCompiler extends Plugin {
       }
       command = `node ${script} -c ${config} -o ${staticBuildPath}`;
     } else {
-      command = `node ${script} -c ${config} -p ${this.environment.THEME_PORT}`;
+      const commandOptions = this.environment.THEME_AS_CLI ? ` --ci` : '';
+
+      command = `node ${script} -c ${config} -p ${this.environment.THEME_PORT}${commandOptions}`;
     }
 
     const shell = exec(command);
@@ -597,13 +603,19 @@ class StyleguideCompiler extends Plugin {
    * Synchronizes the processed assets to the static stylguide directory.
    */
   async synchronizeAssets() {
-    const { staticDirectory } = this.config.options;
+    let { staticDirectory } = this.config.options;
+
+    if (this.environment.RENDER_DIRECTORY) {
+      staticDirectory = this.environment.RENDER_DIRECTORY;
+    }
+
     const staticBuildPath = path.join(this.environment.THEME_DIST, staticDirectory);
 
     // Ensure the processed assets are also available for the static build.
     const assets = glob
       .sync(`${this.environment.THEME_DIST}/**/*`)
-      .filter((asset) => asset.indexOf(staticBuildPath) < 0);
+      .filter((asset) => asset.indexOf(staticBuildPath) < 0)
+      .filter((asset) => asset.indexOf(this.config.options.staticDirectory) < 0);
 
     await Promise.all(
       assets.map(
