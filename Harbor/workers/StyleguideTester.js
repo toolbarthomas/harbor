@@ -43,7 +43,9 @@ class StyleguideTester extends Worker {
     this.Console.info(`Extracting stories from ${path.resolve(THEME_DIST, staticDirectory)}`);
 
     // Extract the generated stories from the defined snapshot directory.
-    execSync(`${cwd} extract ${path.resolve(THEME_DIST, staticDirectory)} ${manifest}`);
+    execSync(`${cwd} extract ${path.resolve(THEME_DIST, staticDirectory)} ${manifest}`, {
+      stdio: 'ignore',
+    });
 
     if (!fs.existsSync(manifest)) {
       this.Console.error(`Unable to load stories manifest: ${manifest}`);
@@ -79,7 +81,7 @@ class StyleguideTester extends Worker {
       const url = `http://localhost:${this.environment.THEME_PORT}/iframe.html?id=${value.id}`;
 
       if (Array.isArray(excludeScenarios) && excludeScenarios.includes(value.id)) {
-        this.Console.info(`Excluding scenario: ${value.id}`);
+        this.Console.log(`Excluding scenario: ${value.id}`);
         return;
       }
 
@@ -99,7 +101,9 @@ class StyleguideTester extends Worker {
     this.Console.info(`Starting Snapshot server....`);
 
     // Setup a temporary Snapshot server to test the defined scenarios.
-    const server = spawn('node', [script, '--styleguide', '--ci']);
+    const server = spawn('node', [script, '--styleguide', '--ci'], {
+      detached: true,
+    });
 
     server.on('error', () => {
       hasError = true;
@@ -110,7 +114,7 @@ class StyleguideTester extends Worker {
     });
 
     const scenarioLength = backstopConfig.scenarios.length * backstopConfig.viewports.length;
-    this.Console.info(`Testing ${scenarioLength} scenarios.`);
+    this.Console.log(`Testing ${scenarioLength} scenarios.`);
 
     // Select the supported Backstopjs command, it should be adjusted within
     // the plugin definition value e.g.: harbor --styleguide=refernece
@@ -118,7 +122,7 @@ class StyleguideTester extends Worker {
       ? this.environment.THEME_TEST_PHASE
       : 'test';
 
-    this.Console.info(`Starting test suite: ${command}`);
+    this.Console.log(`Starting test suite: ${THEME_TEST_PHASE}`);
 
     await backstop(command, { config: backstopConfig }).catch((exception) => {
       if (exception) {
@@ -127,17 +131,20 @@ class StyleguideTester extends Worker {
       }
     });
 
-    server.stdin.pause();
-    server.kill();
+    // Ensure the whole process group is terminated to prevent duplicate
+    // instances after multiple tests.
+    process.kill(-server.pid);
 
-    // Reject afterwards so we can close any instances within the Worker scope.
-    if (hasError) {
-      super.reject();
+    server.on('close', () => {
+      // Reject afterwards so we can close any instances within the Worker scope.
+      if (hasError) {
+        super.reject();
 
-      return process.exit(1);
-    }
-
-    return super.resolve();
+        return process.exit(1);
+      } else {
+        return super.resolve();
+      }
+    });
   }
 
   /**
@@ -165,7 +172,7 @@ class StyleguideTester extends Worker {
               });
 
               response.on('end', () => {
-                this.Console.info(`Found Snapshot server at take: ${take}`);
+                this.Console.log(`Found Snapshot server at take: ${take}`);
 
                 resolve();
               });
