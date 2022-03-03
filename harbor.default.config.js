@@ -82,14 +82,7 @@ export default {
           asyncCompareLimit: 32,
           debug: false,
           debugWindow: false,
-          excludeScenarios: [
-            'components-video-block--default',
-            'components-video-block--small',
-            'components-video-block--large',
-            'components-video-block--red',
-            'components-video-block--green',
-            'components-video-block--white',
-          ],
+          excludeScenarios: [],
           scenarioDefaults: {
             hideSelectors: [],
             removeSelectors: ['iframe'],

@@ -27,7 +27,7 @@ class StyleguideTester extends Worker {
     // Prepare to build a new Storybook snapshot.
     try {
       execSync(`node ${script} --styleguide --isProduction --staticDirectory=${staticDirectory}`, {
-        stdio: 'ignore',
+        stdio: 'inherit',
       });
     } catch (exception) {
       this.Console.error(exception);
@@ -44,7 +44,7 @@ class StyleguideTester extends Worker {
 
     // Extract the generated stories from the defined snapshot directory.
     execSync(`${cwd} extract ${path.resolve(THEME_DIST, staticDirectory)} ${manifest}`, {
-      stdio: 'ignore',
+      stdio: 'inherit',
     });
 
     if (!fs.existsSync(manifest)) {

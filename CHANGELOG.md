@@ -1,8 +1,20 @@
-## 0.105.3 (February 28, 2022)
+## 0.110.2 (March 3, 2022)
+
+### Features
+
+- Inherit stdio setting for `StyleguideTester`.
+
+## 0.110.1 (March 3, 2022)
 
 ### Maintenance
 
-- Implements NPM package maintenance.
+- Cleanup `StyleguideTester` worker configuration.
+
+## 0.110.0 (March 3, 2022)
+
+### Features
+
+- Implements `StyleguideTester` worker to enable Styleguide Snapshot testing.
 
 ## 0.105.2 (February 21, 2022)
 
