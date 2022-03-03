@@ -37,8 +37,8 @@ class StyleguideCompiler extends Plugin {
     const config = path.resolve(StyleguideCompiler.configPath());
     let { staticDirectory } = this.config.options;
 
-    if (this.environment.RENDER_DIRECTORY) {
-      staticDirectory = this.environment.RENDER_DIRECTORY;
+    if (this.environment.THEME_STATIC_DIRECTORY) {
+      staticDirectory = this.environment.THEME_STATIC_DIRECTORY;
     }
 
     // Define the Storybook builder configuration as CommonJS module since Storybook
@@ -605,8 +605,8 @@ class StyleguideCompiler extends Plugin {
   async synchronizeAssets() {
     let { staticDirectory } = this.config.options;
 
-    if (this.environment.RENDER_DIRECTORY) {
-      staticDirectory = this.environment.RENDER_DIRECTORY;
+    if (this.environment.THEME_STATIC_DIRECTORY) {
+      staticDirectory = this.environment.THEME_STATIC_DIRECTORY;
     }
 
     const staticBuildPath = path.join(this.environment.THEME_DIST, staticDirectory);

@@ -26,7 +26,7 @@
     "THEME_LIBRARIES_OVERRIDES": "readonly",
     "THEME_LIBRARIES": "readonly",
     "THEME_PORT": "readonly",
-    "THEME_RENDER_DIRECTORY": "readonly",
+    "THEME_STATIC_DIRECTORY": "readonly",
     "THEME_SPRITES": "readonly",
     "THEME_SRC": "readonly",
     "THEME_TEST_PHASE": "readonly",

@@ -17,7 +17,7 @@ class Environment {
       THEME_PORT: 8080,
       THEME_DEBUG: false,
       THEME_ENVIRONMENT: 'production',
-      THEME_RENDER_DIRECTORY: '',
+      THEME_STATIC_DIRECTORY: '',
       THEME_TEST_PHASE: 'test',
       THEME_WEBSOCKET_PORT: 35729,
       THEME_AS_CLI: false,

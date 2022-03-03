@@ -12,7 +12,7 @@ It is optional to use the bundled workers but they ensure that they work correct
 
 You can install Harbor via NPM ([Nodejs](https://nodejs.org) is required in order to do this.):
 
-```
+```sh
 $ npm install @toolbarthomas/harbor
 ```
 
@@ -25,13 +25,14 @@ $ node node_modules/@toolbarthomas/harbor/index.js
 Harbor will run the default tasks when there are no CLI arguments defined for the initial command.
 The following CLI arguments can be used in order to customize the build process.
 
-| Argument     | Description                                                  |
-| ------------ | ------------------------------------------------------------ |
-| --task       | Starts one or more worker tasks to compile the theme assets. |
-| --verbose    | Writes extended console messages within the command line.    |
-| --styleguide | Starts the styleguide builder.                               |
-| --watch      | Observes for file changes for the initiated tasks.           |
-| --minify     | Minifies the processed assets.                               |
+| Argument     | Description                                                                           |
+| ------------ | ------------------------------------------------------------------------------------- |
+| --task       | Starts one or more worker tasks to compile the theme assets.                          |
+| --verbose    | Writes extended console messages within the command line.                             |
+| --styleguide | Starts the styleguide builder.                                                        |
+| --watch      | Observes for file changes for the initiated tasks.                                    |
+| --minify     | Minifies the processed assets.                                                        |
+| --test       | Defines the testing phase for Backstopjs, should be `test`, `reference` or `approve`. |
 
 You can also use the `harbor` command instead if you installed it globally:
 This will only run the default workers but you can use additional parameters like the local commands.
@@ -97,6 +98,7 @@ The following workers are configured within the default configuration:
 | JsCompiler       | Transforms the defined entry javascript files with Babel.                       | `JSCompiler` `js` `javascripts` `compile` `default`     |
 | Resolver         | Resolves NPM installed vendor pacakges to the THEME_DIST environment directory. | `Resolver` `resolve` `prepare` `default`                |
 | SassCompiler     | Compiles the defined entry Sass files with Node Sass.                           | `SassCompiler` `sass` `stylesheets` `compile` `default` |
+| StyleguideTester | Initiates Snapshot tests for the styleguide with BackstopJS.                    | `StyleguideTester` `test`                               |
 | SVSpriteCompiler | Creates one or more inline SVG sprites based from the configured entries.       | `SVGSpriteCompiler` `svg` `images` `compile` `default`  |
 
 ## Plugins
@@ -130,14 +132,17 @@ $ node node_modules/@toolbarthomas/harbor/index.js --task=javascripts --minify -
 An optional Harbor environment can be defined by creating a [dotenv](https://www.npmjs.com/package/dotenv) file within the root of your theme directory.
 The following configuration can be adjusted, the default values will be used for any missing environment variable.
 
-| Environment variable | Default value | Description                                                                                                                                                  |
-| -------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| THEME_SRC            | ./src         | Defines the working source directory for all Worker entries.                                                                                                 |
-| THEME_DIST           | ./dist        | Defines the build directory for all Worker entries & the styleguide development server.                                                                      |
-| THEME_PORT           | 8080          | Defines the server port for the styleguide development server.                                                                                               |
-| THEME_ENVIRONMENT    | production    | Enables environment specific Plugins to be used.                                                                                                             |
-| THEME_DEBUG          | false         | Includes sourcemaps if the defined entries support it.                                                                                                       |
-| THEME_WEBSOCKET_PORT | 35729         | Enables attached library stylesheets to be automatically refreshed within the styleguide, the websocket won't be created if there is no port number defined. |
+| Environment variable   | Default value    | Description                                                                                                                                                  |
+| ---------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| THEME_SRC              | ./src            | Defines the working source directory for all Worker entries.                                                                                                 |
+| THEME_DIST             | ./dist           | Defines the build directory for all Worker entries & the styleguide development server.                                                                      |
+| THEME_PORT             | 8080             | Defines the server port for the styleguide development server.                                                                                               |
+| THEME_DEBUG            | false            | Includes sourcemaps if the defined entries support it.                                                                                                       |
+| THEME_ENVIRONMENT      | production       | Enables environment specific Plugins to be used.                                                                                                             |
+| THEME_STATIC_DIRECTORY | storybook-static | Defines the destination path for the static styleguide build. This is used to create multiple static builds within the codebase.                             |
+| THEME_WEBSOCKET_PORT   | 35729            | Enables attached library stylesheets to be automatically refreshed within the styleguide, the websocket won't be created if there is no port number defined. |
+| THEME_TEST_PHASE       | test             | Defines the testing method for BackstopJS: `test`, `reference` or `approve`.                                                                                 |
+| THEME_AS_CLI           | false            | Launches Storybook in CLI mode that is used by the StyleguideTester.                                                                                         |
 
 ## Default Configuration
 
@@ -208,6 +213,18 @@ The result will be written relative to the configured environment destination di
 | plugins           | Object                 | Optional plugins that will be assigned to the Postcss plugin.               |
 | plugins.postcss   | Object                 | The optional Postcss plugin(configuration).                                 |
 | entry             | Object[string, string] | Renders & lints the given entries with Node Sass & Postcss.                 |
+
+### StyleguideTester configuration
+
+The StyleguideTester enables snapshot testing of the generated styleguide. All valid stories will be extracted by Storybook and are tested with [BackstopJS](https://github.com/garris/BackstopJS).
+
+| Option                  | type   | Description                                                                                                          |
+| ----------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
+| options                 | Object | Optional configuration for the worker & BackstopJS.                                                                  |
+| options.backstopJS      | Object | Defines the base configuration for BackstopJS. [More info](https://github.com/garris/BackstopJS#advanced-scenarios)  |
+| options.staticDirectory | string | Defines the destination directory for the static styleguide build, to prevent removal of already generated packages. |
+| options.outputPath      | string | The destination for the Styleguide manifest that is used for the Snapshot tester.                                    |
+| hook                    | string | Runs the worker if the given hook is subscribed to the Task Manager.                                                 |
 
 ### SvgSpriteCompiler configuration
 
@@ -290,6 +307,7 @@ You can assign the following NPM script entries when using the default hook conf
     "serve": "node node_modules/@toolbarthomas/harbor/index.js --serve",
     "styleguide": "node node_modules/@toolbarthomas/harbor/index.js --styleguide",
     "stylesheets": "node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets",
+    "test": "node node_modules/@toolbarthomas/harbor/index.js --task=test",
   }
 ```
 
@@ -439,8 +457,34 @@ And:
 
 Will render:
 
-```html
+```xml
 <svg aria-hidden="true" aria-focusable="false">
   <use xlink:href="dist/main/images/icons.svg#svg--chevron--down"></use>
 </svg>
+```
+
+### Running Snapshot tests
+
+It is possible to run Snapshot tests with BackstopJS for all created Storybook stories.
+Storybook first generates a stories manifest in order to define the components to test.
+A temporary Storybook instance will be created afterwards, which BackstopJS will use for the snapshot tests.
+
+You need to enable reference snapshots first otherwise you will encounter an error, you need to pass the optional `test` parameter within the command:
+
+```sh
+$ harbor --task=test --test=reference
+```
+
+This will create reference snapshots within the defined `options.backstopJS.bitmaps_reference` configuration option.
+These snapshots will tested with the defined testing snapshots afterwards:
+
+```sh
+# You don't need to define the `test` parameter since this is the default testing method.
+$ harbor --task=test --test=test
+```
+
+An exception will be thrown if there are any mismatches with the references. You can approve these changes automatically by running:
+
+```sh
+$ harbor --task=test --test=approve
 ```

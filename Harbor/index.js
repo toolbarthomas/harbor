@@ -55,7 +55,7 @@ class Harbor {
    * Init Harbor and run tasks specified from the Command Line Arguments.
    */
   async init() {
-    const { ci, task, isProduction, renderDirectory, ...args } = this.Argv.args;
+    const { ci, task, isProduction, staticDirectory, ...args } = this.Argv.args;
     const { customArgs } = args;
 
     const Env = new Environment();
@@ -75,9 +75,9 @@ class Harbor {
       this.env.THEME_ENVIRONMENT = 'production';
     }
 
-    if (renderDirectory) {
-      this.Console.log(`Enforcing custom render directory: ${renderDirectory}`);
-      this.env.RENDER_DIRECTORY = renderDirectory;
+    if (staticDirectory) {
+      this.Console.log(`Enforcing custom render directory: ${staticDirectory}`);
+      this.env.THEME_STATIC_DIRECTORY = staticDirectory;
     }
 
     // Defines the actual test suite command for Backstopjs.

@@ -12,7 +12,7 @@ class Argv {
       watch: false,
       isProduction: false,
       ci: false,
-      renderDirectory: '',
+      staticDirectory: 'storybook-static',
     };
   }
 

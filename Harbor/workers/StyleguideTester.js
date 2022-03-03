@@ -26,7 +26,7 @@ class StyleguideTester extends Worker {
 
     // Prepare to build a new Storybook snapshot.
     try {
-      execSync(`node ${script} --styleguide --isProduction --renderDirectory=${staticDirectory}`, {
+      execSync(`node ${script} --styleguide --isProduction --staticDirectory=${staticDirectory}`, {
         stdio: 'ignore',
       });
     } catch (exception) {
@@ -122,7 +122,7 @@ class StyleguideTester extends Worker {
       ? this.environment.THEME_TEST_PHASE
       : 'test';
 
-    this.Console.log(`Starting test suite: ${THEME_TEST_PHASE}`);
+    this.Console.log(`Starting test suite: ${this.environment.THEME_TEST_PHASE}`);
 
     await backstop(command, { config: backstopConfig }).catch((exception) => {
       if (exception) {
