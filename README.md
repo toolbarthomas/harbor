@@ -218,13 +218,14 @@ The result will be written relative to the configured environment destination di
 
 The StyleguideTester enables snapshot testing of the generated styleguide. All valid stories will be extracted by Storybook and are tested with [BackstopJS](https://github.com/garris/BackstopJS).
 
-| Option                  | type   | Description                                                                                                          |
-| ----------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
-| options                 | Object | Optional configuration for the worker & BackstopJS.                                                                  |
-| options.backstopJS      | Object | Defines the base configuration for BackstopJS. [More info](https://github.com/garris/BackstopJS#advanced-scenarios)  |
-| options.staticDirectory | string | Defines the destination directory for the static styleguide build, to prevent removal of already generated packages. |
-| options.outputPath      | string | The destination for the Styleguide manifest that is used for the Snapshot tester.                                    |
-| hook                    | string | Runs the worker if the given hook is subscribed to the Task Manager.                                                 |
+| Option                    | type   | Description                                                                                                          |
+| ------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
+| options                   | Object | Optional configuration for the worker & BackstopJS.                                                                  |
+| options.backstopJS        | Object | Defines the base configuration for BackstopJS. [More info](https://github.com/garris/BackstopJS#advanced-scenarios)  |
+| options.staticDirectory   | string | Defines the destination directory for the static styleguide build, to prevent removal of already generated packages. |
+| options.scenarioDirectory | string | Defines the destination directory for additional scenarios defined as YAML or JSON file.                             |
+| options.outputPath        | string | The destination for the Styleguide manifest that is used for the Snapshot tester.                                    |
+| hook                      | string | Runs the worker if the given hook is subscribed to the Task Manager.                                                 |
 
 ### SvgSpriteCompiler configuration
 

@@ -1,3 +1,9 @@
+## 0.111.0 (March 4, 2022)
+
+### Features
+
+- Implements optional scenarios for backstopJS.
+
 ## 0.110.2 (March 3, 2022)
 
 ### Features

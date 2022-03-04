@@ -1,9 +1,11 @@
-import { fileURLToPath } from 'url';
 import { execSync, spawn } from 'child_process';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
-import path from 'path';
+import glob from 'glob';
 import http from 'http';
 import os from 'os';
+import path from 'path';
+import YAML from 'yaml';
 
 // @TODO should install within instance like the node-sass fallback.
 import backstop from 'backstopjs';
@@ -58,6 +60,7 @@ class StyleguideTester extends Worker {
     } catch (exception) {
       if (exception) {
         this.Console.error(exception);
+
         return this.reject();
       }
     }
@@ -76,7 +79,8 @@ class StyleguideTester extends Worker {
       ...config,
     };
 
-    // @TODO should implement option to test a single scenario.
+    // Define the scenario from the generated Storybook instance.
+    // @TODO Should implement option to test a single scenario.
     Object.values(stories).forEach((value) => {
       const url = `http://localhost:${this.environment.THEME_PORT}/iframe.html?id=${value.id}`;
 
@@ -96,7 +100,48 @@ class StyleguideTester extends Worker {
       });
     });
 
-    // return this.reject();
+    const customScenarios = glob.sync(`${this.config.options.scenarioDirectory}/**/*.{json,yaml}`);
+    if (customScenarios.length) {
+      this.Console.info(`Importing ${customScenarios.length} backstopJS scenarios...`);
+
+      customScenarios.forEach((customScenario) => {
+        if (!fs.statSync(customScenario).size) {
+          this.Console.log(`Skipping empty scenario: ${customScenario}`);
+          return;
+        }
+
+        const extname = path.extname(customScenario);
+        let scenarioConfig = {};
+        const data = fs.readFileSync(customScenario).toString();
+        let canImport = true;
+
+        try {
+          if (extname === '.yaml') {
+            scenarioConfig = YAML.parse(data);
+          } else {
+            scenarioConfig = JSON.parse(data);
+          }
+        } catch (exception) {
+          this.Console.error(`Unable to import custom scenario: ${customScenario}`);
+          this.Console.error(exception);
+          canImport = false;
+        }
+
+        // Ensure a scenario label is defined.
+        if (!scenarioConfig.label) {
+          scenarioConfig.label = path.basename(customScenario, extname);
+        }
+
+        if (canImport) {
+          this.Console.info(`Inserted Custom scenario: ${customScenario}`);
+
+          backstopConfig.scenarios.push({
+            ...scenarioConfig,
+            ...scenarioDefaults,
+          });
+        }
+      });
+    }
 
     this.Console.info(`Starting Snapshot server....`);
 
@@ -105,10 +150,13 @@ class StyleguideTester extends Worker {
       detached: true,
     });
 
+    // Mark the current instance as invalid in order to exit the process.
     server.on('error', () => {
       hasError = true;
     });
 
+    // Await for the Styleguide server before the Snapshot tester can be
+    // started.
     await this.awaitServer().catch(() => {
       this.reject();
     });

@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.110.2",
+  "version": "0.111.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -65,7 +65,6 @@
     "camelcase": "^6.3.0",
     "chalk": "^5.0.0",
     "chokidar": "^3.5.3",
-    "community-faker": "^5.5.5",
     "concat": "^1.0.3",
     "copyfiles": "^2.4.1",
     "cssnano": "^5.1.0",
@@ -78,7 +77,6 @@
     "html-escaper": "^3.0.3",
     "imagemin": "^8.0.1",
     "is-svg": "^4.3.2",
-    "jquery": "^3.6.0",
     "log-symbols": "^5.1.0",
     "mkdirp": "^1.0.4",
     "node-sass-glob-importer": "^5.3.2",

@@ -57,6 +57,7 @@ export default {
       options: {
         staticDirectory: 'storybook-snapshot',
         outputPath: 'styleguide.snapshot.json',
+        scenarioDirectory: path.resolve(process.cwd(), 'backstopJS/backstopScenarios'),
         backstopJS: {
           id: 'styleguide',
           paths: {
@@ -85,7 +86,7 @@ export default {
           excludeScenarios: [],
           scenarioDefaults: {
             hideSelectors: [],
-            removeSelectors: ['iframe'],
+            removeSelectors: [],
             selectors: ['document'],
             postInteractionWait: 1000,
             delay: 1000,
