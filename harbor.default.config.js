@@ -52,6 +52,49 @@ export default {
         main: '**/stylesheets/**/**.scss',
       },
     },
+    StyleguideTester: {
+      hook: ['test', 'backstop'],
+      options: {
+        staticDirectory: 'storybook-snapshot',
+        outputPath: 'styleguide.snapshot.json',
+        scenarioDirectory: path.resolve(process.cwd(), 'backstopJS/backstopScenarios'),
+        backstopJS: {
+          id: 'styleguide',
+          paths: {
+            bitmaps_reference: 'backstopJS/backstopReference/bitmapsReference',
+            bitmaps_test: 'backstopJS/backstopTests/bitmapTests',
+            engine_scripts: 'backstopJS/backstopEngine/engineScripts',
+            html_report: 'backstopJS/backstopHTMLReport/HTMLreports',
+            ci_report: 'backstopJS/backstopCIReport/CIreports',
+          },
+          viewports: [
+            {
+              name: 'default',
+              width: 800,
+              height: 600,
+            },
+          ],
+          report: ['browser', 'ci'],
+          engine: 'puppeteer',
+          engineOptions: {
+            args: ['--no-sandbox'],
+          },
+          asyncCaptureLimit: 8,
+          asyncCompareLimit: 32,
+          debug: false,
+          debugWindow: false,
+          excludeScenarios: [],
+          scenarioDefaults: {
+            hideSelectors: [],
+            removeSelectors: [],
+            selectors: ['document'],
+            postInteractionWait: 1000,
+            delay: 1000,
+            misMatchThreshold: 0,
+          },
+        },
+      },
+    },
     SvgSpriteCompiler: {
       hook: ['svg', 'images', 'compile', 'default::1'],
       prefix: '',
@@ -134,16 +177,6 @@ export default {
         configDirectory: path.resolve(process.cwd(), '.storybook'),
         builderDirectory: path.resolve(process.cwd(), '.twing'),
         staticDirectory: 'storybook-static',
-      },
-    },
-    VisualTester: {
-      hook: 'test',
-      entry: {
-        static: 'storybook-static/**/*.html',
-      },
-      options: {
-        ignoredFiles: ['iframe.html'],
-        acceptedFileExtensions: ['html'],
       },
     },
     Watcher: {

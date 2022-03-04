@@ -1,6 +1,7 @@
 node_modules
 dist
 src
+!example/*/src
 
 *.map
 *.log
@@ -11,3 +12,5 @@ src
 .storybook/twing.js
 storybook-static
 .twing
+
+backstopJS

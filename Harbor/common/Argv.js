@@ -10,6 +10,9 @@ class Argv {
       test: false,
       verbose: false,
       watch: false,
+      isProduction: false,
+      ci: false,
+      staticDirectory: 'storybook-static',
     };
   }
 

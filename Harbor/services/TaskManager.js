@@ -1,5 +1,3 @@
-import branchy from 'branchy';
-
 class TaskManager {
   constructor() {
     this.instances = {
@@ -262,13 +260,11 @@ class TaskManager {
               } else {
                 JIT.push(
                   new Promise((cc) => {
-                    branchy(
-                      task.fn().then((exit) => {
-                        postRun(exit, task.hook[0]);
+                    task.fn().then((exit) => {
+                      postRun(exit, task.hook[0]);
 
-                        cc();
-                      })
-                    )();
+                      cc();
+                    });
                   })
                 );
               }

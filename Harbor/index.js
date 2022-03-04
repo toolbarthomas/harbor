@@ -9,6 +9,7 @@ import FileSync from './workers/FileSync.js';
 import JsCompiler from './workers/JsCompiler.js';
 import Resolver from './workers/Resolver.js';
 import SassCompiler from './workers/SassCompiler.js';
+import StyleguideTester from './workers/StyleguideTester.js';
 import SvgSpriteCompiler from './workers/SvgSpriteCompiler.js';
 
 import StyleguideCompiler from './plugins/StyleguideCompiler.js';
@@ -34,6 +35,7 @@ class Harbor {
       JsCompiler: new JsCompiler(this.services),
       Resolver: new Resolver(this.services),
       SassCompiler: new SassCompiler(this.services),
+      StyleguideTester: new StyleguideTester(this.services),
       SvgSpriteCompiler: new SvgSpriteCompiler(this.services),
     };
 
@@ -53,13 +55,35 @@ class Harbor {
    * Init Harbor and run tasks specified from the Command Line Arguments.
    */
   async init() {
-    const { task, ...args } = this.Argv.args;
+    const { ci, task, isProduction, staticDirectory, ...args } = this.Argv.args;
     const { customArgs } = args;
 
     const Env = new Environment();
     this.env = await Env.define();
 
     this.Console = new Logger(this.env);
+
+    if (ci) {
+      this.Console.info(`Running Harbor in CI mode...`);
+    }
+    this.env.THEME_AS_CLI = ci;
+
+    if (isProduction) {
+      this.Console.warning(
+        `Heads up! Harbor will run this instance in production when the 'isProduction' flag is enabled. `
+      );
+      this.env.THEME_ENVIRONMENT = 'production';
+    }
+
+    if (staticDirectory) {
+      this.Console.log(`Enforcing custom render directory: ${staticDirectory}`);
+      this.env.THEME_STATIC_DIRECTORY = staticDirectory;
+    }
+
+    // Defines the actual test suite command for Backstopjs.
+    if (args.test) {
+      this.env.THEME_TEST_PHASE = args.test;
+    }
 
     // Keep track of the arguments that were not recognized by Harbor.
     const unusedCustomArgs = customArgs;
@@ -151,9 +175,9 @@ class Harbor {
       }
     } catch (exception) {
       if (exception) {
-        this.Console.error('Harbor stopped because of an error:');
+        this.Console.error('Harbor stopped because of an error: exception');
 
-        throw Error(exception.toString());
+        process.exit(1);
       }
     }
   }
@@ -190,9 +214,11 @@ class Harbor {
   validateResult(results) {
     if (results && results.exceptions && results.exceptions.length) {
       if (this.env.THEME_ENVIRONMENT !== 'development') {
-        throw Error(
+        this.Console.error(
           `Not all tasks have been completed correctly: ${results.exceptions.join(', ')}`
         );
+
+        process.exit(1);
       }
     }
 
