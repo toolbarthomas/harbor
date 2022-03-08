@@ -1,5 +1,5 @@
 /* eslint-disable no-unsafe-negation */
-import { exec } from 'child_process';
+import { exec, execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import glob from 'glob';
@@ -30,9 +30,11 @@ class StyleguideCompiler extends Plugin {
     const bin =
       this.environment.THEME_ENVIRONMENT === 'production' ? 'build-storybook' : 'start-storybook';
 
-    const script = fs.existsSync(path.resolve(`node_modules/.bin/${bin}`))
-      ? path.resolve(`node_modules/.bin/${bin}`)
-      : path.resolve(`../../.bin/${bin}`);
+    const nodeModules = fs.existsSync(path.resolve(`node_modules/.bin/${bin}`))
+      ? path.resolve('node_modules')
+      : path.resolve('../../');
+
+    const script = path.resolve(`${nodeModules}/.bin/${bin}`);
 
     const config = path.resolve(StyleguideCompiler.configPath());
     let { staticDirectory } = this.config.options;
@@ -40,6 +42,50 @@ class StyleguideCompiler extends Plugin {
     if (this.environment.THEME_STATIC_DIRECTORY) {
       staticDirectory = this.environment.THEME_STATIC_DIRECTORY;
     }
+
+    // Instal the legacy Twing libraries during within the current instance.
+    if (this.config.options && this.config.options.useLegacyCompiler) {
+      let cleanInstal = true;
+
+      try {
+        const version = execSync('npm list --depth=0 twing').toString();
+
+        if (version.indexOf('2.3.7') >= 0) {
+          cleanInstal = false;
+        }
+      } catch (exception) {
+        this.Console.log(exception);
+        cleanInstal = false;
+      }
+
+      try {
+        if (cleanInstal) {
+          this.Console.info(
+            `Removing original libraries in favor of the legacy Twing libraries...`
+          );
+
+          execSync(`npm --no-save uninstall twing twing-loader`, {
+            stdio: 'inherit',
+          });
+        }
+
+        this.Console.info(`Installing legacy Twing libraries...`);
+
+        execSync(
+          `npm install --no-save twing@2.3.7 twing-loader@2.0.2 type-name@2.0.2 stringify-object@3.3.0`,
+          {
+            stdio: 'inherit',
+          }
+        );
+      } catch (exception) {
+        this.Console.error(exception);
+
+        return super.reject();
+      }
+    }
+
+    // Instal the older Twing & Twing-loader libraries if the
+    // 'useLegacyCompiler' config option is enabled.
 
     // Define the Storybook builder configuration as CommonJS module since Storybook
     // currently doesn't support the implementation of ESM.
@@ -142,13 +188,19 @@ class StyleguideCompiler extends Plugin {
    * defined Twig templates.
    */
   setupBuilder() {
-    const cwd = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../builders/Twing');
+    const type = this.config.options && this.config.options.useLegacyCompiler ? 'sync' : 'async';
+
+    const cwd = path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      '../builders/Twing',
+      type
+    );
 
     const destination = path.resolve(StyleguideCompiler.configPath(), 'twing.cjs');
 
     const queryEntry = (entry, query) => glob.sync(path.join(entry, query));
 
-    const initialFilters = ['_date', '_escape'];
+    const initialFilters = this.config.options.useLegacyCompiler ? [] : ['_date', '_escape'];
     const defaultFilters = queryEntry(cwd, 'filters/**.cjs').filter(
       (m) => !initialFilters.includes(path.basename(m, '.cjs'))
     );
@@ -157,7 +209,7 @@ class StyleguideCompiler extends Plugin {
       ? queryEntry(this.config.options.builderDirectory, 'filters/**.cjs')
       : [];
 
-    const initialFunctions = ['dump'];
+    const initialFunctions = this.config.options.useLegacyCompiler ? [] : ['dump'];
     const defaultFunctions = queryEntry(cwd, 'functions/**.cjs').filter(
       (m) => !initialFunctions.includes(path.basename(m, '.cjs'))
     );

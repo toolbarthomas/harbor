@@ -171,6 +171,7 @@ export default {
         alias: {
           '@theme': process.cwd(),
         },
+        useLegacyCompiler: false,
         globalMode: false,
         librariesOverride: {},
         optimization: {

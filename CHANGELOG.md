@@ -1,3 +1,9 @@
+## 0.112.0 (March 8, 2022)
+
+### Features
+
+- Implements `useLegacyCompiler` option that enables the usage of older Twing libraries within the styleguide to disable the requirement of async stories.
+
 ## 0.111.0 (March 4, 2022)
 
 ### Features

@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.111.1",
+  "version": "0.112.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -81,7 +81,7 @@
     "mkdirp": "^1.0.4",
     "node-sass-glob-importer": "^5.3.2",
     "outdent": "^0.8.0",
-    "postcss": "^8.4.7",
+    "postcss": "^8.4.8",
     "postcss-combine-duplicated-selectors": "^10.0.3",
     "postcss-scss": "^4.0.3",
     "prettier": "^2.5.1",
