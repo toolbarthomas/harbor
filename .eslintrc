@@ -17,7 +17,7 @@
   ],
   "globals": {
     "Drupal": "writable",
-    "drupalSettings": "readonly"
+    "drupalSettings": "readonly",
     "jQuery": "readonly",
     "THEME_AS_CLI": "readonly",
     "THEME_DEBUG": "readonly",
@@ -30,7 +30,7 @@
     "THEME_SPRITES": "readonly",
     "THEME_SRC": "readonly",
     "THEME_TEST_PHASE": "readonly",
-    "THEME_WEBSOCKET_PORT": "readonly",
+    "THEME_WEBSOCKET_PORT": "readonly"
   },
   "rules": {
     "import/no-extraneous-dependencies": 0,

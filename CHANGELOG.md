@@ -1,3 +1,15 @@
+## 0.112.2 (March 8, 2022)
+
+### Maintenance
+
+- Remove renderContext fallback.
+
+## 0.112.1 (March 8, 2022)
+
+### Maintenance
+
+- Ensure Twing libraries are correctly installed when using useLegacyCompiler.
+
 ## 0.112.0 (March 8, 2022)
 
 ### Features

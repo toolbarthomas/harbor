@@ -1,5 +1,5 @@
 /* eslint-disable no-unsafe-negation */
-import { exec, execSync } from 'child_process';
+import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import glob from 'glob';
@@ -21,6 +21,8 @@ class StyleguideCompiler extends Plugin {
     // @TODO can be removed since we can dynamically define this.
     // Contains the value storage for the template variables.
     this.renderContext = {};
+
+    this.modulePath = path.resolve(fileURLToPath(import.meta.url), '../../../');
   }
 
   /**
@@ -32,7 +34,7 @@ class StyleguideCompiler extends Plugin {
 
     const nodeModules = fs.existsSync(path.resolve(`node_modules/.bin/${bin}`))
       ? path.resolve('node_modules')
-      : path.resolve('../../');
+      : path.resolve(this.modulePath, 'node_modules');
 
     const script = path.resolve(`${nodeModules}/.bin/${bin}`);
 
@@ -43,46 +45,77 @@ class StyleguideCompiler extends Plugin {
       staticDirectory = this.environment.THEME_STATIC_DIRECTORY;
     }
 
-    // Instal the legacy Twing libraries during within the current instance.
-    if (this.config.options && this.config.options.useLegacyCompiler) {
-      let cleanInstal = true;
+    // // Instal the legacy Twing libraries during within the current instance.
+    // if (this.config.options && this.config.options.useLegacyCompiler) {
+    //   let cleanInstal = true;
 
-      try {
-        const version = execSync('npm list --depth=0 twing').toString();
+    //   try {
+    //     const version = execSync(`npm list --depth=0 twing`, {
+    //       cwd: this.modulePath,
+    //     }).toString();
 
-        if (version.indexOf('2.3.7') >= 0) {
-          cleanInstal = false;
-        }
-      } catch (exception) {
-        this.Console.log(exception);
-        cleanInstal = false;
-      }
+    //     if (version.indexOf('2.3.7') >= 0) {
+    //       cleanInstal = false;
+    //     }
+    //   } catch (exception) {
+    //     this.Console.log(exception);
+    //     cleanInstal = false;
+    //   }
 
-      try {
-        if (cleanInstal) {
-          this.Console.info(
-            `Removing original libraries in favor of the legacy Twing libraries...`
-          );
+    //   try {
+    //     if (cleanInstal) {
+    //       this.Console.info(
+    //         `Removing original libraries in favor of the legacy Twing libraries...`
+    //       );
 
-          execSync(`npm --no-save uninstall twing twing-loader`, {
-            stdio: 'inherit',
-          });
-        }
+    //       execSync(`npm uninstall twing twing-loader`, {
+    //         cwd: this.modulePath,
+    //         stdio: 'inherit',
+    //       });
+    //     }
 
-        this.Console.info(`Installing legacy Twing libraries...`);
+    //     this.Console.info(`Installing legacy Twing libraries...`);
 
-        execSync(
-          `npm install --no-save twing@2.3.7 twing-loader@2.0.2 type-name@2.0.2 stringify-object@3.3.0`,
-          {
-            stdio: 'inherit',
-          }
-        );
-      } catch (exception) {
-        this.Console.error(exception);
+    //     execSync(
+    //       `npm install twing@2.3.7 twing-loader@2.0.2 type-name@2.0.2 stringify-object@3.3.0`,
+    //       {
+    //         cwd: this.modulePath,
+    //         stdio: 'inherit',
+    //       }
+    //     );
+    //   } catch (exception) {
+    //     this.Console.error(exception);
 
-        return super.reject();
-      }
-    }
+    //     return super.reject();
+    //   }
+    // } else {
+    //   try {
+    //     const version = execSync(`npm list --depth=0 twing`, {
+    //       cwd: this.modulePath,
+    //     }).toString();
+
+    //     if (version.indexOf('2.3.7') >= 0) {
+    //       this.Console.info(`Installing modern Twing libraries...`);
+
+    //       execSync(`npm uninstall twing twing-loader type-name stringify-object`, {
+    //         cwd: this.modulePath,
+    //         stdio: 'inherit',
+    //       });
+
+    //       execSync(`npm install twing twing-loader`, {
+    //         cwd: this.modulePath,
+    //         stdio: 'inherit',
+    //       });
+    //     }
+    //   } catch (exception) {
+    //     this.Console.warning(exception);
+
+    //     execSync(`npm install twing twing-loader`, {
+    //       cwd: this.modulePath,
+    //       stdio: 'inherit',
+    //     });
+    //   }
+    // }
 
     // Instal the older Twing & Twing-loader libraries if the
     // 'useLegacyCompiler' config option is enabled.
@@ -200,7 +233,7 @@ class StyleguideCompiler extends Plugin {
 
     const queryEntry = (entry, query) => glob.sync(path.join(entry, query));
 
-    const initialFilters = this.config.options.useLegacyCompiler ? [] : ['_date', '_escape'];
+    const initialFilters = ['_date', '_escape'];
     const defaultFilters = queryEntry(cwd, 'filters/**.cjs').filter(
       (m) => !initialFilters.includes(path.basename(m, '.cjs'))
     );
@@ -268,7 +301,7 @@ class StyleguideCompiler extends Plugin {
       if (typeof loader.addPath === 'function') {
         if (${this.config.options.alias !== undefined}) {
           try {
-            const alias = ${JSON.stringify(this.config.options.alias)};
+            const alias = ${JSON.stringify(this.config.options.alias, null, 2)};
 
             if (alias) {
               Object.keys(alias).forEach((name) => {
@@ -514,8 +547,8 @@ class StyleguideCompiler extends Plugin {
       const webpack = require('webpack');
       const YAML = require('yaml');
 
-      const addons = [${addons.map((p) => `'${p}'`).join(',')}]
-      const stories = [${stories.map((p) => `'${p}'`).join(',')}]
+      const addons = [${addons.map((p) => `'${p}'`).join(',')}];
+      const stories = [${stories.map((p) => `'${p}'`).join(',\n')}];
 
       // Include the Drupal library context within the Storybook instance that
       // can be used for the Drupal related Twig extensions.
@@ -548,7 +581,7 @@ class StyleguideCompiler extends Plugin {
       )};
       if (enableSprites) {
         try {
-          const entry = ${JSON.stringify(this.workers.SvgSpriteCompiler.config.entry)};
+          const entry = ${JSON.stringify(this.workers.SvgSpriteCompiler.config.entry, null, 2)};
 
           Object.keys(entry).forEach((n) => {
             let p = path.normalize(path.dirname(entry[n])).replace('*', '');
@@ -584,7 +617,9 @@ class StyleguideCompiler extends Plugin {
         // alias.
         if (config.resolve && config.resolve.alias) {
           config.resolve.alias = Object.assign(${JSON.stringify(
-            this.config.options.alias
+            this.config.options.alias,
+            null,
+            2
           )}, config.resolve.alias);
         }
 
@@ -593,12 +628,14 @@ class StyleguideCompiler extends Plugin {
           new webpack.DefinePlugin({
             THEME_LIBRARIES: JSON.stringify(libraries),
             THEME_LIBRARIES_OVERRIDES: JSON.stringify(${JSON.stringify(
-              this.config.options.librariesOverride || {}
+              this.config.options.librariesOverride || {},
+              null,
+              2
             )}),
             THEME_DIST: '"${path.normalize(this.environment.THEME_DIST)}/"',
             THEME_ENVIRONMENT: '"${this.environment.THEME_ENVIRONMENT}"',
             THEME_SPRITES: JSON.stringify(sprites),
-            THEME_ALIAS: JSON.stringify(${JSON.stringify(this.config.options.alias)}),
+            THEME_ALIAS: JSON.stringify(${(JSON.stringify(this.config.options.alias), null, 2)}),
             THEME_WEBSOCKET_PORT: '${this.environment.THEME_WEBSOCKET_PORT}',
           })
         );
@@ -613,22 +650,33 @@ class StyleguideCompiler extends Plugin {
             : 'config.optimization || false'
         };
 
-        process.env['THEME_ALIAS'] = JSON.stringify(${JSON.stringify(this.config.options.alias)});
+        process.env['THEME_ALIAS'] = JSON.stringify(${JSON.stringify(
+          this.config.options.alias,
+          null,
+          2
+        )});
 
         return config;
       }
-
-      // Enforce the Harbor environment within the Webpack instance.
-      // DefinePlugin does not give the desired result withing the Twing Builder.
-      process.env.THEME_LIBRARIES = JSON.stringify(libraries);
-      process.env.THEME_LIBRARIES_OVERRIDES = JSON.stringify(${JSON.stringify(
-        this.config.options.librariesOverride || {}
-      )});
-      process.env.THEME_DIST = '"${path.normalize(this.environment.THEME_DIST)}/"';
-      process.env.THEME_ENVIRONMENT = '"${this.environment.THEME_ENVIRONMENT}"';
-      process.env.THEME_SPRITES = JSON.stringify(sprites);
-      process.env.THEME_ALIAS = JSON.stringify(${JSON.stringify(this.config.options.alias)});
-      process.env.THEME_WEBSOCKET_PORT = '${this.environment.THEME_WEBSOCKET_PORT}';
+      ${
+        this.config.options && !this.config.options.useLegacyCompiler
+          ? outdent`
+              // Enforce the Harbor environment within the Webpack instance.
+              // DefinePlugin does not give the desired result withing the Twing Builder.
+              process.env.THEME_LIBRARIES = JSON.stringify(libraries);
+              process.env.THEME_LIBRARIES_OVERRIDES = JSON.stringify(${JSON.stringify(
+                this.config.options.librariesOverride || {}
+              )});
+              process.env.THEME_DIST = '"${path.normalize(this.environment.THEME_DIST)}/"';
+              process.env.THEME_ENVIRONMENT = '"${this.environment.THEME_ENVIRONMENT}"';
+              process.env.THEME_SPRITES = JSON.stringify(sprites);
+              process.env.THEME_ALIAS = JSON.stringify(${JSON.stringify(
+                this.config.options.alias
+              )});
+              process.env.THEME_WEBSOCKET_PORT = '${this.environment.THEME_WEBSOCKET_PORT}';
+            `
+          : ''
+      }
 
       module.exports = {
         stories,
