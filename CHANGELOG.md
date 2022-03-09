@@ -4,6 +4,7 @@
 
 - Cleanup some logic.
 - Mark Twing Builder legacy option as WIP.
+- Implements NPM package maintenance.
 
 ## 0.112.2 (March 8, 2022)
 
