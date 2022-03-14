@@ -86,7 +86,7 @@ class SvgSpriteCompiler extends Worker {
 
       const basePath = path.join(
         this.environment.THEME_SRC,
-        path.dirname(this.config.entry[filename].replace('/*', ''))
+        this.config.entry[filename].substring(0, this.config.entry[filename].indexOf('/*'))
       );
 
       const destination = path
