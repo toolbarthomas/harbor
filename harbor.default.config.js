@@ -52,6 +52,21 @@ export default {
         main: '**/stylesheets/**/**.scss',
       },
     },
+    StyleguideHelper: {
+      hook: ['setup'],
+      entry: {
+        main: '**/*.twig',
+      },
+      options: {
+        configurationExtensions: ['yaml', 'json', 'js'],
+        extname: 'js',
+        disableAlias: false,
+        ignoreInitial: false,
+        structuredTitle: true,
+        sep: ' / ',
+        destinationDirectory: 'styleguide',
+      },
+    },
     StyleguideTester: {
       hook: ['test', 'backstop'],
       options: {

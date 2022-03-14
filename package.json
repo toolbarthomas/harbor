@@ -18,6 +18,7 @@
     "serve": "node ./index.js --serve",
     "styleguide": "node ./index.js --styleguide",
     "stylesheets": "node ./index.js --task=stylesheets",
+    "setup": "node ./index.js --task=setup",
     "test": "node ./index.js --task=test",
     "test:reference": "node ./index.js --test=reference",
     "test:approve": "node ./index.js --test=approve"
@@ -99,6 +100,7 @@
     "twing-loader": "^4.0.0",
     "type-name": "^2.0.2",
     "uglify-js": "^3.15.3",
-    "ws": "^8.5.0"
+    "ws": "^8.5.0",
+    "yaml-loader": "^0.6.0"
   }
 }

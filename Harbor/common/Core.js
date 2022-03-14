@@ -97,12 +97,14 @@ class Core {
    */
   defineEntry(useDestination) {
     if (!this.config.entry || !(this.config.entry instanceof Object)) {
+      this.Console.log(`Unable to define entry for: ${this.name}`);
       return;
     }
 
     const entries = Object.keys(this.config.entry);
 
     if (!entries.length) {
+      this.Console.log(`No entries found for: ${this.name}`);
       return;
     }
 

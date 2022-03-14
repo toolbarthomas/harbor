@@ -98,6 +98,7 @@ The following workers are configured within the default configuration:
 | JsCompiler       | Transforms the defined entry javascript files with Babel.                       | `JSCompiler` `js` `javascripts` `compile` `default`     |
 | Resolver         | Resolves NPM installed vendor pacakges to the THEME_DIST environment directory. | `Resolver` `resolve` `prepare` `default`                |
 | SassCompiler     | Compiles the defined entry Sass files with Node Sass.                           | `SassCompiler` `sass` `stylesheets` `compile` `default` |
+| StyleguideHelper | Creates initial storybook entries from the defined Twig templates.              | `StyleguideHelper` `setup`                              |
 | StyleguideTester | Initiates Snapshot tests for the styleguide with BackstopJS.                    | `StyleguideTester` `test`                               |
 | SVSpriteCompiler | Creates one or more inline SVG sprites based from the configured entries.       | `SVGSpriteCompiler` `svg` `images` `compile` `default`  |
 
@@ -176,7 +177,7 @@ The Cleaner is a default Harbor worker that will delete all files within the def
 
 | Option | type   | Description                                                          |
 | ------ | ------ | -------------------------------------------------------------------- |
-| hook   | string | Runs the worker if the given hook is subscribed to the Task Manager. |
+| hook   | String | Runs the worker if the given hook is subscribed to the Task Manager. |
 
 ### FileSync configuration
 
@@ -184,8 +185,8 @@ The FileSync will synchronize the defined static entries to the configured envir
 
 | Option   | type     | Description                                                                                   |
 | -------- | -------- | --------------------------------------------------------------------------------------------- |
-| patterns | string[] | Copies the given patterns and it's folder structure to the environment destination directory. |
-| hook     | string   | Runs the worker if the given hook is subscribed to the Task Manager.                          |
+| patterns | String[] | Copies the given patterns and it's folder structure to the environment destination directory. |
+| hook     | String   | Runs the worker if the given hook is subscribed to the Task Manager.                          |
 
 ### JsCompiler configuration
 
@@ -194,8 +195,8 @@ The result will be written relative to the configured environment destination di
 
 | Option            | type                   | Description                                                             |
 | ----------------- | ---------------------- | ----------------------------------------------------------------------- |
-| entry             | Object[string, string] | Transforms & lints the given entries with Babel & Eslint.               |
-| hook              | string                 | Runs the worker if the given hook is subscribed to the Task Manager.    |
+| entry             | Object[String, String] | Transforms & lints the given entries with Babel & Eslint.               |
+| hook              | String                 | Runs the worker if the given hook is subscribed to the Task Manager.    |
 | plugins           | Object                 | Optional plugins that will be assigned to the Babel & Eslint instances. |
 | plugins.eslint    | Object                 | The optional Eslint plugin(configuration).                              |
 | plugins.transform | Object                 | The optional Babel transform(configuration).                            |
@@ -208,11 +209,28 @@ The result will be written relative to the configured environment destination di
 | Option            | type                   | Description                                                                 |
 | ----------------- | ---------------------- | --------------------------------------------------------------------------- |
 | options           | Object                 | Optional configuration for the Node Sass compiler.                          |
-| useLegacyCompiler | boolean                | Flag that enables the Node Sass compiler instead of the Dart Sass compiler. |
-| hook              | string                 | Runs the worker if the given hook is subscribed to the Task Manager.        |
+| useLegacyCompiler | Boolean                | Flag that enables the Node Sass compiler instead of the Dart Sass compiler. |
+| hook              | String                 | Runs the worker if the given hook is subscribed to the Task Manager.        |
 | plugins           | Object                 | Optional plugins that will be assigned to the Postcss plugin.               |
 | plugins.postcss   | Object                 | The optional Postcss plugin(configuration).                                 |
-| entry             | Object[string, string] | Renders & lints the given entries with Node Sass & Postcss.                 |
+| entry             | Object[String, String] | Renders & lints the given entries with Node Sass & Postcss.                 |
+
+### StyleguideHelper configuration
+
+The StyleguideHelper creates initial Styleguide entry templates from the existing Twig templates any json or yaml file that is relative to the Twig template will be included within the styleguide entyr.
+
+| Option                          | type        | Description                                                                                                                          |
+| ------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| options                         | Object      | Optional configuration for the worker.                                                                                               |
+| options.extname                 | String      | Use the defined extension when the styleguide entry is written to the FileSystem.                                                    |
+| options.configurationExtensions | String[]    | Includes the first configuration entry from the defined extensions, the configuration is found relative within the template context. |
+| options.defaultModuleName       | String      | Defines the name for the default entry story.                                                                                        |
+| options.disableAlias            | Boolean     | Don't use the included @theme alias and use a relative path instead.                                                                 |
+| options.ignoreInitial           | Boolean     | Overwrites the existing entry files when enabled.                                                                                    |
+| options.structuredTitle         | Boolean     | Includes the base directory structure for the styleguide entries when enabled.                                                       |
+| options.sep                     | String      | Defines the structure separator for the entry title.                                                                                 |
+| options.destinationDirectory    | String/null | Writes the new entries to the defined directory or write it relative to the template by disabling this option.                       |
+| hook                            | String      | Runs the worker if the given hook is subscribed to the Task Manager.                                                                 |
 
 ### StyleguideTester configuration
 
@@ -222,10 +240,10 @@ The StyleguideTester enables snapshot testing of the generated styleguide. All v
 | ------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------- |
 | options                   | Object | Optional configuration for the worker & BackstopJS.                                                                  |
 | options.backstopJS        | Object | Defines the base configuration for BackstopJS. [More info](https://github.com/garris/BackstopJS#advanced-scenarios)  |
-| options.staticDirectory   | string | Defines the destination directory for the static styleguide build, to prevent removal of already generated packages. |
-| options.scenarioDirectory | string | Defines the destination directory for additional scenarios defined as YAML or JSON file.                             |
-| options.outputPath        | string | The destination for the Styleguide manifest that is used for the Snapshot tester.                                    |
-| hook                      | string | Runs the worker if the given hook is subscribed to the Task Manager.                                                 |
+| options.staticDirectory   | String | Defines the destination directory for the static styleguide build, to prevent removal of already generated packages. |
+| options.scenarioDirectory | String | Defines the destination directory for additional scenarios defined as YAML or JSON file.                             |
+| options.outputPath        | String | The destination for the Styleguide manifest that is used for the Snapshot tester.                                    |
+| hook                      | String | Runs the worker if the given hook is subscribed to the Task Manager.                                                 |
 
 ### SvgSpriteCompiler configuration
 
@@ -234,10 +252,10 @@ The result will be written relative to the configured environment destination di
 
 | Option  | type                   | Description                                                          |
 | ------- | ---------------------- | -------------------------------------------------------------------- |
-| entry   | Object[string, string] | Compiles the given entries with SvgStore.                            |
+| entry   | Object[String, String] | Compiles the given entries with SvgStore.                            |
 | options | Object                 | Optional configuration for the Sprite compiler.                      |
-| hook    | string                 | Runs the worker if the given hook is subscribed to the Task Manager. |
-| prefix  | string                 | The ID prefix for each icon within the compiled sprite.              |
+| hook    | String                 | Runs the worker if the given hook is subscribed to the Task Manager. |
+| prefix  | String                 | The ID prefix for each icon within the compiled sprite.              |
 
 ### Resolver configuration
 
@@ -245,8 +263,8 @@ The Resolver will resolve the defined packages from the node_modules to the envi
 
 | Option | type                   | Description                                                          |
 | ------ | ---------------------- | -------------------------------------------------------------------- |
-| entry  | Object[string, string] | Resolves the given entry packages to the environment destination.    |
-| hook   | string                 | Runs the worker if the given hook is subscribed to the Task Manager. |
+| entry  | Object[String, String] | Resolves the given entry packages to the environment destination.    |
+| hook   | String                 | Runs the worker if the given hook is subscribed to the Task Manager. |
 
 ## Default Plugin Configuration
 
@@ -267,7 +285,7 @@ This can be resolved by viewing the actual result from a (local) webserver.
 
 | Option                    | type                   | Description                                                                                                    |
 | ------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
-| entry                     | Object[string, string] | Compiles the given entries with Storybook.                                                                     |
+| entry                     | Object[String, String] | Compiles the given entries with Storybook.                                                                     |
 | options                   | Object                 | Optional configuration for the Storybook compiler.                                                             |
 | options.alias             | Object                 | Assigns Babel module-resolver aliases to the Storybook instance.                                               |
 | options.globalMode        | Boolean/String         | `experimental` This will use a global render context for Twig.                                                 |
@@ -276,8 +294,8 @@ This can be resolved by viewing the actual result from a (local) webserver.
 | options.configDirectory   | String                 | Defines the Storybook instance directory for your theme: `./.storybook`.                                       |
 | options.builderDirectory  | String                 | Defines the Twing instance directory `.twing` that can be used to include custom Twing functionality.          |
 | options.staticDirectory   | String                 | Defines the destination path for the `production` build of the Storybook styleguide `storybook-static`.        |
-| options.useLegacyCompiler | boolean                | Enables the usage of older Twing libraries within the styleguide to disable the requirement of async stories.  |
-| hook                      | string                 | Runs the worker if the given hook is subscribed to the Task Manager.                                           |
+| options.useLegacyCompiler | Boolean                | Enables the usage of older Twing libraries within the styleguide to disable the requirement of async stories.  |
+| hook                      | String                 | Runs the worker if the given hook is subscribed to the Task Manager.                                           |
 
 ### Watcher configuration
 
@@ -289,10 +307,10 @@ The Watcher will shutdown automatically if no event occured during the defined d
 | options             | Object                 | Optional configuration for the Watcher class.                                           |
 | options.delay       | number                 | Creates a timeout before running the connected Workers after a Watch event has occured. |
 | options.duration    | number                 | Defines the lifetime in miliseconds of the spawned Watcher instances.                   |
-| instances           | Object[string, object] | Spawns a Wacther instance for each defined entry.                                       |
-| instances[].event   | string                 | Defines the Event handler and will publish the defined hook with the TaskManager.       |
-| instances[].path    | string/string[]        | Watches the given paths for the spawned Watcher.                                        |
-| instances[].workers | string[]               | Will publish the defined Harbor workers in order.                                       |
+| instances           | Object[String, Object] | Spawns a Wacther instance for each defined entry.                                       |
+| instances[].event   | String                 | Defines the Event handler and will publish the defined hook with the TaskManager.       |
+| instances[].path    | String/String[]        | Watches the given paths for the spawned Watcher.                                        |
+| instances[].workers | String[]               | Will publish the defined Harbor workers in order.                                       |
 
 ## Example NPM script setup
 
@@ -354,8 +372,8 @@ import styles from './styles.css';
 
 ### Suggested javascript structure.
 
-Using the functionality of the Drupal.behaviors object, you can run the defined javascript during the (initial) (re)load within Drupal and Storybook.
-Storybook calls the attach handler within the Drupal behaviors, this object is used within Drupal sites and is also available for the styleguide.
+Using the functionality of the Drupal.behaviors Object, you can run the defined javascript during the (initial) (re)load within Drupal and Storybook.
+Storybook calls the attach handler within the Drupal behaviors, this Object is used within Drupal sites and is also available for the styleguide.
 
 The actual javascript can be created like the following and should be compliant with the Drupal javascript structure:
 

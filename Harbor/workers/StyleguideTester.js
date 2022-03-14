@@ -189,10 +189,12 @@ class StyleguideTester extends Worker {
         super.reject();
 
         return process.exit(1);
-      } else {
-        return super.resolve();
       }
+
+      return super.resolve();
     });
+
+    return null;
   }
 
   /**

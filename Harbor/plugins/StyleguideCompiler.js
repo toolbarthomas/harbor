@@ -532,6 +532,13 @@ class StyleguideCompiler extends Plugin {
           },
         });
 
+        // Include the YAML loader to enable support for YAML files
+        config.module.rules.push({
+          test: /\.ya?ml$/,
+          type: 'json',
+          use: 'yaml-loader',
+        });
+
         config.plugins.forEach((plugin, i) => {
           if (plugin.constructor.name === 'ProgressPlugin') {
             config.plugins.splice(i, 1);

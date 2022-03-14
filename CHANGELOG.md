@@ -1,3 +1,13 @@
+## 0.115.0 (March 14, 2022)
+
+### Features
+
+- Implements StyleguideHelper worker that enables initial styleguide entry configuration.
+
+### Maintenance
+
+- Writes the compiled SVG sprites to the correct destination directory that is relative to the SVG entry sources. This resolves the issue where the SVG sprite was written one level higher of the original directory. You should update your icon paths for the sprite images as of this version.
+
 ## 0.114.1 (March 14, 2022)
 
 ### Maintenance

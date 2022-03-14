@@ -1,4 +1,5 @@
 import Argv from './common/Argv.js';
+import ConfigManager from './common/ConfigManager.js';
 import Environment from './common/Environment.js';
 import Logger from './common/Logger.js';
 
@@ -9,14 +10,14 @@ import FileSync from './workers/FileSync.js';
 import JsCompiler from './workers/JsCompiler.js';
 import Resolver from './workers/Resolver.js';
 import SassCompiler from './workers/SassCompiler.js';
+import StyleguideHelper from './workers/StyleguideHelper.js';
 import StyleguideTester from './workers/StyleguideTester.js';
 import SvgSpriteCompiler from './workers/SvgSpriteCompiler.js';
 
+import JsOptimizer from './plugins/JsOptimizer.js';
 import StyleguideCompiler from './plugins/StyleguideCompiler.js';
 import StyleOptimizer from './plugins/StyleOptimizer.js';
-import JsOptimizer from './plugins/JsOptimizer.js';
 import Watcher from './plugins/Watcher.js';
-import ConfigManager from './common/ConfigManager.js';
 
 /**
  * Factory setup for Harbor.
@@ -35,6 +36,7 @@ class Harbor {
       JsCompiler: new JsCompiler(this.services),
       Resolver: new Resolver(this.services),
       SassCompiler: new SassCompiler(this.services),
+      StyleguideHelper: new StyleguideHelper(this.services),
       StyleguideTester: new StyleguideTester(this.services),
       SvgSpriteCompiler: new SvgSpriteCompiler(this.services),
     };
