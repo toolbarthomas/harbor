@@ -42,5 +42,10 @@
         "props": false
       }
     ]
+  },
+  "settings": {
+    "import/resolver": {
+      "babel-module": {}
+    }
   }
 }

@@ -1,3 +1,10 @@
+## 0.114.1 (March 14, 2022)
+
+### Maintenance
+
+- Cleanup unused scripts.
+- Implements NPM package maintenance.
+
 ## 0.114.0 (March 8, 2022)
 
 ### Maintenance
