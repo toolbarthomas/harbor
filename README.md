@@ -222,15 +222,42 @@ The StyleguideHelper creates initial Styleguide entry templates from the existin
 | Option                          | type        | Description                                                                                                                          |
 | ------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | options                         | Object      | Optional configuration for the worker.                                                                                               |
-| options.extname                 | String      | Use the defined extension when the styleguide entry is written to the FileSystem.                                                    |
 | options.configurationExtensions | String[]    | Includes the first configuration entry from the defined extensions, the configuration is found relative within the template context. |
 | options.defaultModuleName       | String      | Defines the name for the default entry story.                                                                                        |
-| options.disableAlias            | Boolean     | Don't use the included @theme alias and use a relative path instead.                                                                 |
-| options.ignoreInitial           | Boolean     | Overwrites the existing entry files when enabled.                                                                                    |
-| options.structuredTitle         | Boolean     | Includes the base directory structure for the styleguide entries when enabled.                                                       |
-| options.sep                     | String      | Defines the structure separator for the entry title.                                                                                 |
 | options.destinationDirectory    | String/null | Writes the new entries to the defined directory or write it relative to the template by disabling this option.                       |
+| options.disableAlias            | Boolean     | Don't use the included @theme alias and use a relative path instead.                                                                 |
+| options.extname                 | String      | Use the defined extension when the styleguide entry is written to the FileSystem.                                                    |
+| options.ignoreInitial           | Boolean     | Overwrites the existing entry files when enabled.                                                                                    |
+| options.sep                     | String      | Defines the structure separator for the entry title.                                                                                 |
+| options.structuredTitle         | Boolean     | Includes the base directory structure for the styleguide entries when enabled.                                                       |
+| options.variants                | Object      | Includes optional module variants for the entry template.                                                                            |
 | hook                            | String      | Runs the worker if the given hook is subscribed to the Task Manager.                                                                 |
+
+#### Define StyleguideHelper variants
+
+You can define additional module variants for each entry template by defining additional
+properties that will be used within the template scope:
+
+```js
+StyleguideHelper: {
+  variants: {
+    modifier_class: {
+      query: /[^&(){}`a-zA-Z][.][a-zA-Z-]+--[a-zA-Z-]+/g,
+      from: 'scss',
+      transform: (v) => v.split('.').join(''),
+    },
+  },
+}
+```
+
+The `query` option should match a regular expression that will match everything
+within the given source file. This source file is based defined from the initial source file where the `from` option is used as file extension replacement:
+
+```
+src/example.twig => src/example.scss
+```
+
+A `transform` handler can be included in order to strip any unwanted character from the matched results within the regular expression.
 
 ### StyleguideTester configuration
 

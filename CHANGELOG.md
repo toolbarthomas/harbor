@@ -1,3 +1,13 @@
+## 0.116.0 (March 15, 2022)
+
+### Features
+
+- Implements StyleguideHelper variants option to define initial Module variants.
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
 ## 0.115.0 (March 14, 2022)
 
 ### Features
