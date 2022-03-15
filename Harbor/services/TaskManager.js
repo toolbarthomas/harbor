@@ -1,23 +1,13 @@
-class TaskManager {
-  constructor() {
+import Service from './Service.js';
+
+class TaskManager extends Service {
+  constructor(acceptedServices) {
+    super(acceptedServices);
+
     this.instances = {
       plugins: {},
       workers: {},
     };
-
-    this.acceptedServices = ['Console', 'environment'];
-  }
-
-  /**
-   * Mounts the defined service to the current TaskManager.
-   *
-   * @param {String} name The name of the mounted service.
-   * @param {any} instance The handler of the mounted service.
-   */
-  mount(name, service) {
-    if (name && !this[name] && this.acceptedServices.includes(name)) {
-      this[name] = service;
-    }
   }
 
   /**

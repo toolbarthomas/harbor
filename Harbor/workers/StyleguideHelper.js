@@ -11,10 +11,19 @@ class StyleguideHelper extends Worker {
   constructor(services) {
     super(services);
 
+    // Keep track of the subscribed titles to prevent duplicate entries.
     this.titles = new Map();
+
+    // Should contain the custom configured alias entries defined from the
+    // StyleguideCompiler plugin.
+    this.alias = {};
   }
 
   async init() {
+    if (this.services && this.services.ConfigPublisher) {
+      this.alias = this.services.ConfigPublisher.getOption('StyleguideCompiler', 'alias');
+    }
+
     await Promise.all(this.entry.map((entry) => this.setupInitialStories(entry)));
 
     super.resolve();
@@ -111,41 +120,9 @@ class StyleguideHelper extends Worker {
   defineInitialTemplate(source) {
     const basename = path.basename(source, path.extname(source));
     const moduleName = camelcase(basename, { pascalCase: true });
-    const configurationExtensions =
-      this.config.options && this.config.options.configurationExtensions
-        ? this.config.options.configurationExtensions
-        : ['yaml', 'json'];
-    const includeStylesheets =
-      this.config.options && this.config.options.includeStylesheets
-        ? this.config.options.includeStylesheets
-        : [];
-
-    const flatten = (payload) =>
-      payload.reduce(
-        (flat, toFlatten) => flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten),
-        []
-      );
-
-    const config = flatten(
-      configurationExtensions
-        .map((extension) => glob.sync(`${path.dirname(source)}/**/*.${extension}`))
-        .filter((e) => e && e.length)
-    );
 
     const template = outdent`
-      import ${moduleName} from '${this.useAlias(source)}';
-      ${
-        includeStylesheets &&
-        includeStylesheets
-          .map((stylesheet) => `import '${this.useAlias(stylesheet)}';`)
-          .join('\n\n')
-      }
-
-      ${
-        config.length
-          ? `import ${moduleName}Configuration from '${this.useAlias(config[0], true)}';`
-          : `const ${moduleName}Configuration = {};`
-      }
+      ${this.useAssets(moduleName, source)}
 
       export default {
         title: '${this.useTitle(source)}',
@@ -157,11 +134,47 @@ class StyleguideHelper extends Worker {
       };
 
       export const ${this.useDefaultModule()} = (args, { loaded }) => loaded.${moduleName};
+
       ${this.useDefaultModule()}.args = ${moduleName}Configuration;
 
     `;
 
     return template;
+  }
+
+  useAssets(moduleName, source) {
+    const assets = [];
+
+    const configurationExtensions = super.getOption('configurationExtensions', ['yaml', 'json']);
+    const includeStylesheets = super.getOption('includeStylesheets', []);
+    const includeScripts = super.getOption('includeScripts', []);
+
+    const config = super.flatten(
+      configurationExtensions
+        .map((extension) => glob.sync(`${path.dirname(source)}/**/*.${extension}`))
+        .filter((e) => e && e.length)
+    );
+
+    // Setup the initial import
+    assets.push(`import ${moduleName} from '${this.useAlias(source)}';`);
+
+    // Include optional stylesheets.
+    includeStylesheets.forEach((stylesheet) =>
+      assets.push(`import '${this.useAlias(stylesheet)}';`)
+    );
+
+    // Include optional scripts.
+    includeScripts.forEach((script) => assets.push(`import '${this.useAlias(script)}';`));
+
+    // Define the default template configuration.
+    if (config.length) {
+      assets.push(`import ${moduleName}Configuration from '${this.useAlias(config[0], true)}';`);
+    } else {
+      assets.push('');
+      assets.push(`const ${moduleName}Configuration = {};`);
+    }
+
+    return assets.join('\n');
   }
 
   /**
@@ -177,7 +190,23 @@ class StyleguideHelper extends Worker {
       return `./${path.basename(source)}`;
     }
 
-    return path.join('@theme', source);
+    const proposal = Object.values(this.alias)
+      .filter((value) => path.resolve(source).indexOf(value) >= 0)
+      .sort((a, b) => {
+        const aa = a.split(path.sep);
+        const bb = b.split(path.sep);
+
+        return aa[0] - bb[0] || aa[1] - bb[1] || aa[2] - bb[2];
+      });
+
+    const approvedAlias = Object.keys(this.alias).filter(
+      (name) => this.alias[name] === proposal[proposal.length - 1]
+    );
+
+    return path.join(
+      approvedAlias[0] || '@theme',
+      path.resolve(source).replace(this.alias[approvedAlias], '')
+    );
   }
 
   /**

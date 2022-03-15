@@ -143,6 +143,18 @@ class Core {
   }
 
   /**
+   * Helper function to flatten a nested array.
+   *
+   * @param {Array} arr The array that will be flatten.
+   */
+  flatten(arr) {
+    return arr.reduce(
+      (acc, current) => acc.concat(Array.isArray(current) ? this.flatten(current) : current),
+      []
+    );
+  }
+
+  /**
    * Subscribes the init handler of the current Worker or Plugin to the
    * TaskManager.
    *

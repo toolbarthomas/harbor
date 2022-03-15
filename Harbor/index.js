@@ -3,6 +3,7 @@ import ConfigManager from './common/ConfigManager.js';
 import Environment from './common/Environment.js';
 import Logger from './common/Logger.js';
 
+import ConfigPublisher from './services/ConfigPublisher.js';
 import TaskManager from './services/TaskManager.js';
 
 import Cleaner from './workers/Cleaner.js';
@@ -27,7 +28,8 @@ class Harbor {
     this.Argv = new Argv();
 
     this.services = {
-      TaskManager: new TaskManager(),
+      ConfigPublisher: new ConfigPublisher(['Console']),
+      TaskManager: new TaskManager(['Console', 'environment']),
     };
 
     this.workers = {
@@ -96,6 +98,11 @@ class Harbor {
     // Assign the defined Console & environment to the TaskManager service.
     this.services.TaskManager.mount('Console', this.Console);
     this.services.TaskManager.mount('environment', this.env);
+
+    this.services.ConfigPublisher.mount('Console', this.Console);
+
+    this.share(this.workers, 'workers', config);
+    this.share(this.plugins, 'plugins', config);
 
     // Ensure the configuration is defined before mounting anything.
     this.mount(this.workers, config);
@@ -206,6 +213,21 @@ class Harbor {
         // Subscribe the current name to the Harbor TaskManager.
         handler.subscribe(hook && hook !== name ? [name, ...h] : [...h]);
       });
+    }
+  }
+
+  /**
+   * Expose the worker & plugin configuration to the ConfigPublisher
+   */
+  share(instance, type, config) {
+    if (!this.services || !this.services.ConfigPublisher) {
+      return;
+    }
+
+    const s = (n, t) => this.services.ConfigPublisher.subscribe(n, config[t][n].options);
+
+    if (instance) {
+      Object.keys(instance).forEach((n) => s(n, type));
     }
   }
 

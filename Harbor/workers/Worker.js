@@ -15,6 +15,20 @@ class Worker extends Core {
   constructor(services, options) {
     super(services, options, 'workers');
   }
+
+  /**
+   * Returns the defined configuration option with optional fallback.
+   *
+   * @param {String} name The configurated option to return.
+   * @param {*} defaultValue Returns the fallback value instead.
+   */
+  getOption(name, defaultValue) {
+    if (this.config.options && this.config.options[name] != null) {
+      return this.config.options[name];
+    }
+
+    return defaultValue;
+  }
 }
 
 export default Worker;
