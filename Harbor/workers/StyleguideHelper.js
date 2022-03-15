@@ -96,7 +96,7 @@ class StyleguideHelper extends Worker {
                     this.Console.warning(exception);
                   }
 
-                  this.Console.info(`Styleguide entry template created: ${destination}`);
+                  this.Console.log(`Styleguide entry template created: ${destination}`);
 
                   callback();
                 });
@@ -105,7 +105,18 @@ class StyleguideHelper extends Worker {
               }
             })
         )
-      ).then(done);
+      )
+        .catch((exception) => {
+          this.Console.error(exception);
+          return super.reject();
+        })
+        .then(() => {
+          this.Console.info(
+            `Created ${queue.length} initial styleguide entries: ${destinationDirectory}`
+          );
+
+          done();
+        });
     });
   }
 
@@ -120,6 +131,7 @@ class StyleguideHelper extends Worker {
   defineInitialTemplate(source) {
     const basename = path.basename(source, path.extname(source));
     const moduleName = camelcase(basename, { pascalCase: true });
+    const variantQueue = this.loadVariants(source);
 
     const template = outdent`
       ${this.useAssets(moduleName, source)}
@@ -134,14 +146,75 @@ class StyleguideHelper extends Worker {
       };
 
       export const ${this.useDefaultModule()} = (args, { loaded }) => loaded.${moduleName};
-
       ${this.useDefaultModule()}.args = ${moduleName}Configuration;
-
+      ${this.useVariants(moduleName, variantQueue)}
     `;
 
     return template;
   }
 
+  /**
+   * Includes additional module exports from the default module. This is based
+   * from the matched modifers.
+   *
+   * @param {String} moduleName The name of the module that has the actual
+   * variants.
+   * @param {Object} variants The object with variants that are defined from the
+   * variant configuration option.
+   */
+  useVariants(moduleName, variants) {
+    if (!(variants instanceof Object)) {
+      return '';
+    }
+
+    const queue = {};
+
+    Object.entries(variants).forEach(([option, variant]) => {
+      this.Console.log(`Variant found: ${moduleName} - ${option};`);
+      const { map, transform } = variant;
+
+      if (!map.length) {
+        return;
+      }
+
+      map.forEach((v) => {
+        const variantName = camelcase(v, { pascalCase: true });
+        if (!queue[variantName]) {
+          queue[variantName] = {};
+        }
+
+        queue[variantName][option] = typeof transform === 'function' ? transform(v) : v;
+      });
+    });
+
+    const output = [];
+    Object.entries(queue).forEach(([variantName, options]) => {
+      const variantOptions = JSON.stringify(options);
+
+      output.push(`export const ${variantName} = (args, { loaded }) => loaded.${moduleName};`);
+      output.push(outdent`
+        ${variantName}.args = {
+          ${variantOptions
+            .substring(1, variantOptions.length - 1)
+            .split('":"')
+            .join('" : "')
+            .split('","')
+            .join('",\n  "')},
+          ...${moduleName}Configuration,
+        };`);
+
+      output.push('');
+    });
+
+    return output.join('\n');
+  }
+
+  /**
+   * Inserts the required module imports and exports for the current template.
+   *
+   * @param {String} moduleName The module name that will be used as export.
+   * @param {String} source The actual path for the module import.
+   */
   useAssets(moduleName, source) {
     const assets = [];
 
@@ -155,22 +228,28 @@ class StyleguideHelper extends Worker {
         .filter((e) => e && e.length)
     );
 
-    // Setup the initial import
-    assets.push(`import ${moduleName} from '${this.useAlias(source)}';`);
-
     // Include optional stylesheets.
-    includeStylesheets.forEach((stylesheet) =>
-      assets.push(`import '${this.useAlias(stylesheet)}';`)
-    );
+    if (includeStylesheets.length) {
+      includeStylesheets.forEach((stylesheet) => {
+        assets.push(`import '${this.useAlias(stylesheet)}';`);
+      });
+      assets.push('');
+    }
 
     // Include optional scripts.
-    includeScripts.forEach((script) => assets.push(`import '${this.useAlias(script)}';`));
+    if (includeScripts.length) {
+      includeScripts.forEach((script) => assets.push(`import '${this.useAlias(script)}';`));
+      assets.push('');
+    }
+
+    // Setup the initial import
+    assets.push(`import ${moduleName} from '${this.useAlias(source)}';`);
+    assets.push('');
 
     // Define the default template configuration.
     if (config.length) {
       assets.push(`import ${moduleName}Configuration from '${this.useAlias(config[0], true)}';`);
     } else {
-      assets.push('');
       assets.push(`const ${moduleName}Configuration = {};`);
     }
 
@@ -257,6 +336,52 @@ class StyleguideHelper extends Worker {
     }
 
     return result;
+  }
+
+  /**
+   * Includes optional template variants that is matched with the variant query.
+   * @param {*} source
+   */
+  loadVariants(source) {
+    const variants = super.getOption('variants', {});
+    const queue = {};
+
+    // Implements the template modifier variants that are based from the
+    // relative stylesheet
+    if (variants instanceof Object) {
+      Object.entries(variants).forEach(([variant, options]) => {
+        const { from, transform, query } = options;
+
+        if (!from || !query) {
+          this.Console.log(`Skipping variant: ${variant}`);
+          return;
+        }
+
+        const externalStylesheet = source.replace(
+          path.extname(source),
+          `.${from.replace('.', '')}`
+        );
+
+        if (fs.existsSync(externalStylesheet)) {
+          const data = fs.readFileSync(externalStylesheet).toString();
+          if (!data) {
+            return;
+          }
+
+          const matches = data.matchAll(query);
+
+          queue[variant] = {
+            map: [...matches].map(([value]) => value),
+            transform,
+          };
+          queue[variant].map = queue[variant].map
+            .filter((v, i) => queue[variant].map.indexOf(v) === i)
+            .map((v) => v.split(' ').join(''));
+        }
+      });
+    }
+
+    return queue;
   }
 }
 

@@ -59,12 +59,13 @@ export default {
       },
       options: {
         configurationExtensions: ['yaml', 'json', 'js'],
-        extname: 'js',
-        disableAlias: false,
-        ignoreInitial: false,
-        structuredTitle: true,
-        sep: ' / ',
         destinationDirectory: 'styleguide',
+        disableAlias: false,
+        extname: 'js',
+        ignoreInitial: false,
+        sep: ' / ',
+        structuredTitle: true,
+        variants: {},
       },
     },
     StyleguideTester: {
