@@ -1,8 +1,14 @@
+## 0.117.1 (March 16, 2022)
+
+### Features
+
+- StyleguideHelper - Optimizes generated module names.
+
 ## 0.117.0 (March 16, 2022)
 
 ### Features
 
-- Override the external configuration if the current variant has any directories defined.
+- StyleguideHelper - Override the external configuration with optional source file defined from `includeDirectories`.
 
 ## 0.116.0 (March 15, 2022)
 
