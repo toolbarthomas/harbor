@@ -311,8 +311,13 @@ class StyleguideHelper extends Worker {
         .filter((e) => e && e.length)
     );
 
-    // Include optional stylesheets.
+    const configImport =
+      config.length && config[0].indexOf(path.basename(source, path.extname(source))) >= 0
+        ? config[0]
+        : null;
+
     if (includeStylesheets.length) {
+      // Include optional stylesheets.
       includeStylesheets.forEach((stylesheet) => {
         assets.push(`import '${this.useAlias(stylesheet)}';`);
       });
@@ -330,8 +335,8 @@ class StyleguideHelper extends Worker {
     assets.push('');
 
     // Define the default template configuration.
-    if (config.length) {
-      assets.push(`import ${moduleName}Configuration from '${this.useAlias(config[0], true)}';`);
+    if (configImport) {
+      assets.push(`import ${moduleName}Configuration from '${this.useAlias(configImport, true)}';`);
     } else {
       assets.push(`const ${moduleName}Configuration = {};`);
     }
@@ -384,13 +389,13 @@ class StyleguideHelper extends Worker {
     // Ensure the name is not the same as the initial moduleImport
     if (name === moduleName) {
       this.Console.warning(`Entry ${moduleName} is also used for: ${source}`);
-      const uniqueName = camelcase(`${name}__Export`, { pascalCase: true });
+      const uniqueName = StyleguideHelper.escapeName(`${name}__Export`);
       this.Console.info(`Using '${uniqueName}' instead.`);
 
       return uniqueName;
     }
 
-    return name;
+    return StyleguideHelper.escapeName(name);
   }
 
   /**
