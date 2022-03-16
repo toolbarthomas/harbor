@@ -228,9 +228,13 @@ The StyleguideHelper creates initial Styleguide entry templates from the existin
 | options.disableAlias            | Boolean     | Don't use the included @theme alias and use a relative path instead.                                                                 |
 | options.extname                 | String      | Use the defined extension when the styleguide entry is written to the FileSystem.                                                    |
 | options.ignoreInitial           | Boolean     | Overwrites the existing entry files when enabled.                                                                                    |
+| options.prettier                | Boolean     | Should implement your project prettier configuration to ensure the styleguide entries are written in the correct syntax.             |
 | options.sep                     | String      | Defines the structure separator for the entry title.                                                                                 |
 | options.structuredTitle         | Boolean     | Includes the base directory structure for the styleguide entries when enabled.                                                       |
 | options.variants                | Object      | Includes optional module variants for the entry template.                                                                            |
+| options.variants[].context      | String      | Should match with the file that is used for the variant configuration.                                                               |
+| options.variants[].query        | String      | Executes a regular expression match within the defined context path, scripting files are ignored.                                    |
+| options.variants[].transform    | Function    | Optional handler that will the matched query values.                                                                                 |
 | hook                            | String      | Runs the worker if the given hook is subscribed to the Task Manager.                                                                 |
 
 #### Define StyleguideHelper variants
@@ -243,7 +247,7 @@ StyleguideHelper: {
   variants: {
     modifier_class: {
       query: /[^&(){}`a-zA-Z][.][a-zA-Z-]+--[a-zA-Z-]+/g,
-      from: 'scss',
+      context: 'scss',
       transform: (v) => v.split('.').join(''),
     },
   },
@@ -258,6 +262,39 @@ src/example.twig => src/example.scss
 ```
 
 A `transform` handler can be included in order to strip any unwanted character from the matched results within the regular expression.
+
+You can also directly import the variant configuration if the defined context matches a `.js`, `.json`, `.mjs` or `.yaml` file. This will assign the extra properties to the defined variant:
+
+```js
+// Will create a variant as module import:
+// import ButtonExampleConfiguration from button.example.json
+// within the template context: button.twig.
+StyleguideHelper: {
+  variants: {
+    modifier_class: {
+      context: '.example.json',
+    },
+  },
+}
+```
+
+It is also possible to search for configuration files outside the directory by including the `includeDirectories` option within the variant configuration.
+
+Keep in mind that the directories are resolved from the defined `THEME_SRC` environment path. It will use the configuration if the file `config/{module}.example.json` exists:
+
+```js
+// Will create a variant as module import:
+// import ButtonExampleConfiguration from button.example.json
+// outside the template context: button.twig.
+StyleguideHelper: {
+  variants: {
+    modifier_class: {
+      context: '.example.json',
+      includeDirectories: ['config'],
+    },
+  },
+}
+```
 
 ### StyleguideTester configuration
 

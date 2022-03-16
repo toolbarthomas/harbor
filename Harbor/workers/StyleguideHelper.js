@@ -4,6 +4,7 @@ import fs from 'fs';
 import glob from 'glob';
 import mkdirp from 'mkdirp';
 import path from 'path';
+import prettier from 'prettier';
 
 import Worker from './Worker.js';
 
@@ -91,15 +92,22 @@ class StyleguideHelper extends Worker {
           ([destination, template]) =>
             new Promise((callback) => {
               try {
-                fs.writeFile(destination, template, (exception) => {
-                  if (exception) {
-                    this.Console.warning(exception);
+                fs.writeFile(
+                  destination,
+                  prettier.format(template, {
+                    parser: 'babel',
+                    ...super.getOption('prettier', {}),
+                  }),
+                  (exception) => {
+                    if (exception) {
+                      this.Console.warning(exception);
+                    }
+
+                    this.Console.log(`Styleguide entry template created: ${destination}`);
+
+                    callback();
                   }
-
-                  this.Console.log(`Styleguide entry template created: ${destination}`);
-
-                  callback();
-                });
+                );
               } catch (exception) {
                 this.Console.warning(exception);
               }
@@ -111,9 +119,13 @@ class StyleguideHelper extends Worker {
           return super.reject();
         })
         .then(() => {
-          this.Console.info(
-            `Created ${queue.length} initial styleguide entries: ${destinationDirectory}`
-          );
+          if (queue.length) {
+            this.Console.info(
+              `Created ${queue.length} initial styleguide entries: ${destinationDirectory}`
+            );
+          } else {
+            this.Console.warning(`No new styleguide entries have been generated...`);
+          }
 
           done();
         });
@@ -130,11 +142,12 @@ class StyleguideHelper extends Worker {
    */
   defineInitialTemplate(source) {
     const basename = path.basename(source, path.extname(source));
-    const moduleName = camelcase(basename, { pascalCase: true });
+    const moduleName = camelcase(basename, { pascalCase: true }).replace(/[^a-zA-Z]+/g, '');
     const variantQueue = this.loadVariants(source);
 
     const template = outdent`
       ${this.useAssets(moduleName, source)}
+      ${this.useVariantConfigurations(moduleName, variantQueue)}
 
       export default {
         title: '${this.useTitle(source)}',
@@ -145,12 +158,62 @@ class StyleguideHelper extends Worker {
         ],
       };
 
-      export const ${this.useDefaultModule()} = (args, { loaded }) => loaded.${moduleName};
-      ${this.useDefaultModule()}.args = ${moduleName}Configuration;
+      export const ${this.useDefaultModule(
+        moduleName,
+        source
+      )} = (args, { loaded }) => loaded.${moduleName};
+      ${this.useDefaultModule(moduleName, source)}.args = ${moduleName}Configuration;
       ${this.useVariants(moduleName, variantQueue)}
     `;
 
     return template;
+  }
+
+  /**
+   * Ensures the defined value is within the correct module syntax.
+   * @param {String} value The actual name to escape.
+   * @param {String} index Inserts an additional suffix.
+   * @returns
+   */
+  static escapeName(value, suffix) {
+    const name = camelcase(value.replace(/[^a-zA-Z]+/g, '-'), {
+      pascalCase: true,
+    }).replace(/[^a-zA-Z]+/g, '');
+
+    return suffix ? `${name}${suffix}` : name;
+  }
+
+  /**
+   * Creates additional imports for the configured variant assets.
+   *
+   * @param {String} moduleName The name of the module that has the actual
+   * variants.
+   * @param {Object} variants The object with variants that are defined from the
+   * variant configuration option.
+   */
+  useVariantConfigurations(moduleName, variants) {
+    if (!moduleName) {
+      return '';
+    }
+
+    const output = [];
+
+    Object.entries(variants).forEach(([variant, options], index) => {
+      const { context, map, generateKey } = options;
+
+      this.Console.log(`Using external configuration for variant: ${variant}`);
+
+      if (!map && context && fs.existsSync(context)) {
+        const variantName = StyleguideHelper.escapeName(
+          generateKey ? path.basename(context, path.extname(context)) : variant,
+          generateKey ? index : 0
+        );
+
+        output.push(`import ${variantName}Configuration from '${this.useAlias(context)}';`);
+      }
+    });
+
+    return output.join('\n');
   }
 
   /**
@@ -168,40 +231,60 @@ class StyleguideHelper extends Worker {
     }
 
     const queue = {};
+    const output = [];
 
-    Object.entries(variants).forEach(([option, variant]) => {
+    output.push('');
+
+    Object.entries(variants).forEach(([option, variant], index) => {
       this.Console.log(`Variant found: ${moduleName} - ${option};`);
-      const { map, transform } = variant;
+      const { context, generateKey, map, transform } = variant;
 
-      if (!map.length) {
+      if (!fs.existsSync(context)) {
         return;
       }
 
-      map.forEach((v) => {
-        const variantName = camelcase(v, { pascalCase: true });
-        if (!queue[variantName]) {
-          queue[variantName] = {};
-        }
+      if (!map || !map.length) {
+        const variantName = StyleguideHelper.escapeName(
+          generateKey ? path.basename(context, path.extname(context)) : option,
+          generateKey ? index : 0
+        );
 
-        queue[variantName][option] = typeof transform === 'function' ? transform(v) : v;
-      });
+        queue[variantName] = context;
+      } else {
+        map.forEach((v, i) => {
+          const variantName = StyleguideHelper.escapeName(v, i);
+          if (!queue[variantName]) {
+            queue[variantName] = {};
+          }
+
+          queue[variantName][option] = typeof transform === 'function' ? transform(v) : v;
+        });
+      }
     });
 
-    const output = [];
     Object.entries(queue).forEach(([variantName, options]) => {
       const variantOptions = JSON.stringify(options);
 
       output.push(`export const ${variantName} = (args, { loaded }) => loaded.${moduleName};`);
-      output.push(outdent`
-        ${variantName}.args = {
-          ${variantOptions
-            .substring(1, variantOptions.length - 1)
-            .split('":"')
-            .join('" : "')
-            .split('","')
-            .join('",\n  "')},
-          ...${moduleName}Configuration,
-        };`);
+
+      // Parse the variant configuration directly if the options is not a file
+      // reference.
+      if (options instanceof Object) {
+        output.push(outdent`
+          ${variantName}.args = {
+            ${variantOptions
+              .substring(1, variantOptions.length - 1)
+              .split('":"')
+              .join('" : "')
+              .split('","')
+              .join('",\n  "')},
+            ...${moduleName}Configuration,
+          };`);
+      } else {
+        output.push(
+          outdent`${variantName}.args = Object.assign(${moduleName}Configuration, ${variantName}Configuration);`
+        );
+      }
 
       output.push('');
     });
@@ -218,7 +301,7 @@ class StyleguideHelper extends Worker {
   useAssets(moduleName, source) {
     const assets = [];
 
-    const configurationExtensions = super.getOption('configurationExtensions', ['yaml', 'json']);
+    const configurationExtensions = super.getOption('configurationExtensions', []);
     const includeStylesheets = super.getOption('includeStylesheets', []);
     const includeScripts = super.getOption('includeScripts', []);
 
@@ -290,13 +373,24 @@ class StyleguideHelper extends Worker {
 
   /**
    * Returns the default name for initial styleguide entry module.
+   *
+   * @param {String} moduleName Prefixes the default export with the actual
+   * module name.
+   * @param {String} source The source path of the actual template file.
    */
-  useDefaultModule() {
-    if (this.config.options && this.config.options.defaultModuleName) {
-      return this.config.options.defaultModuleName;
+  useDefaultModule(moduleName, source) {
+    const name = super.getOption('defaultModuleName', 'Default');
+
+    // Ensure the name is not the same as the initial moduleImport
+    if (name === moduleName) {
+      this.Console.warning(`Entry ${moduleName} is also used for: ${source}`);
+      const uniqueName = camelcase(`${name}__Export`, { pascalCase: true });
+      this.Console.info(`Using '${uniqueName}' instead.`);
+
+      return uniqueName;
     }
 
-    return 'Default';
+    return name;
   }
 
   /**
@@ -306,7 +400,9 @@ class StyleguideHelper extends Worker {
    * template.
    */
   useTitle(source) {
-    const moduleName = camelcase(path.basename(source, path.extname(source)), { pascalCase: true });
+    const moduleName = camelcase(path.basename(source, path.extname(source)), {
+      pascalCase: true,
+    }).replace(/[^a-zA-Z]+/g, '');
 
     const relativeSource = path
       .resolve(source)
@@ -315,14 +411,26 @@ class StyleguideHelper extends Worker {
     const dirs = relativeSource
       .split(path.sep)
       .filter((s) => s.length && path.basename(source).indexOf(s))
-      .map((s) => camelcase(s, { pascalCase: true }));
+      .map((s) => camelcase(s, { pascalCase: true }).replace(/[^a-zA-Z]+/g, ''));
+
+    const sep = super.getOption('sep', ' / ');
 
     let result = moduleName;
     if (dirs.length && this.config.options && this.config.options.structuredTitle) {
-      result = `${dirs.join(this.config.options.sep || ' / ')}${
-        this.config.options.sep || ' / '
-      }${moduleName}`;
+      result = `${dirs.join(sep)}${sep}${moduleName}`;
     }
+
+    // Remove immediate duplicate title entries.
+    result = result
+      .split(sep)
+      .reduce((acc, current) => {
+        if (acc[acc.length - 1] !== current) {
+          acc.push(current);
+        }
+
+        return acc;
+      }, [])
+      .join(sep);
 
     if (!this.titles.has(result)) {
       this.titles.set(result, 1);
@@ -350,33 +458,64 @@ class StyleguideHelper extends Worker {
     // relative stylesheet
     if (variants instanceof Object) {
       Object.entries(variants).forEach(([variant, options]) => {
-        const { from, transform, query } = options;
+        const { context, transform, query, includeDirectories } = options;
 
-        if (!from || !query) {
+        if (!context) {
           this.Console.log(`Skipping variant: ${variant}`);
           return;
         }
 
-        const externalStylesheet = source.replace(
-          path.extname(source),
-          `.${from.replace('.', '')}`
-        );
+        let externalSource = `${source.replace(path.extname(source), '')}${context}`;
 
-        if (fs.existsSync(externalStylesheet)) {
-          const data = fs.readFileSync(externalStylesheet).toString();
-          if (!data) {
-            return;
+        // Override the external configuration if the current variant has
+        // any directories defined.
+        if (includeDirectories && includeDirectories.length) {
+          includeDirectories.forEach((directory) => {
+            const cwd = path.resolve(this.environment.THEME_SRC, directory);
+            const proposal = glob.sync(`${cwd}/**/${path.basename(externalSource)}`);
+
+            if (!proposal.length) {
+              return;
+            }
+
+            proposal.forEach((p) => {
+              if (!fs.existsSync(p) || !fs.statSync(p).size) {
+                return;
+              }
+
+              this.Console.log(`Using variant source from: ${p}`);
+              externalSource = p;
+            });
+          });
+        }
+
+        if (fs.existsSync(externalSource)) {
+          if (
+            super
+              .getOption('configurationExtensions', [])
+              .map((e) => `.${e.replace('.', '')}`)
+              .includes(path.extname(externalSource))
+          ) {
+            queue[variant] = {
+              context: externalSource,
+            };
+          } else if (query) {
+            const data = fs.readFileSync(externalSource).toString();
+            if (!data) {
+              return;
+            }
+
+            const matches = data.matchAll(query);
+
+            queue[variant] = {
+              context: externalSource,
+              map: [...matches].map(([value]) => value),
+              transform,
+            };
+            queue[variant].map = queue[variant].map
+              .filter((v, i) => queue[variant].map.indexOf(v) === i)
+              .map((v) => v.split(' ').join(''));
           }
-
-          const matches = data.matchAll(query);
-
-          queue[variant] = {
-            map: [...matches].map(([value]) => value),
-            transform,
-          };
-          queue[variant].map = queue[variant].map
-            .filter((v, i) => queue[variant].map.indexOf(v) === i)
-            .map((v) => v.split(' ').join(''));
         }
       });
     }

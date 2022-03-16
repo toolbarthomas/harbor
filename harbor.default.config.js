@@ -7,9 +7,10 @@ import combineDuplicateSelectors from 'postcss-combine-duplicated-selectors';
 import cssnano from 'cssnano';
 import stylelint from 'stylelint';
 
-const styleLintConfig = glob.sync('.stylelintrc*');
-const browserListConfig = glob.sync('.browserlistrc*');
 const babelConfig = glob.sync('.babelrc*');
+const browserListConfig = glob.sync('.browserlistrc*');
+const prettierConfig = glob.sync('.prettierrc*');
+const styleLintConfig = glob.sync('.stylelintrc*');
 
 export default {
   workers: {
@@ -58,8 +59,16 @@ export default {
         main: '**/*.twig',
       },
       options: {
-        configurationExtensions: ['yaml', 'json', 'js'],
+        prettier: JSON.parse(
+          fs.readFileSync(
+            prettierConfig.length
+              ? prettierConfig[0]
+              : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.prettierrc')
+          )
+        ),
+        configurationExtensions: ['yml', 'yaml', 'json', 'js', 'mjs'],
         destinationDirectory: 'styleguide',
+        defaultModuleName: 'Default',
         disableAlias: false,
         extname: 'js',
         ignoreInitial: false,
