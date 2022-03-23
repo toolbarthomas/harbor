@@ -1,3 +1,9 @@
+## 0.117.4 (March 23, 2022)
+
+### Maintenance
+
+- Don't suffix package.json while Resolving direct paths from dependencies.
+
 ## 0.117.2 (March 23, 2022)
 
 ### Maintenance
