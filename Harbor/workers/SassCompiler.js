@@ -199,7 +199,7 @@ class SassCompiler extends Worker {
         Object.assign(this.config.options || {}, {
           file: entry,
           includePaths: [this.environment.THEME_SRC],
-          sourceMap: this.environment.THEME_DEBUG,
+          sourceMap: Boolean(this.environment.THEME_DEBUG),
           importer: globImporter(),
           outFile: destination,
         }),

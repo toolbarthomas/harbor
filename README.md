@@ -388,7 +388,6 @@ You can assign the following NPM script entries when using the default hook conf
     "images": "node node_modules/@toolbarthomas/harbor/index.js --task=images",
     "javascripts": "node node_modules/@toolbarthomas/harbor/index.js --task=javascripts",
     "resolve": "node node_modules/@toolbarthomas/harbor/index.js --task=resolve",
-    "serve": "node node_modules/@toolbarthomas/harbor/index.js --serve",
     "styleguide": "node node_modules/@toolbarthomas/harbor/index.js --styleguide",
     "stylesheets": "node node_modules/@toolbarthomas/harbor/index.js --task=stylesheets",
     "test": "node node_modules/@toolbarthomas/harbor/index.js --task=test",

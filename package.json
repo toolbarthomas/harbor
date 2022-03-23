@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.117.2",
+  "version": "0.117.3",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -15,7 +15,6 @@
     "images": "node ./index.js --task=images",
     "javascripts": "node ./index.js --task=javascripts",
     "resolve": "node ./index.js --task=resolve",
-    "serve": "node ./index.js --serve",
     "styleguide": "node ./index.js --styleguide",
     "stylesheets": "node ./index.js --task=stylesheets",
     "setup": "node ./index.js --task=setup",
@@ -76,6 +75,7 @@
     "eslint-import-resolver-babel-module": "^5.3.1",
     "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-prettier": "^4.0.0",
+    "glob": "^7.2.0",
     "html-escaper": "^3.0.3",
     "imagemin": "^8.0.1",
     "is-svg": "^4.3.2",
