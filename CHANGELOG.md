@@ -1,3 +1,9 @@
+## 0.118.2 (March 24, 2022)
+
+### Maintenance
+
+- AssetExporter - Don't wrap anonymous function around asset export.
+
 ## 0.118.1 (March 24, 2022)
 
 ### Maintenance
