@@ -36,9 +36,9 @@ class StyleguideCompiler extends Plugin {
       ? path.resolve('node_modules')
       : path.resolve(this.modulePath, 'node_modules');
 
-    const script = path.resolve(`${nodeModules}/.bin/${bin}`);
+    const script = Plugin.escapeCommand(path.resolve(`${nodeModules}/.bin/${bin}`));
 
-    const config = path.resolve(StyleguideCompiler.configPath());
+    const config = Plugin.escapeCommand(path.resolve(StyleguideCompiler.configPath()));
     let { staticDirectory } = this.config.options;
 
     if (this.environment.THEME_STATIC_DIRECTORY) {

@@ -15,6 +15,7 @@ import StyleguideHelper from './workers/StyleguideHelper.js';
 import StyleguideTester from './workers/StyleguideTester.js';
 import SvgSpriteCompiler from './workers/SvgSpriteCompiler.js';
 
+import AssetExporter from './plugins/AssetExporter.js';
 import JsOptimizer from './plugins/JsOptimizer.js';
 import StyleguideCompiler from './plugins/StyleguideCompiler.js';
 import StyleOptimizer from './plugins/StyleOptimizer.js';
@@ -44,6 +45,7 @@ class Harbor {
     };
 
     this.plugins = {
+      AssetExporter: new AssetExporter(this.services, {}),
       JsOptimizer: new JsOptimizer(this.services, {}),
       StyleguideCompiler: new StyleguideCompiler(this.services, {}, this.workers),
       StyleOptimizer: new StyleOptimizer(this.services, {

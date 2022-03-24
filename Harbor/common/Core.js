@@ -31,6 +31,20 @@ class Core {
   }
 
   /**
+   * Returns the defined configuration option with optional fallback.
+   *
+   * @param {String} name The configurated option to return.
+   * @param {*} defaultValue Returns the fallback value instead.
+   */
+  getOption(name, defaultValue) {
+    if (this.config.options && this.config.options[name] != null) {
+      return this.config.options[name];
+    }
+
+    return defaultValue;
+  }
+
+  /**
    * Defines the specific Harbor instance options.
    *
    * @param {Object} options The options that will be defined for the running
@@ -140,6 +154,15 @@ class Core {
         return map.length ? map : [];
       })
       .filter((entry) => entry.length);
+  }
+
+  /**
+   * Ensures the given line is encoded correctly for Command line interfaces.
+   *
+   * @param {String} line The line that will be escaped.
+   */
+  static escapeCommand(line) {
+    return line.replace(/ /g, '\\ ');
   }
 
   /**

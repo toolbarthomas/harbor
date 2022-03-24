@@ -4,15 +4,16 @@
 class Argv {
   constructor() {
     this.defaults = {
+      ci: false,
+      export: false,
+      isProduction: false,
       minify: false,
+      staticDirectory: 'storybook-static',
       styleguide: false,
       task: false,
       test: false,
       verbose: false,
       watch: false,
-      isProduction: false,
-      ci: false,
-      staticDirectory: 'storybook-static',
     };
   }
 

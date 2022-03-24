@@ -159,6 +159,13 @@ export default {
     },
   },
   plugins: {
+    AssetExporter: {
+      entry: {},
+      hook: 'export',
+      options: {
+        includeLiterals: [],
+      },
+    },
     JsOptimizer: {
       entry: {
         main: '**/javascripts/**/*.js',

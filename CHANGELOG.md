@@ -1,3 +1,9 @@
+## 0.118.0 (March 24, 2022)
+
+### Features
+
+- AssetExporter - Exports generated assets into a JS module literal.
+
 ## 0.117.4 (March 23, 2022)
 
 ### Maintenance
