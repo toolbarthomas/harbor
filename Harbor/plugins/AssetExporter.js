@@ -1,6 +1,7 @@
-import fs from 'fs';
 import { outdent } from 'outdent';
+import fs from 'fs';
 import glob from 'glob';
+import path from 'path';
 
 import Plugin from './Plugin.js';
 
@@ -24,59 +25,63 @@ class AssetExporter extends Plugin {
       super.flatten(
         entries
           .map((name) => [
-            ...glob.sync(this.config.entry[name]).map((entry) => {
-              if (queue.includes(entry)) {
-                this.Console.warning(`Skipping existing asset: ${entry}`);
-                return null;
-              }
+            ...glob
+              .sync(path.join(this.environment.THEME_DIST, this.config.entry[name]))
+              .map((entry) => {
+                if (queue.includes(entry)) {
+                  this.Console.warning(`Skipping existing asset: ${entry}`);
+                  return null;
+                }
 
-              return new Promise((done) => {
-                fs.readFile(entry, (readException, data) => {
-                  if (readException) {
-                    this.Console.error(readException);
+                return new Promise((done) => {
+                  fs.readFile(entry, (readException, data) => {
+                    if (readException) {
+                      this.Console.error(readException);
 
-                    super.reject();
+                      super.reject();
 
-                    return;
-                  }
-
-                  if (data) {
-                    const literal = includeLiteral.filter((l) => l.entry === name)[0];
-
-                    let template = '';
-
-                    if (literal.exports && literal.import) {
-                      template += `import { ${literal.exports} } from '${literal.import}';\n`;
+                      return;
                     }
 
-                    template += outdent`
+                    if (data) {
+                      const literal = includeLiteral.filter((l) => l.entry === name)[0];
+
+                      let template = '';
+
+                      if (literal.exports && literal.import) {
+                        template += `import { ${literal.exports} } from '${literal.import}';\n`;
+                      }
+
+                      template += outdent`
                       export default () => ${literal.exports || ''}\`
                         ${data}\`
                       `;
 
-                    const destination = `${entry}.asset.js`;
+                      const destination = `${entry}.asset.js`;
 
-                    fs.writeFile(destination, template, (writeException) => {
-                      if (writeException) {
-                        this.Console.error(writeException);
+                      fs.writeFile(destination, template, (writeException) => {
+                        if (writeException) {
+                          this.Console.error(writeException);
 
-                        super.reject();
+                          super.reject();
 
-                        return;
-                      }
+                          return;
+                        }
 
-                      this.Console.info(`Asset exported: ${entry} => ${destination}`);
+                        this.Console.info(`Asset exported: ${entry} => ${destination}`);
 
-                      done();
-                    });
-                  }
+                        done();
+                      });
+                    }
+                  });
                 });
-              });
-            }),
+              }),
           ])
           .filter((e) => e)
       )
     );
+
+    return super.resolve();
   }
 }
 

@@ -1,3 +1,9 @@
+## 0.118.1 (March 24, 2022)
+
+### Maintenance
+
+- AssetExporter - Use Theme Destination while resolving entries.
+
 ## 0.118.0 (March 24, 2022)
 
 ### Features

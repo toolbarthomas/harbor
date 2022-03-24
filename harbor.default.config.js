@@ -163,7 +163,7 @@ export default {
       entry: {},
       hook: 'export',
       options: {
-        includeLiterals: [],
+        includeLiteral: [],
       },
     },
     JsOptimizer: {
