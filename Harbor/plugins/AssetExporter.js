@@ -48,14 +48,14 @@ class AssetExporter extends Plugin {
 
                       let template = '';
 
-                      if (literal.exports && literal.import) {
-                        template += `import { ${literal.exports} } from '${literal.import}';\n`;
+                      if (literal instanceof Object && literal.export && literal.import) {
+                        template += `import { ${literal.export} } from '${literal.import}';\n`;
                       }
 
                       template += outdent`
-                      export default () => ${literal.exports || ''}\`
-                        ${data}\`
-                      `;
+                      export default ${literal && literal.export ? literal.export : ''}\`${data
+                        .toString()
+                        .replace(/`/g, "'")}\`;`;
 
                       const destination = `${entry}.asset.js`;
 

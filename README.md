@@ -345,7 +345,7 @@ It is possible to include an optional literal function within the actual asset b
 | options.includeLiteral           | Object                 | Assigns Babel module-resolver aliases to the Storybook instance.                                   |
 | options.includeLiteral[].entry   | String                 | Should match with the defined entry name, a custom literal will be included when there is a match. |
 | options.includeLiteral[].import  | String                 | The actual import source for the optional module literal.                                          |
-| options.includeLiteral[].exports | String                 | The actual literal that can be prefixed with.                                                      |
+| options.includeLiteral[].export | String                 | The actual literal that can be prefixed with.                                                      |
 | hook                             | String                 | Runs the worker if the given hook is subscribed to the Task Manager.                               |
 
 ### StyleguideCompiler configuration
