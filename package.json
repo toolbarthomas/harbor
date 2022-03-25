@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.118.2",
+  "version": "0.118.3",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -32,7 +32,6 @@
     "./index.js",
     "Harbor/",
     ".storybook/index.ejs",
-    "harbor.config.js",
     "harbor.default.config.js",
     ".env"
   ],
@@ -86,7 +85,7 @@
     "postcss": "^8.4.12",
     "postcss-combine-duplicated-selectors": "^10.0.3",
     "postcss-scss": "^4.0.3",
-    "prettier": "^2.6.0",
+    "prettier": "^2.6.1",
     "rimraf": "^3.0.2",
     "sass": "^1.49.9",
     "snake-case": "^3.0.4",
