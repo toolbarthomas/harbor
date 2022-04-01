@@ -225,7 +225,7 @@ export default {
         stylesheets: {
           event: 'change',
           path: '**/stylesheets/**/**.scss',
-          workers: ['SassCompiler'],
+          workers: ['SassCompiler', 'JsCompiler'],
         },
         javascripts: {
           event: 'change',

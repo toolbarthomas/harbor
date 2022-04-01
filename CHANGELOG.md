@@ -1,3 +1,9 @@
+## 0.120.1 (April 1, 2022)
+
+### Maintenance
+
+- Fixes async issue within Watcher instances.
+
 ## 0.120.0 (April 1, 2022)
 
 ### Maintenance

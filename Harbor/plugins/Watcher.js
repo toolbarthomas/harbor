@@ -88,28 +88,29 @@ class Watcher extends Plugin {
               return;
             }
 
-            for (let i = 0; i < this.config.instances[name].workers.length; i += 1) {
-              const worker = this.config.instances[name].workers[i];
+            if (this.instances[name].watcher) {
+              clearTimeout(this.instances[name].watcher);
+            }
 
-              if (this.instances[name][worker] && this.instances[name][worker].watcher) {
-                clearTimeout(this.instances[name][worker].watcher);
-              }
+            if (this.instances[name].reset) {
+              clearTimeout(this.instances[name].reset);
+            }
 
-              if (this.instances[name].reset) {
-                clearTimeout(this.instances[name].reset);
-              }
+            if (!this.instances[name].active) {
+              this.instances[name].watcher = setTimeout(async () => {
+                this.instances[name].active = true;
 
-              if (!this.instances[name][worker]) {
-                this.instances[name][worker] = {};
+                if (this.config.instances[name].event !== 'all') {
+                  this.Console.info(`File updated ${source}`);
+                }
 
-                this.instances[name][worker].watcher = setTimeout(async () => {
-                  if (this.config.instances[name].event !== 'all') {
-                    this.Console.info(`File updated ${source}`);
-                  }
+                if (TaskManager) {
+                  for (let i = 0; i < this.config.instances[name].workers.length; i += 1) {
+                    const worker = this.config.instances[name].workers[i];
 
-                  if (TaskManager) {
                     const { hook } = ConfigManager.load(worker, 'workers');
 
+                    // eslint-disable-next-line no-await-in-loop
                     await TaskManager.publish('workers', hook || worker);
 
                     if (this.wss && this.wss.clients) {
@@ -122,14 +123,14 @@ class Watcher extends Plugin {
                       });
                     }
 
-                    this.Console.info(`Resuming watcher: ${name}`);
+                    this.Console.info(`Resuming watcher: ${name} => ${hook || worker}`);
                   }
+                }
 
-                  this.instances[name][worker] = null;
-                }, this.config.options.delay || 500);
+                this.instances[name].active = null;
+              }, this.config.options.delay || 500);
 
-                this.defineReset(name, done);
-              }
+              this.defineReset(name, done);
             }
           }
         );
