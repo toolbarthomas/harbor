@@ -3,9 +3,9 @@ import fs from 'fs';
 import glob from 'glob';
 import path from 'path';
 
-import Plugin from './Plugin.js';
+import Worker from './Worker.js';
 
-class AssetExporter extends Plugin {
+class AssetExporter extends Worker {
   async init() {
     if (!this.config.entry) {
       return super.resolve();
@@ -82,6 +82,13 @@ class AssetExporter extends Plugin {
     );
 
     return super.resolve();
+  }
+
+  /**
+   * Ensures the defined entries are resolved from the THEME_destination folder.
+   */
+  defineEntry() {
+    super.defineEntry(true);
   }
 }
 

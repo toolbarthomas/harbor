@@ -1,3 +1,22 @@
+## 0.120.0 (April 1, 2022)
+
+### Maintenance
+
+- Includes support for multiple worker tasks within a Watcher instance.
+
+## 0.119.0 (April 1, 2022)
+
+### Maintenance
+
+- Move AssetExporter as Worker instead of Plugin.
+- Implements NPM package maintenance.
+
+## 0.118.5 (March 31, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
 ## 0.118.4 (March 29, 2022)
 
 ### Maintenance

@@ -6,6 +6,7 @@ import Logger from './common/Logger.js';
 import ConfigPublisher from './services/ConfigPublisher.js';
 import TaskManager from './services/TaskManager.js';
 
+import AssetExporter from './workers/AssetExporter.js';
 import Cleaner from './workers/Cleaner.js';
 import FileSync from './workers/FileSync.js';
 import JsCompiler from './workers/JsCompiler.js';
@@ -15,7 +16,6 @@ import StyleguideHelper from './workers/StyleguideHelper.js';
 import StyleguideTester from './workers/StyleguideTester.js';
 import SvgSpriteCompiler from './workers/SvgSpriteCompiler.js';
 
-import AssetExporter from './plugins/AssetExporter.js';
 import JsOptimizer from './plugins/JsOptimizer.js';
 import StyleguideCompiler from './plugins/StyleguideCompiler.js';
 import StyleOptimizer from './plugins/StyleOptimizer.js';
@@ -34,6 +34,7 @@ class Harbor {
     };
 
     this.workers = {
+      AssetExporter: new AssetExporter(this.services, {}),
       Cleaner: new Cleaner(this.services),
       FileSync: new FileSync(this.services),
       JsCompiler: new JsCompiler(this.services),
@@ -45,7 +46,6 @@ class Harbor {
     };
 
     this.plugins = {
-      AssetExporter: new AssetExporter(this.services, {}),
       JsOptimizer: new JsOptimizer(this.services, {}),
       StyleguideCompiler: new StyleguideCompiler(this.services, {}, this.workers),
       StyleOptimizer: new StyleOptimizer(this.services, {
@@ -226,7 +226,8 @@ class Harbor {
       return;
     }
 
-    const s = (n, t) => this.services.ConfigPublisher.subscribe(n, config[t][n].options);
+    const s = (n, t) =>
+      config[t][n] && this.services.ConfigPublisher.subscribe(n, config[t][n].options);
 
     if (instance) {
       Object.keys(instance).forEach((n) => s(n, type));

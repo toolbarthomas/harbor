@@ -68,16 +68,16 @@ class Watcher extends Plugin {
 
         // Setup the actual Watcher.
         this.instances[name] = {
-          watcher: null,
           instance: chokidar.watch(
             query,
             Object.assign(this.config.instances[name].options || {}, {
               ignoreInitial: true,
             })
           ),
-          active: false,
           running: false,
         };
+
+        this.defineReset(name, done);
 
         // Create the Shutdown handler that will close the new Watcher after configured
         // time has passed.
@@ -88,17 +88,21 @@ class Watcher extends Plugin {
               return;
             }
 
-            this.config.instances[name].workers.forEach((worker) => {
-              this.Console.log('Resetting shutdown timer...');
-              clearTimeout(this.instances[name].watcher);
-              clearTimeout(this.instances[name].reset);
+            for (let i = 0; i < this.config.instances[name].workers.length; i += 1) {
+              const worker = this.config.instances[name].workers[i];
 
-              this.defineReset(name, done);
+              if (this.instances[name][worker] && this.instances[name][worker].watcher) {
+                clearTimeout(this.instances[name][worker].watcher);
+              }
 
-              if (!this.instances[name].active) {
-                this.instances[name].watcher = setTimeout(async () => {
-                  this.instances[name].active = true;
+              if (this.instances[name].reset) {
+                clearTimeout(this.instances[name].reset);
+              }
 
+              if (!this.instances[name][worker]) {
+                this.instances[name][worker] = {};
+
+                this.instances[name][worker].watcher = setTimeout(async () => {
                   if (this.config.instances[name].event !== 'all') {
                     this.Console.info(`File updated ${source}`);
                   }
@@ -121,14 +125,14 @@ class Watcher extends Plugin {
                     this.Console.info(`Resuming watcher: ${name}`);
                   }
 
-                  this.instances[name].active = false;
+                  this.instances[name][worker] = null;
                 }, this.config.options.delay || 500);
+
+                this.defineReset(name, done);
               }
-            });
+            }
           }
         );
-
-        this.defineReset(name, done);
 
         this.instances[name].running = true;
       });
@@ -162,6 +166,7 @@ class Watcher extends Plugin {
         this.Console.log(`Watcher instance closed: ${name}`);
 
         this.instances[name].running = null;
+
         clearTimeout(this.instances[name].reset);
 
         if (!Object.values(this.instances).filter(({ running }) => running).length) {

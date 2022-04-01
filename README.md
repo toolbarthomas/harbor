@@ -93,6 +93,7 @@ The following workers are configured within the default configuration:
 
 | Worker           | Description                                                                     | Hook(s)                                                 |
 | ---------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------- |
+| AssetExporter    | Wraps the defined entries as a template literal module.                         | `AssetExporter` `export`                                |
 | Cleaner          | Cleans the defined THEME_DIST environment directory.                            | `Cleaner` `clean` `prepare` `default`                   |
 | FileSync         | Synchronizes the defined entry files to the THEME_DIST environment directory.   | `FilSync` `sync` `prepare` `default`                    |
 | JsCompiler       | Transforms the defined entry javascript files with Babel.                       | `JSCompiler` `js` `javascripts` `compile` `default`     |
@@ -115,7 +116,6 @@ More plugins can be included within a single command, the following plugins are 
 
 | Plugin             | Environment        | Description                                                                                 | Hook(s)               |
 | ------------------ | ------------------ | ------------------------------------------------------------------------------------------- | --------------------- |
-| AssetExporter      |                    | Wraps the defined entries as a template literal module.                                     | export                |
 | JSOptimizer        | production `only`  | Minifies the defined js entries within the THEME_DIST directory                             | minify                |
 | StyleOptimizer     | production `only`  | Minifies the defined css entries within the THEME_DIST directory                            | minify                |
 | StyleguideCompiler | production         | Creates a static storybook styleguide.                                                      | storybook, styleguide |
@@ -338,15 +338,15 @@ The Resolver will resolve the defined packages from the node_modules to the envi
 The AssetExporter wraps the defined entry templates as a valid module export template literal.
 It is possible to include an optional literal function within the actual asset by defining a new `includeLiteral` Object within the options.
 
-| Option                           | type                   | Description                                                                                        |
-| -------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------- |
-| entry                            | Object[String, String] | Wraps the defined entries as literal exports.                                                      |
-| options                          | Object                 | Optional configuration for the AssetExporter.                                                      |
-| options.includeLiteral           | Object                 | Assigns Babel module-resolver aliases to the Storybook instance.                                   |
-| options.includeLiteral[].entry   | String                 | Should match with the defined entry name, a custom literal will be included when there is a match. |
-| options.includeLiteral[].import  | String                 | The actual import source for the optional module literal.                                          |
+| Option                          | type                   | Description                                                                                        |
+| ------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------- |
+| entry                           | Object[String, String] | Wraps the defined entries as literal exports.                                                      |
+| options                         | Object                 | Optional configuration for the AssetExporter.                                                      |
+| options.includeLiteral          | Object                 | Assigns Babel module-resolver aliases to the Storybook instance.                                   |
+| options.includeLiteral[].entry  | String                 | Should match with the defined entry name, a custom literal will be included when there is a match. |
+| options.includeLiteral[].import | String                 | The actual import source for the optional module literal.                                          |
 | options.includeLiteral[].export | String                 | The actual literal that can be prefixed with.                                                      |
-| hook                             | String                 | Runs the worker if the given hook is subscribed to the Task Manager.                               |
+| hook                            | String                 | Runs the worker if the given hook is subscribed to the Task Manager.                               |
 
 ### StyleguideCompiler configuration
 

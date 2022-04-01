@@ -14,6 +14,13 @@ const styleLintConfig = glob.sync('.stylelintrc*');
 
 export default {
   workers: {
+    AssetExporter: {
+      entry: {},
+      hook: 'export',
+      options: {
+        includeLiteral: [],
+      },
+    },
     Cleaner: {
       hook: ['clean', 'prepare::0', 'default::0'],
     },
@@ -159,13 +166,6 @@ export default {
     },
   },
   plugins: {
-    AssetExporter: {
-      entry: {},
-      hook: 'export',
-      options: {
-        includeLiteral: [],
-      },
-    },
     JsOptimizer: {
       entry: {
         main: '**/javascripts/**/*.js',
