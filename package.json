@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.120.2",
+  "version": "0.120.3",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -9,18 +9,19 @@
   },
   "node": "^12.22.0 || ^14.17.0 || >=16.0.0",
   "scripts": {
-    "production": "node ./index.js --task=prepare,compile --minify",
-    "predevelopment": "npm run production",
     "development": "node ./index.js --watch --styleguide",
+    "export": "node ./index.js --task=export",
     "images": "node ./index.js --task=images",
     "javascripts": "node ./index.js --task=javascripts",
+    "predevelopment": "npm run production",
+    "production": "node ./index.js --task=prepare,compile --minify",
     "resolve": "node ./index.js --task=resolve",
+    "setup": "node ./index.js --task=setup",
     "styleguide": "node ./index.js --styleguide",
     "stylesheets": "node ./index.js --task=stylesheets",
-    "setup": "node ./index.js --task=setup",
-    "test": "node ./index.js --task=test",
+    "test:approve": "node ./index.js --test=approve",
     "test:reference": "node ./index.js --test=reference",
-    "test:approve": "node ./index.js --test=approve"
+    "test": "node ./index.js --task=test"
   },
   "files": [
     ".babelrc",
@@ -74,7 +75,7 @@
     "eslint-import-resolver-babel-module": "^5.3.1",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "glob": "^7.2.0",
+    "glob": "^8.0.1",
     "html-escaper": "^3.0.3",
     "imagemin": "^8.0.1",
     "is-svg": "^4.3.2",
