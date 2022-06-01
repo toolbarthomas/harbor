@@ -69,7 +69,12 @@ class JsOptimizer extends Plugin {
                 }
               }
 
-              return this.write(p, result.error ? data.toString() : result.code)
+              return this.write(
+                p,
+                result.error || this.environment.THEME_ENVIRONMENT === 'development'
+                  ? data.toString()
+                  : result.code
+              )
                 .then(done)
                 .catch((e) => {
                   this.Console.error(e);
@@ -92,7 +97,7 @@ class JsOptimizer extends Plugin {
 
       const bundle = path.resolve(
         path.join(
-          base.sort((a, b) => a.length - b.length)[0].join(path.sep),
+          path.dirname(base.sort((a, b) => a.length - b.length)[0].join(path.sep)),
           `${Object.keys(this.config.entry)[index]}.bundle${path.extname(cwd[0])}`
         )
       );

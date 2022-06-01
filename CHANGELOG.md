@@ -1,3 +1,10 @@
+## 0.120.7 (Jun 1, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+- Fixes JSOptimizer minify issue for `development` environments.
+
 ## 0.120.6 (May 23, 2022)
 
 ### Maintenance
