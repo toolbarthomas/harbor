@@ -2,11 +2,17 @@ base:
   version: 1.x
   css:
     theme:
-      dist/main/stylesheets/index.css: {}
+      dist/stylesheets/index.css: {}
   js:
-    dist/main/javascripts/base.js: { attributes: { defer: true } }
+    dist/javascripts/index.js: { attributes: { defer: true } }
   dependencies:
     - harbor/font-ibm-plex-sans
+
+responsive-menu:
+  js:
+    dist/javascripts/components/responsive-menu/responsive-menu.js: {}
+  dependencies:
+    - harbor/base
 
 font-ibm-plex-sans:
   remote: https://fonts.google.com/specimen/IBM+Plex+Sans

@@ -1,3 +1,9 @@
+## 0.121.0 (Jun 13, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
 ## 0.120.7 (Jun 1, 2022)
 
 ### Maintenance
