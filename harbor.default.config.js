@@ -31,7 +31,8 @@ export default {
     JsCompiler: {
       entry: {
         main: '**/javascripts/**/*.js',
-        modules: 'modules/*/*/*.js',
+        components: '**/components/**/*.js',
+        modules: '**/modules/**/*.js',
       },
       hook: ['js', 'javascripts', 'compile', 'default::1'],
       plugins: {
@@ -57,7 +58,9 @@ export default {
         },
       },
       entry: {
-        main: '**/stylesheets/**/**.scss',
+        main: '**/stylesheets/**/*.scss',
+        modules: '**/modules/**/*.scss',
+        components: '**/components/**/*.scss',
       },
     },
     StyleguideHelper: {
@@ -169,7 +172,8 @@ export default {
     JsOptimizer: {
       entry: {
         main: '**/javascripts/**/*.js',
-        modules: 'modules/*/*/*.js',
+        components: '**/components/**/*.js',
+        modules: '**/modules/**/*.js',
       },
       hook: 'minify',
       options: {

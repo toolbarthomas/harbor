@@ -95,12 +95,20 @@ class JsOptimizer extends Plugin {
       let base = cwd.map((p) => p.split(path.sep));
       base = base.map((b) => b.filter((bb) => base[0].includes(bb)));
 
-      const bundle = path.resolve(
+      const suffix = '.bundle';
+      let bundle = path.resolve(
         path.join(
           path.dirname(base.sort((a, b) => a.length - b.length)[0].join(path.sep)),
-          `${Object.keys(this.config.entry)[index]}.bundle${path.extname(cwd[0])}`
+          `${Object.keys(this.config.entry)[index]}${suffix}${path.extname(cwd[0])}`
         )
       );
+
+      const directory = bundle.substring(0, bundle.indexOf('.bundle'));
+      // Check if the current bundle can be placed.
+      if (fs.existsSync(directory) && fs.lstatSync(directory).isDirectory()) {
+        this.Console.info(`Compatible bundle directory detected, writing to ${directory} instead`);
+        bundle = path.join(directory, path.basename(bundle));
+      }
 
       mkdirp.sync(path.dirname(bundle));
 

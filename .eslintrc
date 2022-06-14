@@ -35,6 +35,14 @@
   "rules": {
     "import/no-extraneous-dependencies": 0,
     "import/extensions": 0,
+    "no-use-before-define": [
+      "error",
+      {
+        "functions": false,
+        "classes": false,
+        "variables": false
+      }
+    ],
     "prettier/prettier": "error",
     "no-param-reassign": [
       2,
