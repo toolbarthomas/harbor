@@ -1,3 +1,9 @@
+## 0.122.0 (Jun 14, 2022)
+
+### Maintenance
+
+- Use correct base directory during JS bundling.
+
 ## 0.121.0 (Jun 13, 2022)
 
 ### Maintenance
