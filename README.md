@@ -8,6 +8,8 @@ The assets are processed on a very basic level, stylesheets can be compiled with
 
 It is optional to use the bundled workers but they ensure that they work correctly within Drupal and your styleguide. It is possible to include other frameworks within the environment by simply adding it within a compatible theme library configuration.
 
+[Get more information](./TIPS.md) for implementing Harbor in your current Drupal environment.
+
 ## Setup
 
 You can install Harbor via NPM ([Nodejs](https://nodejs.org) is required in order to do this.):

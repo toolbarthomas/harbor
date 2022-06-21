@@ -1,3 +1,19 @@
+## 0.124.0 (Jun 21, 2022)
+
+### Features
+
+- Includes implementation information within TIPS.md
+
+## 0.123.0 (Jun 20, 2022)
+
+### Features
+
+- Enable File Watcher after WSS connection instead of stopping the process.
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
 ## 0.122.0 (Jun 14, 2022)
 
 ### Maintenance

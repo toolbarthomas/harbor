@@ -222,23 +222,23 @@ export default {
     Watcher: {
       options: {
         delay: 200,
-        duration: 1000 * 60 * 15,
+        duration: 1000 * 60 * 5,
       },
       hook: 'watch',
       instances: {
         stylesheets: {
           event: 'change',
-          path: '**/stylesheets/**/**.scss',
+          path: '**/**.scss',
           workers: ['SassCompiler', 'JsCompiler'],
         },
         javascripts: {
           event: 'change',
-          path: '**/javascripts/**/**.js',
+          path: '**/**.js',
           workers: ['JsCompiler'],
         },
         svgprites: {
           event: 'all',
-          path: '**/images/**/**.svg',
+          path: '**/**.svg',
           workers: ['SvgSpriteCompiler'],
         },
         sync: {
