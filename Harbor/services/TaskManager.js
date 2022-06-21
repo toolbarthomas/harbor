@@ -1,25 +1,13 @@
-import branchy from 'branchy';
+import Service from './Service.js';
 
-class TaskManager {
-  constructor() {
+class TaskManager extends Service {
+  constructor(acceptedServices) {
+    super(acceptedServices);
+
     this.instances = {
       plugins: {},
       workers: {},
     };
-
-    this.acceptedServices = ['Console', 'environment'];
-  }
-
-  /**
-   * Mounts the defined service to the current TaskManager.
-   *
-   * @param {String} name The name of the mounted service.
-   * @param {any} instance The handler of the mounted service.
-   */
-  mount(name, service) {
-    if (name && !this[name] && this.acceptedServices.includes(name)) {
-      this[name] = service;
-    }
   }
 
   /**
@@ -262,13 +250,11 @@ class TaskManager {
               } else {
                 JIT.push(
                   new Promise((cc) => {
-                    branchy(
-                      task.fn().then((exit) => {
-                        postRun(exit, task.hook[0]);
+                    task.fn().then((exit) => {
+                      postRun(exit, task.hook[0]);
 
-                        cc();
-                      })
-                    )();
+                      cc();
+                    });
                   })
                 );
               }

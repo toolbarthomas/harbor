@@ -16,22 +16,33 @@
     "prettier"
   ],
   "globals": {
-    "jQuery": "readonly",
     "Drupal": "writable",
-    "THEME_SRC": "readonly",
-    "THEME_DIST": "readonly",
-    "THEME_PORT": "readonly",
+    "drupalSettings": "readonly",
+    "jQuery": "readonly",
+    "THEME_AS_CLI": "readonly",
     "THEME_DEBUG": "readonly",
-    "THEME_LIBRARIES": "readonly",
-    "THEME_LIBRARIES_OVERRIDES": "readonly",
+    "THEME_DIST": "readonly",
     "THEME_ENVIRONMENT": "readonly",
-    "THEME_WEBSOCKET_PORT": "readonly",
+    "THEME_LIBRARIES_OVERRIDES": "readonly",
+    "THEME_LIBRARIES": "readonly",
+    "THEME_PORT": "readonly",
     "THEME_SPRITES": "readonly",
-    "drupalSettings": "readonly"
+    "THEME_SRC": "readonly",
+    "THEME_STATIC_DIRECTORY": "readonly",
+    "THEME_TEST_PHASE": "readonly",
+    "THEME_WEBSOCKET_PORT": "readonly"
   },
   "rules": {
     "import/no-extraneous-dependencies": 0,
     "import/extensions": 0,
+    "no-use-before-define": [
+      "error",
+      {
+        "functions": false,
+        "classes": false,
+        "variables": false
+      }
+    ],
     "prettier/prettier": "error",
     "no-param-reassign": [
       2,
@@ -39,5 +50,10 @@
         "props": false
       }
     ]
+  },
+  "settings": {
+    "import/resolver": {
+      "babel-module": {}
+    }
   }
 }

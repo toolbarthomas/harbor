@@ -1,3 +1,230 @@
+## 0.124.0 (Jun 21, 2022)
+
+### Features
+
+- Includes implementation information within TIPS.md
+
+## 0.123.0 (Jun 20, 2022)
+
+### Features
+
+- Enable File Watcher after WSS connection instead of stopping the process.
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.122.0 (Jun 14, 2022)
+
+### Maintenance
+
+- Use correct base directory during JS bundling.
+
+## 0.121.0 (Jun 13, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.120.7 (Jun 1, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+- Fixes JSOptimizer minify issue for `development` environments.
+
+## 0.120.6 (May 23, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.120.5 (May 12, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.120.4 (May 3, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.120.3 (April 12, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.120.2 (April 11, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.120.1 (April 1, 2022)
+
+### Maintenance
+
+- Fixes async issue within Watcher instances.
+
+## 0.120.0 (April 1, 2022)
+
+### Maintenance
+
+- Includes support for multiple worker tasks within a Watcher instance.
+
+## 0.119.0 (April 1, 2022)
+
+### Maintenance
+
+- Move AssetExporter as Worker instead of Plugin.
+- Implements NPM package maintenance.
+
+## 0.118.5 (March 31, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.118.4 (March 29, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.118.3 (March 25, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.118.2 (March 24, 2022)
+
+### Maintenance
+
+- AssetExporter - Don't wrap anonymous function around asset export.
+
+## 0.118.1 (March 24, 2022)
+
+### Maintenance
+
+- AssetExporter - Use Theme Destination while resolving entries.
+
+## 0.118.0 (March 24, 2022)
+
+### Features
+
+- AssetExporter - Exports generated assets into a JS module literal.
+
+## 0.117.4 (March 23, 2022)
+
+### Maintenance
+
+- Don't suffix package.json while Resolving direct paths from dependencies.
+
+## 0.117.2 (March 23, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.117.1 (March 16, 2022)
+
+### Features
+
+- StyleguideHelper - Optimizes generated module names.
+
+## 0.117.0 (March 16, 2022)
+
+### Features
+
+- StyleguideHelper - Override the external configuration with optional source file defined from `includeDirectories`.
+
+## 0.116.0 (March 15, 2022)
+
+### Features
+
+- Implements StyleguideHelper variants option to define initial Module variants.
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.115.0 (March 14, 2022)
+
+### Features
+
+- Implements StyleguideHelper worker that enables initial styleguide entry configuration.
+
+### Maintenance
+
+- Writes the compiled SVG sprites to the correct destination directory that is relative to the SVG entry sources. This resolves the issue where the SVG sprite was written one level higher of the original directory. You should update your icon paths for the sprite images as of this version.
+
+## 0.114.1 (March 14, 2022)
+
+### Maintenance
+
+- Cleanup unused scripts.
+- Implements NPM package maintenance.
+
+## 0.114.0 (March 8, 2022)
+
+### Maintenance
+
+- Cleanup some logic.
+- Mark Twing Builder legacy option as WIP.
+- Implements NPM package maintenance.
+
+## 0.112.2 (March 8, 2022)
+
+### Maintenance
+
+- Remove renderContext fallback.
+
+## 0.112.1 (March 8, 2022)
+
+### Maintenance
+
+- Ensure Twing libraries are correctly installed when using useLegacyCompiler.
+
+## 0.112.0 (March 8, 2022)
+
+### Features
+
+- Implements `useLegacyCompiler` option that enables the usage of older Twing libraries within the styleguide to disable the requirement of async stories.
+
+## 0.111.0 (March 4, 2022)
+
+### Features
+
+- Implements optional scenarios for backstopJS.
+
+## 0.110.2 (March 3, 2022)
+
+### Features
+
+- Inherit stdio setting for `StyleguideTester`.
+
+## 0.110.1 (March 3, 2022)
+
+### Maintenance
+
+- Cleanup `StyleguideTester` worker configuration.
+
+## 0.110.0 (March 3, 2022)
+
+### Features
+
+- Implements `StyleguideTester` worker to enable Styleguide Snapshot testing.
+
+## 0.105.2 (February 21, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
 ## 0.105.1 (February 16, 2022)
 
 ### Maintenance

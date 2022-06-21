@@ -2,15 +2,24 @@ base:
   version: 1.x
   css:
     theme:
-      dist/main/stylesheets/index.css: {}
+      dist/stylesheets/index.css: {}
   js:
-    dist/main/javascripts/base.js: { attributes: { defer: true } }
+    dist/javascripts/index.js: { attributes: { defer: true } }
   dependencies:
     - harbor/font-ibm-plex-sans
+
+responsive-menu:
+  css:
+    component:
+      dist/components/responsive-menu/responsive-menu.css: {}
+  js:
+    dist/components/responsive-menu/responsive-menu.js: {}
+dependencies:
+  - harbor/base
 
 font-ibm-plex-sans:
   remote: https://fonts.google.com/specimen/IBM+Plex+Sans
   css:
     theme:
-      //fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap:
+      //fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600;1,700&display=swap:
         { type: external }

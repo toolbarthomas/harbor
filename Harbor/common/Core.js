@@ -2,7 +2,6 @@ import path from 'path';
 import fs from 'fs';
 import glob from 'glob';
 
-import Environment from './Environment.js';
 import Logger from './Logger.js';
 
 /**
@@ -29,6 +28,20 @@ class Core {
     }
 
     this.defineOptions(options);
+  }
+
+  /**
+   * Returns the defined configuration option with optional fallback.
+   *
+   * @param {String} name The configurated option to return.
+   * @param {*} defaultValue Returns the fallback value instead.
+   */
+  getOption(name, defaultValue) {
+    if (this.config.options && this.config.options[name] != null) {
+      return this.config.options[name];
+    }
+
+    return defaultValue;
   }
 
   /**
@@ -98,12 +111,14 @@ class Core {
    */
   defineEntry(useDestination) {
     if (!this.config.entry || !(this.config.entry instanceof Object)) {
+      this.Console.log(`Unable to define entry for: ${this.name}`);
       return;
     }
 
     const entries = Object.keys(this.config.entry);
 
     if (!entries.length) {
+      this.Console.log(`No entries found for: ${this.name}`);
       return;
     }
 
@@ -139,6 +154,27 @@ class Core {
         return map.length ? map : [];
       })
       .filter((entry) => entry.length);
+  }
+
+  /**
+   * Ensures the given line is encoded correctly for Command line interfaces.
+   *
+   * @param {String} line The line that will be escaped.
+   */
+  static escapeCommand(line) {
+    return line.replace(/ /g, '\\ ');
+  }
+
+  /**
+   * Helper function to flatten a nested array.
+   *
+   * @param {Array} arr The array that will be flatten.
+   */
+  flatten(arr) {
+    return arr.reduce(
+      (acc, current) => acc.concat(Array.isArray(current) ? this.flatten(current) : current),
+      []
+    );
   }
 
   /**
@@ -192,7 +228,7 @@ class Core {
         `Unable to resolve ${this.name}, TaskManager has not been defined.`
       );
     }
-    this.Console.log(`Resolving ${this.type}: ${this.name}`);
+    this.Console.log(`${exit ? 'Rejecting' : 'Resolving'} ${this.type}: ${this.name}`);
 
     return TaskManager.resolve(this.type, this.name, exit);
   }

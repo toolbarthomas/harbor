@@ -21,6 +21,8 @@ class StyleguideCompiler extends Plugin {
     // @TODO can be removed since we can dynamically define this.
     // Contains the value storage for the template variables.
     this.renderContext = {};
+
+    this.modulePath = path.resolve(fileURLToPath(import.meta.url), '../../../');
   }
 
   /**
@@ -30,12 +32,18 @@ class StyleguideCompiler extends Plugin {
     const bin =
       this.environment.THEME_ENVIRONMENT === 'production' ? 'build-storybook' : 'start-storybook';
 
-    const script = fs.existsSync(path.resolve(`node_modules/.bin/${bin}`))
-      ? path.resolve(`node_modules/.bin/${bin}`)
-      : path.resolve(`../../.bin/${bin}`);
+    const nodeModules = fs.existsSync(path.resolve(`node_modules/.bin/${bin}`))
+      ? path.resolve('node_modules')
+      : path.resolve(this.modulePath, 'node_modules');
 
-    const config = path.resolve(StyleguideCompiler.configPath());
-    const { staticDirectory } = this.config.options;
+    const script = Plugin.escapeCommand(path.resolve(`${nodeModules}/.bin/${bin}`));
+
+    const config = Plugin.escapeCommand(path.resolve(StyleguideCompiler.configPath()));
+    let { staticDirectory } = this.config.options;
+
+    if (this.environment.THEME_STATIC_DIRECTORY) {
+      staticDirectory = this.environment.THEME_STATIC_DIRECTORY;
+    }
 
     // Define the Storybook builder configuration as CommonJS module since Storybook
     // currently doesn't support the implementation of ESM.
@@ -98,7 +106,9 @@ class StyleguideCompiler extends Plugin {
       }
       command = `node ${script} -c ${config} -o ${staticBuildPath}`;
     } else {
-      command = `node ${script} -c ${config} -p ${this.environment.THEME_PORT}`;
+      const commandOptions = this.environment.THEME_AS_CLI ? ` --ci` : '';
+
+      command = `node ${script} -c ${config} -p ${this.environment.THEME_PORT}${commandOptions}`;
     }
 
     const shell = exec(command);
@@ -136,7 +146,13 @@ class StyleguideCompiler extends Plugin {
    * defined Twig templates.
    */
   setupBuilder() {
-    const cwd = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../builders/Twing');
+    const type = this.config.options && this.config.options.useLegacyCompiler ? 'sync' : 'async';
+
+    const cwd = path.resolve(
+      path.dirname(fileURLToPath(import.meta.url)),
+      '../builders/Twing',
+      type
+    );
 
     const destination = path.resolve(StyleguideCompiler.configPath(), 'twing.cjs');
 
@@ -151,7 +167,7 @@ class StyleguideCompiler extends Plugin {
       ? queryEntry(this.config.options.builderDirectory, 'filters/**.cjs')
       : [];
 
-    const initialFunctions = ['dump'];
+    const initialFunctions = this.config.options.useLegacyCompiler ? [] : ['dump'];
     const defaultFunctions = queryEntry(cwd, 'functions/**.cjs').filter(
       (m) => !initialFunctions.includes(path.basename(m, '.cjs'))
     );
@@ -210,7 +226,7 @@ class StyleguideCompiler extends Plugin {
       if (typeof loader.addPath === 'function') {
         if (${this.config.options.alias !== undefined}) {
           try {
-            const alias = ${JSON.stringify(this.config.options.alias)};
+            const alias = ${JSON.stringify(this.config.options.alias, null, 2)};
 
             if (alias) {
               Object.keys(alias).forEach((name) => {
@@ -456,8 +472,55 @@ class StyleguideCompiler extends Plugin {
       const webpack = require('webpack');
       const YAML = require('yaml');
 
-      const addons = [${addons.map((p) => `'${p}'`).join(',')}]
-      const stories = [${stories.map((p) => `'${p}'`).join(',')}]
+      const addons = [${addons.map((p) => `'${p}'`).join(',')}];
+      const stories = [${stories.map((p) => `'${p}'`).join(',\n')}];
+
+      // Include the Drupal library context within the Storybook instance that
+      // can be used for the Drupal related Twig extensions.
+      const libraryPaths = [${glob
+        .sync('*.libraries.yml')
+        .map((p) => `'${p}'`)
+        .join(',')}];
+      const libraries = {};
+      if (libraryPaths.length) {
+        libraryPaths.forEach((l) => {
+          const c = fs.readFileSync(l).toString();
+          console.log('Reading library: ' + l);
+
+          if (c && c.length) {
+            try {
+              libraries[path.basename(l)] = YAML.parse(c);
+            } catch (exception) {
+              console.log(exception);
+            }
+          }
+        });
+      }
+
+      // Enable the sprite paths within the Styleguide as global context.
+      const sprites = {};
+      const enableSprites = ${!!(
+        this.workers &&
+        this.workers.SvgSpriteCompiler &&
+        this.workers.SvgSpriteCompiler.config.entry
+      )};
+      if (enableSprites) {
+        try {
+          const entry = ${JSON.stringify(this.workers.SvgSpriteCompiler.config.entry, null, 2)};
+
+          Object.keys(entry).forEach((n) => {
+            let p = path.normalize(path.dirname(entry[n])).replace('*', '');
+            p = path.join('${this.environment.THEME_DIST}', p, n + '.svg');
+
+            if (fs.existsSync(path.resolve(p))) {
+              sprites[n] = p;
+            }
+
+          });
+        } catch (exception) {
+          console.log('Unable to expose compiled inline SVG sprites:' + exception);
+        }
+      }
 
       // Include the Drupal library context within the Storybook instance that
       // can be used for the Drupal related Twig extensions.
@@ -516,6 +579,13 @@ class StyleguideCompiler extends Plugin {
           },
         });
 
+        // Include the YAML loader to enable support for YAML files
+        config.module.rules.push({
+          test: /\.ya?ml$/,
+          type: 'json',
+          use: 'yaml-loader',
+        });
+
         config.plugins.forEach((plugin, i) => {
           if (plugin.constructor.name === 'ProgressPlugin') {
             config.plugins.splice(i, 1);
@@ -526,7 +596,9 @@ class StyleguideCompiler extends Plugin {
         // alias.
         if (config.resolve && config.resolve.alias) {
           config.resolve.alias = Object.assign(${JSON.stringify(
-            this.config.options.alias
+            this.config.options.alias,
+            null,
+            2
           )}, config.resolve.alias);
         }
 
@@ -535,12 +607,14 @@ class StyleguideCompiler extends Plugin {
           new webpack.DefinePlugin({
             THEME_LIBRARIES: JSON.stringify(libraries),
             THEME_LIBRARIES_OVERRIDES: JSON.stringify(${JSON.stringify(
-              this.config.options.librariesOverride || {}
+              this.config.options.librariesOverride || {},
+              null,
+              2
             )}),
             THEME_DIST: '"${path.normalize(this.environment.THEME_DIST)}/"',
             THEME_ENVIRONMENT: '"${this.environment.THEME_ENVIRONMENT}"',
             THEME_SPRITES: JSON.stringify(sprites),
-            THEME_ALIAS: JSON.stringify(${JSON.stringify(this.config.options.alias)}),
+            THEME_ALIAS: JSON.stringify(${(JSON.stringify(this.config.options.alias), null, 2)}),
             THEME_WEBSOCKET_PORT: '${this.environment.THEME_WEBSOCKET_PORT}',
           })
         );
@@ -555,9 +629,32 @@ class StyleguideCompiler extends Plugin {
             : 'config.optimization || false'
         };
 
-        process.env['THEME_ALIAS'] = JSON.stringify(${JSON.stringify(this.config.options.alias)});
+        process.env['THEME_ALIAS'] = JSON.stringify(${JSON.stringify(
+          this.config.options.alias,
+          null,
+          2
+        )});
 
         return config;
+      }
+      ${
+        this.config.options && !this.config.options.useLegacyCompiler
+          ? outdent`
+              // Enforce the Harbor environment within the Webpack instance.
+              // DefinePlugin does not give the desired result withing the Twing Builder.
+              process.env.THEME_LIBRARIES = JSON.stringify(libraries);
+              process.env.THEME_LIBRARIES_OVERRIDES = JSON.stringify(${JSON.stringify(
+                this.config.options.librariesOverride || {}
+              )});
+              process.env.THEME_DIST = '"${path.normalize(this.environment.THEME_DIST)}/"';
+              process.env.THEME_ENVIRONMENT = '"${this.environment.THEME_ENVIRONMENT}"';
+              process.env.THEME_SPRITES = JSON.stringify(sprites);
+              process.env.THEME_ALIAS = JSON.stringify(${JSON.stringify(
+                this.config.options.alias
+              )});
+              process.env.THEME_WEBSOCKET_PORT = '${this.environment.THEME_WEBSOCKET_PORT}';
+            `
+          : ''
       }
 
       // Enforce the Harbor environment within the Webpack instance.
@@ -597,13 +694,19 @@ class StyleguideCompiler extends Plugin {
    * Synchronizes the processed assets to the static stylguide directory.
    */
   async synchronizeAssets() {
-    const { staticDirectory } = this.config.options;
+    let { staticDirectory } = this.config.options;
+
+    if (this.environment.THEME_STATIC_DIRECTORY) {
+      staticDirectory = this.environment.THEME_STATIC_DIRECTORY;
+    }
+
     const staticBuildPath = path.join(this.environment.THEME_DIST, staticDirectory);
 
     // Ensure the processed assets are also available for the static build.
     const assets = glob
       .sync(`${this.environment.THEME_DIST}/**/*`)
-      .filter((asset) => asset.indexOf(staticBuildPath) < 0);
+      .filter((asset) => asset.indexOf(staticBuildPath) < 0)
+      .filter((asset) => asset.indexOf(this.config.options.staticDirectory) < 0);
 
     await Promise.all(
       assets.map(

@@ -1,21 +1,25 @@
 import Argv from './common/Argv.js';
+import ConfigManager from './common/ConfigManager.js';
 import Environment from './common/Environment.js';
 import Logger from './common/Logger.js';
 
+import ConfigPublisher from './services/ConfigPublisher.js';
 import TaskManager from './services/TaskManager.js';
 
+import AssetExporter from './workers/AssetExporter.js';
 import Cleaner from './workers/Cleaner.js';
 import FileSync from './workers/FileSync.js';
 import JsCompiler from './workers/JsCompiler.js';
 import Resolver from './workers/Resolver.js';
 import SassCompiler from './workers/SassCompiler.js';
+import StyleguideHelper from './workers/StyleguideHelper.js';
+import StyleguideTester from './workers/StyleguideTester.js';
 import SvgSpriteCompiler from './workers/SvgSpriteCompiler.js';
 
+import JsOptimizer from './plugins/JsOptimizer.js';
 import StyleguideCompiler from './plugins/StyleguideCompiler.js';
 import StyleOptimizer from './plugins/StyleOptimizer.js';
-import JsOptimizer from './plugins/JsOptimizer.js';
 import Watcher from './plugins/Watcher.js';
-import ConfigManager from './common/ConfigManager.js';
 
 /**
  * Factory setup for Harbor.
@@ -25,15 +29,19 @@ class Harbor {
     this.Argv = new Argv();
 
     this.services = {
-      TaskManager: new TaskManager(),
+      ConfigPublisher: new ConfigPublisher(['Console']),
+      TaskManager: new TaskManager(['Console', 'environment']),
     };
 
     this.workers = {
+      AssetExporter: new AssetExporter(this.services, {}),
       Cleaner: new Cleaner(this.services),
       FileSync: new FileSync(this.services),
       JsCompiler: new JsCompiler(this.services),
       Resolver: new Resolver(this.services),
       SassCompiler: new SassCompiler(this.services),
+      StyleguideHelper: new StyleguideHelper(this.services),
+      StyleguideTester: new StyleguideTester(this.services),
       SvgSpriteCompiler: new SvgSpriteCompiler(this.services),
     };
 
@@ -53,13 +61,35 @@ class Harbor {
    * Init Harbor and run tasks specified from the Command Line Arguments.
    */
   async init() {
-    const { task, ...args } = this.Argv.args;
+    const { ci, task, isProduction, staticDirectory, ...args } = this.Argv.args;
     const { customArgs } = args;
 
     const Env = new Environment();
     this.env = await Env.define();
 
     this.Console = new Logger(this.env);
+
+    if (ci) {
+      this.Console.info(`Running Harbor in CI mode...`);
+    }
+    this.env.THEME_AS_CLI = ci;
+
+    if (isProduction) {
+      this.Console.warning(
+        `Heads up! Harbor will run this instance in production when the 'isProduction' flag is enabled. `
+      );
+      this.env.THEME_ENVIRONMENT = 'production';
+    }
+
+    if (staticDirectory) {
+      this.Console.log(`Enforcing custom render directory: ${staticDirectory}`);
+      this.env.THEME_STATIC_DIRECTORY = staticDirectory;
+    }
+
+    // Defines the actual test suite command for Backstopjs.
+    if (args.test) {
+      this.env.THEME_TEST_PHASE = args.test;
+    }
 
     // Keep track of the arguments that were not recognized by Harbor.
     const unusedCustomArgs = customArgs;
@@ -70,6 +100,11 @@ class Harbor {
     // Assign the defined Console & environment to the TaskManager service.
     this.services.TaskManager.mount('Console', this.Console);
     this.services.TaskManager.mount('environment', this.env);
+
+    this.services.ConfigPublisher.mount('Console', this.Console);
+
+    this.share(this.workers, 'workers', config);
+    this.share(this.plugins, 'plugins', config);
 
     // Ensure the configuration is defined before mounting anything.
     this.mount(this.workers, config);
@@ -151,9 +186,9 @@ class Harbor {
       }
     } catch (exception) {
       if (exception) {
-        this.Console.error('Harbor stopped because of an error:');
+        this.Console.error('Harbor stopped because of an error: exception');
 
-        throw Error(exception.toString());
+        process.exit(1);
       }
     }
   }
@@ -184,15 +219,33 @@ class Harbor {
   }
 
   /**
+   * Expose the worker & plugin configuration to the ConfigPublisher
+   */
+  share(instance, type, config) {
+    if (!this.services || !this.services.ConfigPublisher) {
+      return;
+    }
+
+    const s = (n, t) =>
+      config[t][n] && this.services.ConfigPublisher.subscribe(n, config[t][n].options);
+
+    if (instance) {
+      Object.keys(instance).forEach((n) => s(n, type));
+    }
+  }
+
+  /**
    * Validates the results of all used workers & plugins in order to define the
    * final result of the running Harbor instance.
    */
   validateResult(results) {
     if (results && results.exceptions && results.exceptions.length) {
       if (this.env.THEME_ENVIRONMENT !== 'development') {
-        throw Error(
+        this.Console.error(
           `Not all tasks have been completed correctly: ${results.exceptions.join(', ')}`
         );
+
+        process.exit(1);
       }
     }
 

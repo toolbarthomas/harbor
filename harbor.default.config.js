@@ -7,12 +7,20 @@ import combineDuplicateSelectors from 'postcss-combine-duplicated-selectors';
 import cssnano from 'cssnano';
 import stylelint from 'stylelint';
 
-const styleLintConfig = glob.sync('.stylelintrc*');
-const browserListConfig = glob.sync('.browserlistrc*');
 const babelConfig = glob.sync('.babelrc*');
+const browserListConfig = glob.sync('.browserlistrc*');
+const prettierConfig = glob.sync('.prettierrc*');
+const styleLintConfig = glob.sync('.stylelintrc*');
 
 export default {
   workers: {
+    AssetExporter: {
+      entry: {},
+      hook: 'export',
+      options: {
+        includeLiteral: [],
+      },
+    },
     Cleaner: {
       hook: ['clean', 'prepare::0', 'default::0'],
     },
@@ -23,7 +31,8 @@ export default {
     JsCompiler: {
       entry: {
         main: '**/javascripts/**/*.js',
-        modules: 'modules/*/*/*.js',
+        components: '**/components/**/*.js',
+        modules: '**/modules/**/*.js',
       },
       hook: ['js', 'javascripts', 'compile', 'default::1'],
       plugins: {
@@ -49,7 +58,79 @@ export default {
         },
       },
       entry: {
-        main: '**/stylesheets/**/**.scss',
+        main: '**/stylesheets/**/*.scss',
+        modules: '**/modules/**/*.scss',
+        components: '**/components/**/*.scss',
+      },
+    },
+    StyleguideHelper: {
+      hook: ['setup'],
+      entry: {
+        main: '**/*.twig',
+      },
+      options: {
+        prettier: JSON.parse(
+          fs.readFileSync(
+            prettierConfig.length
+              ? prettierConfig[0]
+              : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.prettierrc')
+          )
+        ),
+        configurationExtensions: ['yml', 'yaml', 'json', 'js', 'mjs'],
+        destinationDirectory: 'styleguide',
+        defaultModuleName: 'Default',
+        disableAlias: false,
+        extname: 'js',
+        ignoreInitial: false,
+        sep: ' / ',
+        structuredTitle: true,
+        variants: {},
+      },
+    },
+    StyleguideTester: {
+      hook: ['test', 'backstop'],
+      options: {
+        staticDirectory: 'storybook-snapshot',
+        outputPath: 'styleguide.snapshot.json',
+        scenarioDirectory: path.resolve(process.cwd(), 'backstopJS/backstopScenarios'),
+        backstopJS: {
+          id: 'styleguide',
+          debug: false,
+          debugWindow: false,
+          engine: 'playwright',
+          engineOptions: {
+            browser: 'chromium',
+            args: ['--no-sandbox'],
+          },
+          excludeScenarios: [],
+          paths: {
+            bitmaps_reference: 'backstopJS/backstopReference/bitmapsReference',
+            bitmaps_test: 'backstopJS/backstopTests/bitmapTests',
+            engine_scripts: 'backstopJS/backstopEngine/engineScripts',
+            html_report: 'backstopJS/backstopHTMLReport/HTMLreports',
+            ci_report: 'backstopJS/backstopCIReport/CIreports',
+          },
+          viewports: [
+            {
+              name: 'default',
+              width: 800,
+              height: 600,
+            },
+          ],
+          report: ['browser', 'ci'],
+          scenarioDefaults: {
+            hideSelectors: [],
+            removeSelectors: [],
+            selectors: ['document'],
+            delay: 3000,
+            readyTimeout: 60000 * 3,
+            postInteractionWait: 3000,
+            asyncCaptureLimit: 1,
+            asyncCompareLimit: 4,
+            misMatchThreshold: 0,
+          },
+          waitTimeout: 60000 * 3,
+        },
       },
     },
     SvgSpriteCompiler: {
@@ -91,7 +172,8 @@ export default {
     JsOptimizer: {
       entry: {
         main: '**/javascripts/**/*.js',
-        modules: 'modules/*/*/*.js',
+        components: '**/components/**/*.js',
+        modules: '**/modules/**/*.js',
       },
       hook: 'minify',
       options: {
@@ -125,6 +207,7 @@ export default {
         alias: {
           '@theme': process.cwd(),
         },
+        useLegacyCompiler: false,
         globalMode: false,
         librariesOverride: {},
         optimization: {
@@ -136,36 +219,26 @@ export default {
         staticDirectory: 'storybook-static',
       },
     },
-    VisualTester: {
-      hook: 'test',
-      entry: {
-        static: 'storybook-static/**/*.html',
-      },
-      options: {
-        ignoredFiles: ['iframe.html'],
-        acceptedFileExtensions: ['html'],
-      },
-    },
     Watcher: {
       options: {
         delay: 200,
-        duration: 1000 * 60 * 15,
+        duration: 1000 * 60 * 5,
       },
       hook: 'watch',
       instances: {
         stylesheets: {
           event: 'change',
-          path: '**/stylesheets/**/**.scss',
-          workers: ['SassCompiler'],
+          path: '**/**.scss',
+          workers: ['SassCompiler', 'JsCompiler'],
         },
         javascripts: {
           event: 'change',
-          path: '**/javascripts/**/**.js',
+          path: '**/**.js',
           workers: ['JsCompiler'],
         },
         svgprites: {
           event: 'all',
-          path: '**/images/**/**.svg',
+          path: '**/**.svg',
           workers: ['SvgSpriteCompiler'],
         },
         sync: {

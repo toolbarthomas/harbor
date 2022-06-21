@@ -40,7 +40,9 @@ class Resolver extends Worker {
                 let queue = 0;
 
                 vendor.forEach((v) => {
-                  const cwd = path.dirname(require.resolve(`${name}/package.json`));
+                  const cwd = path.dirname(
+                    require.resolve(`${name}${path.extname(name) ? '' : '/package.json'}`)
+                  );
                   const p = path.join(cwd, v);
 
                   if (!fs.existsSync(p)) {
