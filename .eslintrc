@@ -33,8 +33,6 @@
     "THEME_WEBSOCKET_PORT": "readonly"
   },
   "rules": {
-    "import/no-extraneous-dependencies": 0,
-    "import/extensions": 0,
     "no-use-before-define": [
       "error",
       {
@@ -43,13 +41,17 @@
         "variables": false
       }
     ],
-    "prettier/prettier": "error",
+    "import/extensions": 0,
+    "import/no-default-export": "error",
+    "import/no-extraneous-dependencies": 0,
+    "import/prefer-default-export": "off",
     "no-param-reassign": [
       2,
       {
         "props": false
       }
-    ]
+    ],
+    "prettier/prettier": "error"
   },
   "settings": {
     "import/resolver": {

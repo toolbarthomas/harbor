@@ -4,6 +4,10 @@
 
 - Includes implementation information within TIPS.md
 
+### Maintenance
+
+- Ensure the static styleguide is removed after a test has been processed.
+
 ## 0.123.0 (Jun 20, 2022)
 
 ### Features

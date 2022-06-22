@@ -8,14 +8,26 @@ base:
   dependencies:
     - harbor/font-ibm-plex-sans
 
+lit-element:
+  js:
+    dist/vendors/@webcomponents/webcomponentsjs/webcomponents-loader.js: {}
+    dist/vendors/@lit/reactive-element/polyfill-support.js/polyfill-support.js: {}
+
 responsive-menu:
   css:
     component:
       dist/components/responsive-menu/responsive-menu.css: {}
   js:
     dist/components/responsive-menu/responsive-menu.js: {}
-dependencies:
-  - harbor/base
+  dependencies:
+    - harbor/base
+
+modal:
+  js:
+    dist/components/modal/lit.modal.js: { attributes: { type: 'module' } }
+  dependencies:
+    - harbor/base
+    - harbor/lit-element
 
 font-ibm-plex-sans:
   remote: https://fonts.google.com/specimen/IBM+Plex+Sans

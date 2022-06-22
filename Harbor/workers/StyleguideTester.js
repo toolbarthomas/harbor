@@ -11,6 +11,7 @@ import YAML from 'yaml';
 import backstop from 'backstopjs';
 
 import Worker from './Worker.js';
+import rimraf from 'rimraf';
 
 /**
  * Enables Snapshot testing for all valid Storybook stories.
@@ -22,6 +23,7 @@ class StyleguideTester extends Worker {
     const { THEME_DIST } = this.environment;
     const manifest = path.resolve(THEME_DIST, staticDirectory, outputPath);
     const initialCwd = path.resolve('node_modules/@storybook/cli/bin/index.js');
+    const destinationDirectory = path.resolve(THEME_DIST, staticDirectory);
     let hasError = false;
 
     this.Console.log('Preparing test server...');
@@ -42,10 +44,10 @@ class StyleguideTester extends Worker {
       ? initialCwd
       : path.resolve('../../@storybook/cli/bin/index.js');
 
-    this.Console.info(`Extracting stories from ${path.resolve(THEME_DIST, staticDirectory)}`);
+    this.Console.info(`Extracting stories from ${destinationDirectory}`);
 
     // Extract the generated stories from the defined snapshot directory.
-    execSync(`${cwd} extract ${path.resolve(THEME_DIST, staticDirectory)} ${manifest}`, {
+    execSync(`${cwd} extract ${destinationDirectory} ${manifest}`, {
       stdio: 'inherit',
     });
 
@@ -184,14 +186,21 @@ class StyleguideTester extends Worker {
     process.kill(-server.pid);
 
     server.on('close', () => {
-      // Reject afterwards so we can close any instances within the Worker scope.
-      if (hasError) {
-        super.reject();
+      if (fs.existsSync(destinationDirectory)) {
+        this.Console.log(`Removing previous styleguide build: ${destinationDirectory}`);
 
-        return process.exit(1);
+        rimraf(destinationDirectory, () => {
+          if (hasError) {
+            this.Console.warning(`Backstop test has failed since it encountered some errors`);
+            // Reject afterwards so we can close any instances within the Worker scope.
+            super.reject();
+
+            return process.exit(1);
+          }
+
+          return super.resolve();
+        });
       }
-
-      return super.resolve();
     });
 
     return null;

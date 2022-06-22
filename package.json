@@ -15,6 +15,7 @@
     "javascripts": "node ./index.js --task=javascripts",
     "predevelopment": "npm run production",
     "production": "node ./index.js --task=prepare,compile --minify",
+    "postproduction": "node ./index.js --task=export,setup",
     "resolve": "node ./index.js --task=resolve",
     "setup": "node ./index.js --task=setup",
     "styleguide": "node ./index.js --styleguide",

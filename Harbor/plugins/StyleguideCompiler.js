@@ -1,12 +1,12 @@
 /* eslint-disable no-unsafe-negation */
 import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
+import { snakeCase } from 'snake-case';
 import fs from 'fs';
 import glob from 'glob';
 import mkdirp from 'mkdirp';
 import outdent from 'outdent';
 import path from 'path';
-import { snakeCase } from 'snake-case';
 
 import Plugin from './Plugin.js';
 

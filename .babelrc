@@ -21,6 +21,16 @@
           ]
         }
       }
+    ],
+    [
+      "@babel/plugin-proposal-decorators",
+      {
+        "decoratorsBeforeExport": true,
+        "version": "2021-12"
+      }
+    ],
+    [
+      "@babel/plugin-proposal-class-properties"
     ]
   ]
 }
