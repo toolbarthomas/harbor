@@ -1,4 +1,10 @@
-## 0.124.1 (Jun 21, 2022)
+## 0.124.2 (Jun 22, 2022)
+
+### Maintenance
+
+- Include Resolver within the run series
+
+## 0.124.1 (Jun 22, 2022)
 
 ### Maintenance
 

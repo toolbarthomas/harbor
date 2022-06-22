@@ -16,7 +16,7 @@ export default {
   workers: {
     AssetExporter: {
       entry: {},
-      hook: ['export', 'generate::0', 'run::5'],
+      hook: ['export', 'generate::0', 'run::6'],
       options: {
         includeLiteral: [],
       },
@@ -34,7 +34,7 @@ export default {
         components: '**/components/**/*.js',
         modules: '**/modules/**/*.js',
       },
-      hook: ['js', 'javascripts', 'compile', 'default::1', 'run::3'],
+      hook: ['js', 'javascripts', 'compile', 'default::1', 'run::4'],
       plugins: {
         transform: babelConfig.length
           ? null
@@ -46,7 +46,7 @@ export default {
       },
     },
     SassCompiler: {
-      hook: ['sass', 'stylesheets', 'compile', 'default::1', 'run::2'],
+      hook: ['sass', 'stylesheets', 'compile', 'default::1', 'run::3'],
       options: {},
       plugins: {
         stylelint: {
@@ -134,7 +134,7 @@ export default {
       },
     },
     SvgSpriteCompiler: {
-      hook: ['svg', 'images', 'compile', 'default::1', 'run::4'],
+      hook: ['svg', 'images', 'compile', 'default::1', 'run::5'],
       prefix: '',
       entry: {
         svgsprite: 'images/*/**.svg',
@@ -163,7 +163,7 @@ export default {
       },
     },
     Resolver: {
-      hook: ['resolve', 'prepare::2', 'default::2'],
+      hook: ['resolve', 'prepare::2', 'default::2', 'run::2'],
       cwd: 'vendors',
       entry: {},
     },
