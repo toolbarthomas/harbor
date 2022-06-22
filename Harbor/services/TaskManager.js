@@ -152,9 +152,15 @@ class TaskManager extends Service {
 
           const order =
             parseInt(
-              (task.hook.filter((h) => h && h.split('::') && h.split('::')[1])[0] || '').split(
-                '::'
-              )[1],
+              (
+                task.hook.filter(
+                  (h) =>
+                    list.filter((l) => h.includes(l)).length &&
+                    h &&
+                    h.split('::') &&
+                    h.split('::')[1]
+                )[0] || ''
+              ).split('::')[1],
               10
             ) || 0;
 

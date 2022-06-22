@@ -16,16 +16,16 @@ export default {
   workers: {
     AssetExporter: {
       entry: {},
-      hook: 'export',
+      hook: ['export', 'generate::0', 'run::5'],
       options: {
         includeLiteral: [],
       },
     },
     Cleaner: {
-      hook: ['clean', 'prepare::0', 'default::0'],
+      hook: ['clean', 'prepare::0', 'default::0', 'run::0'],
     },
     FileSync: {
-      hook: ['sync', 'prepare::1', 'default::1'],
+      hook: ['sync', 'prepare::1', 'default::1', 'run::1'],
       patterns: ['images', 'webfonts'],
     },
     JsCompiler: {
@@ -34,7 +34,7 @@ export default {
         components: '**/components/**/*.js',
         modules: '**/modules/**/*.js',
       },
-      hook: ['js', 'javascripts', 'compile', 'default::1'],
+      hook: ['js', 'javascripts', 'compile', 'default::1', 'run::3'],
       plugins: {
         transform: babelConfig.length
           ? null
@@ -46,7 +46,7 @@ export default {
       },
     },
     SassCompiler: {
-      hook: ['sass', 'stylesheets', 'compile', 'default::1'],
+      hook: ['sass', 'stylesheets', 'compile', 'default::1', 'run::2'],
       options: {},
       plugins: {
         stylelint: {
@@ -64,7 +64,7 @@ export default {
       },
     },
     StyleguideHelper: {
-      hook: ['setup'],
+      hook: ['setup', 'generate::1', 'run::7'],
       entry: {
         main: '**/*.twig',
       },
@@ -134,7 +134,7 @@ export default {
       },
     },
     SvgSpriteCompiler: {
-      hook: ['svg', 'images', 'compile', 'default::1'],
+      hook: ['svg', 'images', 'compile', 'default::1', 'run::4'],
       prefix: '',
       entry: {
         svgsprite: 'images/*/**.svg',

@@ -1,3 +1,9 @@
+## 0.124.1 (Jun 21, 2022)
+
+### Maintenance
+
+- Ensure the order is correct for synchronous Worker hooks like run::X
+
 ## 0.124.0 (Jun 21, 2022)
 
 ### Features
