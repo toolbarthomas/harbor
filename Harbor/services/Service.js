@@ -1,4 +1,4 @@
-class Service {
+export class Service {
   constructor(acceptedServices) {
     this.name = this.constructor.name;
 
@@ -21,5 +21,3 @@ class Service {
     }
   }
 }
-
-export default Service;

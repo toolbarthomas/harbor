@@ -3,13 +3,13 @@ import path from 'path';
 import mkdirp from 'mkdirp';
 import { createRequire } from 'module';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
 /**
  * Resolves the configured Resolver entries to the environment destination
  * directory.
  */
-class Resolver extends Worker {
+export class Resolver extends Worker {
   /**
    * Resolves the configured Resolver entries.
    */
@@ -94,5 +94,3 @@ class Resolver extends Worker {
     return super.resolve();
   }
 }
-
-export default Resolver;

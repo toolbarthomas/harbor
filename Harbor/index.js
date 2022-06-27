@@ -1,30 +1,30 @@
-import Argv from './common/Argv.js';
-import ConfigManager from './common/ConfigManager.js';
-import Environment from './common/Environment.js';
-import Logger from './common/Logger.js';
+import { Argv } from './common/Argv.js';
+import { ConfigManager } from './common/ConfigManager.js';
+import { Environment } from './common/Environment.js';
+import { Logger } from './common/Logger.js';
 
-import ConfigPublisher from './services/ConfigPublisher.js';
-import TaskManager from './services/TaskManager.js';
+import { ConfigPublisher } from './services/ConfigPublisher.js';
+import { TaskManager } from './services/TaskManager.js';
 
-import AssetExporter from './workers/AssetExporter.js';
-import Cleaner from './workers/Cleaner.js';
-import FileSync from './workers/FileSync.js';
-import JsCompiler from './workers/JsCompiler.js';
-import Resolver from './workers/Resolver.js';
-import SassCompiler from './workers/SassCompiler.js';
-import StyleguideHelper from './workers/StyleguideHelper.js';
-import StyleguideTester from './workers/StyleguideTester.js';
-import SvgSpriteCompiler from './workers/SvgSpriteCompiler.js';
+import { AssetExporter } from './workers/AssetExporter.js';
+import { Cleaner } from './workers/Cleaner.js';
+import { FileSync } from './workers/FileSync.js';
+import { JsCompiler } from './workers/JsCompiler.js';
+import { Resolver } from './workers/Resolver.js';
+import { SassCompiler } from './workers/SassCompiler.js';
+import { StyleguideHelper } from './workers/StyleguideHelper.js';
+import { StyleguideTester } from './workers/StyleguideTester.js';
+import { SvgSpriteCompiler } from './workers/SvgSpriteCompiler.js';
 
-import JsOptimizer from './plugins/JsOptimizer.js';
-import StyleguideCompiler from './plugins/StyleguideCompiler.js';
-import StyleOptimizer from './plugins/StyleOptimizer.js';
-import Watcher from './plugins/Watcher.js';
+import { JsOptimizer } from './plugins/JsOptimizer.js';
+import { StyleguideCompiler } from './plugins/StyleguideCompiler.js';
+import { StyleOptimizer } from './plugins/StyleOptimizer.js';
+import { Watcher } from './plugins/Watcher.js';
 
 /**
  * Factory setup for Harbor.
  */
-class Harbor {
+export class Harbor {
   constructor() {
     this.Argv = new Argv();
 
@@ -260,5 +260,3 @@ class Harbor {
     }
   }
 }
-
-export default Harbor;

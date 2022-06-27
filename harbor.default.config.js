@@ -195,7 +195,9 @@ export default {
         combineDuplicateSelectors: combineDuplicateSelectors({ removeDuplicatedProperties: true }),
       },
       entry: {
-        main: '**/stylesheets/*.css',
+        main: '**/stylesheets/**/*.css',
+        modules: '**/modules/**/*.css',
+        components: '**/components/**/*.css',
       },
     },
     StyleguideCompiler: {

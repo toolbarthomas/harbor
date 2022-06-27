@@ -6,9 +6,9 @@ import mkdirp from 'mkdirp';
 import path from 'path';
 import prettier from 'prettier';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
-class StyleguideHelper extends Worker {
+export class StyleguideHelper extends Worker {
   constructor(services) {
     super(services);
 
@@ -528,5 +528,3 @@ class StyleguideHelper extends Worker {
     return queue;
   }
 }
-
-export default StyleguideHelper;

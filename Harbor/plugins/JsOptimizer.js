@@ -4,12 +4,12 @@ import mkdirp from 'mkdirp';
 import path from 'path';
 import { minify } from 'uglify-js';
 
-import Plugin from './Plugin.js';
+import { Plugin } from './Plugin.js';
 
 /**
  * Minifies the defined js entries within the THEME_DIST directory
  */
-class JsOptimizer extends Plugin {
+export class JsOptimizer extends Plugin {
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
@@ -106,7 +106,7 @@ class JsOptimizer extends Plugin {
       const directory = bundle.substring(0, bundle.indexOf('.bundle'));
       // Check if the current bundle can be placed.
       if (fs.existsSync(directory) && fs.lstatSync(directory).isDirectory()) {
-        this.Console.info(`Compatible bundle directory detected, writing to ${directory} instead`);
+        this.Console.info(`Compatible bundle directory detected, writing to ${directory}`);
         bundle = path.join(directory, path.basename(bundle));
       }
 
@@ -155,5 +155,3 @@ class JsOptimizer extends Plugin {
     });
   }
 }
-
-export default JsOptimizer;

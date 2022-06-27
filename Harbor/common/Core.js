@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs';
 import glob from 'glob';
 
-import Logger from './Logger.js';
+import { Logger } from './Logger.js';
 
 /**
  * Base Framework for defining Workers & Plugins.
@@ -12,7 +12,7 @@ import Logger from './Logger.js';
  * should not be customized.
  * @param {string} type Defines the new instance as Worker or Plugin.
  */
-class Core {
+export class Core {
   constructor(services, options, type) {
     this.name = this.constructor.name;
 
@@ -42,6 +42,38 @@ class Core {
     }
 
     return defaultValue;
+  }
+
+  /**
+   * Parse the requested Environment variable to the correct Primitive.
+   *
+   * @param {String} name Transforms the defined Environment variable if it
+   * exists.
+   */
+  parseEnvironmentProperty(name) {
+    const prop = this.environment[name];
+
+    if (!prop) {
+      this.Console.warning(`Unable to use Environment value since '${name}' is not defined...`);
+    }
+
+    //
+    if (!Number.isNaN(parseFloat(prop))) {
+      return Number(prop);
+    }
+
+    // Ensures the given property is transformed as Boolean.
+    if (typeof prop === 'string') {
+      if (prop.toLowerCase() === 'false') {
+        return false;
+      }
+
+      if (prop.toLowerCase() === 'true') {
+        return true;
+      }
+    }
+
+    return prop;
   }
 
   /**
@@ -240,5 +272,3 @@ class Core {
     this.resolve(true);
   }
 }
-
-export default Core;

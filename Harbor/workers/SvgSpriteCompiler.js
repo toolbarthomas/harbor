@@ -6,12 +6,12 @@ import svgstore from 'svgstore';
 import SVGO from 'svgo';
 import isSvg from 'is-svg';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
 /**
  * Create SVG sprites from the configured entries.
  */
-class SvgSpriteCompiler extends Worker {
+export class SvgSpriteCompiler extends Worker {
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
@@ -169,5 +169,3 @@ class SvgSpriteCompiler extends Worker {
     };
   }
 }
-
-export default SvgSpriteCompiler;

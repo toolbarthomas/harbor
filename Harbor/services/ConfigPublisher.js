@@ -1,6 +1,6 @@
-import Service from './Service.js';
+import { Service } from './Service.js';
 
-class ConfigPublisher extends Service {
+export class ConfigPublisher extends Service {
   constructor(acceptedServices) {
     super(acceptedServices);
 
@@ -67,5 +67,3 @@ class ConfigPublisher extends Service {
     return instance[option];
   }
 }
-
-export default ConfigPublisher;

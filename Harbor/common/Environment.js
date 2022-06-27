@@ -9,7 +9,7 @@ import path from 'path';
  * Harbor will define these environment variables and will fall back
  * to the default values when missing.
  */
-class Environment {
+export class Environment {
   constructor() {
     this.defaults = {
       THEME_SRC: './src',
@@ -34,7 +34,7 @@ class Environment {
     if (fs.existsSync(source)) {
       process.env.DOTENV_CONFIG_PATH = source;
       await new Promise((done) => {
-        import('dotenv/config').then((result) => {
+        import('dotenv/config').then(() => {
           done(process.env);
         });
       });
@@ -87,5 +87,3 @@ class Environment {
     return fs.readdirSync(path.resolve(environment.THEME_DIST)).length > 0;
   }
 }
-
-export default Environment;

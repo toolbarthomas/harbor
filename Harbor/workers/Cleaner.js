@@ -2,12 +2,12 @@ import rimraf from 'rimraf';
 import fs from 'fs';
 import path from 'path';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
 /**
  * Clears the defined environment destination directory.
  */
-class Cleaner extends Worker {
+export class Cleaner extends Worker {
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
@@ -31,5 +31,3 @@ class Cleaner extends Worker {
     }
   }
 }
-
-export default Cleaner;

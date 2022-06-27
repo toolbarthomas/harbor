@@ -3,9 +3,9 @@ import fs from 'fs';
 import glob from 'glob';
 import path from 'path';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
-class AssetExporter extends Worker {
+export class AssetExporter extends Worker {
   async init() {
     if (!this.config.entry) {
       return super.resolve();
@@ -91,5 +91,3 @@ class AssetExporter extends Worker {
     super.defineEntry(true);
   }
 }
-
-export default AssetExporter;

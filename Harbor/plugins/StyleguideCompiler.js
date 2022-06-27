@@ -8,13 +8,13 @@ import mkdirp from 'mkdirp';
 import outdent from 'outdent';
 import path from 'path';
 
-import Plugin from './Plugin.js';
+import { Plugin } from './Plugin.js';
 
 /**
  * Create a new Styleguide with the compiled assets from the destination
  * directory.
  */
-class StyleguideCompiler extends Plugin {
+export class StyleguideCompiler extends Plugin {
   constructor(services, options, workers) {
     super(services, options, workers);
 
@@ -106,7 +106,7 @@ class StyleguideCompiler extends Plugin {
       }
       command = `node ${script} -c ${config} -o ${staticBuildPath}`;
     } else {
-      const commandOptions = this.environment.THEME_AS_CLI ? ` --ci` : '';
+      const commandOptions = this.parseEnvironmentProperty('THEME_AS_CLI') ? ` --ci` : '';
 
       command = `node ${script} -c ${config} -p ${this.environment.THEME_PORT}${commandOptions}`;
     }
@@ -564,11 +564,11 @@ class StyleguideCompiler extends Plugin {
               null,
               2
             )}),
-            THEME_DIST: '"${path.normalize(this.environment.THEME_DIST)}/"',
-            THEME_ENVIRONMENT: '"${this.environment.THEME_ENVIRONMENT}"',
+            THEME_DIST: '${path.normalize(this.environment.THEME_DIST)}/',
+            THEME_ENVIRONMENT: '${this.environment.THEME_ENVIRONMENT}',
             THEME_SPRITES: JSON.stringify(sprites),
-            THEME_ALIAS: JSON.stringify(${(JSON.stringify(this.config.options.alias), null, 2)}),
-            THEME_WEBSOCKET_PORT: '${this.environment.THEME_WEBSOCKET_PORT}',
+            THEME_ALIAS: ${JSON.stringify(this.config.options.alias, null, 2)},
+            THEME_WEBSOCKET_PORT: ${this.environment.THEME_WEBSOCKET_PORT},
           })
         );
 
@@ -599,13 +599,13 @@ class StyleguideCompiler extends Plugin {
               process.env.THEME_LIBRARIES_OVERRIDES = JSON.stringify(${JSON.stringify(
                 this.config.options.librariesOverride || {}
               )});
-              process.env.THEME_DIST = '"${path.normalize(this.environment.THEME_DIST)}/"';
-              process.env.THEME_ENVIRONMENT = '"${this.environment.THEME_ENVIRONMENT}"';
-              process.env.THEME_SPRITES = JSON.stringify(sprites);
+              process.env.THEME_DIST = '${path.normalize(this.environment.THEME_DIST)}/';
+              process.env.THEME_ENVIRONMENT = '${this.environment.THEME_ENVIRONMENT}';
+              process.env.THEME_SPRITES = JSON.stringify(sprites, null, 2);
               process.env.THEME_ALIAS = JSON.stringify(${JSON.stringify(
                 this.config.options.alias
               )});
-              process.env.THEME_WEBSOCKET_PORT = '${this.environment.THEME_WEBSOCKET_PORT}';
+              process.env.THEME_WEBSOCKET_PORT = ${this.environment.THEME_WEBSOCKET_PORT};
             `
           : ''
       }
@@ -676,5 +676,3 @@ class StyleguideCompiler extends Plugin {
     return path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.storybook');
   }
 }
-
-export default StyleguideCompiler;

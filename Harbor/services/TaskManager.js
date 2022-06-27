@@ -1,6 +1,6 @@
-import Service from './Service.js';
+import { Service } from './Service.js';
 
-class TaskManager extends Service {
+export class TaskManager extends Service {
   constructor(acceptedServices) {
     super(acceptedServices);
 
@@ -316,5 +316,3 @@ class TaskManager extends Service {
     return false;
   }
 }
-
-export default TaskManager;

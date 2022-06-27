@@ -9,14 +9,14 @@ import YAML from 'yaml';
 
 // @TODO should install within instance like the node-sass fallback.
 import backstop from 'backstopjs';
-
-import Worker from './Worker.js';
 import rimraf from 'rimraf';
+
+import { Worker } from './Worker.js';
 
 /**
  * Enables Snapshot testing for all valid Storybook stories.
  */
-class StyleguideTester extends Worker {
+export class StyleguideTester extends Worker {
   async init() {
     const script = path.resolve(fileURLToPath(import.meta.url), '../../../index.js');
     const { staticDirectory, outputPath } = this.config.options;
@@ -84,7 +84,9 @@ class StyleguideTester extends Worker {
     // Define the scenario from the generated Storybook instance.
     // @TODO Should implement option to test a single scenario.
     Object.values(stories).forEach((value) => {
-      const url = `http://localhost:${this.environment.THEME_PORT}/iframe.html?id=${value.id}`;
+      const url = `http://localhost:${this.parseEnvironmentProperty(
+        this.environment.THEME_PORT
+      )}/iframe.html?id=${value.id}`;
 
       if (Array.isArray(excludeScenarios) && excludeScenarios.includes(value.id)) {
         this.Console.log(`Excluding scenario: ${value.id}`);
@@ -223,7 +225,7 @@ class StyleguideTester extends Worker {
             {
               host: 'localhost',
               path: '/iframe.html',
-              port: this.environment.THEME_PORT,
+              port: this.parseEnvironmentProperty('THEME_PORT'),
             },
             (response) => {
               response.on('data', () => {
@@ -258,5 +260,3 @@ class StyleguideTester extends Worker {
     });
   }
 }
-
-export default StyleguideTester;

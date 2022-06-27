@@ -2,13 +2,13 @@ import copyfiles from 'copyfiles';
 import fs from 'fs';
 import path from 'path';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
 /**
  * Synchronizes the configured Filesync entries to the defined environment
  * destination directory.
  */
-class FileSync extends Worker {
+export class FileSync extends Worker {
   constructor(services) {
     super(services);
 
@@ -91,5 +91,3 @@ class FileSync extends Worker {
     return resolvedPatterns;
   }
 }
-
-export default FileSync;

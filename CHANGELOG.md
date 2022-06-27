@@ -1,3 +1,11 @@
+## 0.125.0 (Jun 27, 2022)
+
+### Maintenance
+
+- Ensures the Watcher is correctly closed to prevent duplicate process exception.
+- Use named exports instead of default exports for Harbor Core Classes.
+- Implements NPM package maintenance.
+
 ## 0.124.2 (Jun 22, 2022)
 
 ### Maintenance

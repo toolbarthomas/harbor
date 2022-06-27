@@ -6,12 +6,12 @@ import outdent from 'outdent';
 import path from 'path';
 import stylelint from 'stylelint';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
 /**
  * Compiles the configured entries with Node Sass.
  */
-class SassCompiler extends Worker {
+export class SassCompiler extends Worker {
   constructor(services) {
     super(services);
 
@@ -199,7 +199,7 @@ class SassCompiler extends Worker {
         Object.assign(this.config.options || {}, {
           file: entry,
           includePaths: [this.environment.THEME_SRC],
-          sourceMap: Boolean(this.environment.THEME_DEBUG),
+          sourceMap: this.parseEnvironmentProperty('THEME_DEBUG'),
           importer: globImporter(),
           outFile: destination,
         }),
@@ -250,5 +250,3 @@ class SassCompiler extends Worker {
     });
   }
 }
-
-export default SassCompiler;

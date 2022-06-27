@@ -2,14 +2,14 @@ import chokidar from 'chokidar';
 import path from 'path';
 import WebSocket, { WebSocketServer } from 'ws';
 
-import ConfigManager from '../common/ConfigManager.js';
-import Plugin from './Plugin.js';
+import { ConfigManager } from '../common/ConfigManager.js';
+import { Plugin } from './Plugin.js';
 
 /**
  * Creates a Watcher instance for each defined instance key and will run the
  * configured hook from the constructed TaskManager.
  */
-class Watcher extends Plugin {
+export class Watcher extends Plugin {
   constructor(services, options) {
     super(services, options);
 
@@ -39,7 +39,7 @@ class Watcher extends Plugin {
         this.Console.log(`Preparing Socket...`);
 
         this.wss = new WebSocketServer({
-          port: this.environment.THEME_WEBSOCKET_PORT,
+          port: this.parseEnvironmentProperty('THEME_WEBSOCKET_PORT'),
         });
       }
     }
@@ -74,6 +74,14 @@ class Watcher extends Plugin {
       });
     });
 
+    console.log('wss', this.wss);
+
+    // Ensure the Websocket Server is closed before the Plugin is resolved.
+    if (this.wss && this.wss.close) {
+      this.Console.log(
+        `Closing WebSocket Server at: ${this.parseEnvironmentProperty('THEME_WEBSOCKET_PORT')}`
+      );
+    }
     super.resolve();
   }
 
@@ -205,5 +213,3 @@ class Watcher extends Plugin {
     }, this.config.options.duration || 1000 * 60 * 15);
   }
 }
-
-export default Watcher;
