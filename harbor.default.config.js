@@ -16,7 +16,7 @@ export default {
   workers: {
     AssetExporter: {
       entry: {},
-      hook: ['export', 'generate::0', 'run::6'],
+      hook: ['export', 'generate::0'],
       options: {
         includeLiteral: [],
       },
@@ -64,7 +64,7 @@ export default {
       },
     },
     StyleguideHelper: {
-      hook: ['setup', 'generate::1', 'run::7'],
+      hook: ['setup', 'generate::1', 'run::6'],
       entry: {
         main: '**/*.twig',
       },
@@ -191,7 +191,10 @@ export default {
                 overrideBrowserslist: [('> 2%', 'last 2 versions')],
               }
         ),
-        cssnano: cssnano({ mergeLonghand: false }),
+        cssnano: cssnano({
+          mergeLonghand: false,
+          discardComments: true,
+        }),
         combineDuplicateSelectors: combineDuplicateSelectors({ removeDuplicatedProperties: true }),
       },
       entry: {

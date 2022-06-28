@@ -1,3 +1,15 @@
+## 0.125.2 (Jun 28, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance.
+
+## 0.125.1 (Jun 28, 2022)
+
+### Maintenance
+
+- Remove run command from AssetExporter.
+
 ## 0.125.0 (Jun 27, 2022)
 
 ### Maintenance
