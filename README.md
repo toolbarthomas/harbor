@@ -230,6 +230,7 @@ The StyleguideHelper creates initial Styleguide entry templates from the existin
 | options.destinationDirectory    | String/null | Writes the new entries to the defined directory or write it relative to the template by disabling this option.                       |
 | options.disableAlias            | Boolean     | Don't use the included @theme alias and use a relative path instead.                                                                 |
 | options.extname                 | String      | Use the defined extension when the styleguide entry is written to the FileSystem.                                                    |
+| options.filterKeywords          | String[]    | Removes the defined keywords from the generated Module export, File paths won't be adjusted from this settings.                      |
 | options.ignoreInitial           | Boolean     | Overwrites the existing entry files when enabled.                                                                                    |
 | options.prettier                | Boolean     | Should implement your project prettier configuration to ensure the styleguide entries are written in the correct syntax.             |
 | options.sep                     | String      | Defines the structure separator for the entry title.                                                                                 |

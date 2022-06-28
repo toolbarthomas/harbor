@@ -1,3 +1,15 @@
+## 0.126.0 (Jun 28, 2022)
+
+### Features
+
+- StyleguideHelper: Implements `filterKeywords` option to simplify Module exports.
+
+## 0.125.3 (Jun 28, 2022)
+
+### Maintenance
+
+- Remove console.log
+
 ## 0.125.2 (Jun 28, 2022)
 
 ### Maintenance

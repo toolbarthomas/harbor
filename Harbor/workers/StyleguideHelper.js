@@ -142,7 +142,9 @@ export class StyleguideHelper extends Worker {
    */
   defineInitialTemplate(source) {
     const basename = path.basename(source, path.extname(source));
-    const moduleName = camelcase(basename, { pascalCase: true }).replace(/[^a-zA-Z]+/g, '');
+    const moduleName = this.filterKeywords(
+      camelcase(basename, { pascalCase: true }).replace(/[^a-zA-Z]+/g, '')
+    );
     const variantQueue = this.loadVariants(source);
 
     const template = outdent`
@@ -170,10 +172,36 @@ export class StyleguideHelper extends Worker {
   }
 
   /**
+   * Removes the defined options.ignoreKeywords for the defined styleguide
+   * entry.
+   *
+   * @param {String} value Removes the keywords from the defined String.
+   */
+  filterKeywords(value) {
+    if (typeof value !== 'string') {
+      return value;
+    }
+
+    const ignoreKeywords = this.getOption('ignoreKeywords');
+
+    if (!ignoreKeywords || !ignoreKeywords.length) {
+      return value;
+    }
+
+    let v = value;
+
+    ignoreKeywords.forEach((keyword) => {
+      v = v.replace(new RegExp(keyword, 'ig'), '');
+    });
+
+    return v;
+  }
+
+  /**
    * Ensures the defined value is within the correct module syntax.
+   *
    * @param {String} value The actual name to escape.
    * @param {String} index Inserts an additional suffix.
-   * @returns
    */
   static escapeName(value, suffix) {
     const name = camelcase(value.replace(/[^a-zA-Z]+/g, '-'), {
@@ -181,6 +209,19 @@ export class StyleguideHelper extends Worker {
     }).replace(/[^a-zA-Z]+/g, '');
 
     return suffix ? `${name}${suffix}` : name;
+  }
+
+  /**
+   * Ensures spaces are inserted for the given string value.
+   *
+   * @param {String} value The defined value to insert spaces into.
+   */
+  static ensureSpacing(value) {
+    if (typeof value !== 'string') {
+      return value;
+    }
+
+    return value.replace(/([A-Z])/g, ' $1').trim();
   }
 
   /**
@@ -448,7 +489,7 @@ export class StyleguideHelper extends Worker {
       );
     }
 
-    return result;
+    return this.filterKeywords(StyleguideHelper.ensureSpacing(result));
   }
 
   /**

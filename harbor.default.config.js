@@ -76,6 +76,7 @@ export default {
               : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.prettierrc')
           )
         ),
+        ignoreKeywords: ['harbor'],
         configurationExtensions: ['yml', 'yaml', 'json', 'js', 'mjs'],
         destinationDirectory: 'styleguide',
         defaultModuleName: 'Default',

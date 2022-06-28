@@ -74,8 +74,6 @@ export class Watcher extends Plugin {
       });
     });
 
-    console.log('wss', this.wss);
-
     // Ensure the Websocket Server is closed before the Plugin is resolved.
     if (this.wss && this.wss.close) {
       this.Console.log(
