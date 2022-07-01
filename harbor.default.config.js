@@ -77,7 +77,7 @@ export default {
           )
         ),
         ignoreKeywords: ['harbor'],
-        configurationExtensions: ['yml', 'yaml', 'json', 'js', 'mjs'],
+        configurationExtensions: ['yml', 'yaml', 'json'],
         destinationDirectory: 'styleguide',
         defaultModuleName: 'Default',
         disableAlias: false,

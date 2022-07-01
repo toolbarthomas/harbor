@@ -471,6 +471,7 @@ export class StyleguideCompiler extends Plugin {
       const path = require('path');
       const webpack = require('webpack');
       const YAML = require('yaml');
+      const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
 
       const addons = [${addons.map((p) => `'${p}'`).join(',')}];
       const stories = [${stories.map((p) => `'${p}'`).join(',\n')}];
@@ -545,6 +546,40 @@ export class StyleguideCompiler extends Plugin {
           }
         });
 
+        // Enable support for Webpack5
+        config.plugins.push(new NodePolyfillPlugin({
+          excludeAliases: [
+            'buffer',
+            'console',
+            'process',
+            'assert',
+            'constants',
+            'crypto',
+            'domain',
+            'events',
+            'http',
+            'https',
+            'os',
+            'path',
+            'punycode',
+            'querystring',
+            'stream',
+            '_stream_duplex',
+            '_stream_passthrough',
+            '_stream-readable',
+            '_stream_transform',
+            '_stream_writeable',
+            'string_decoder',
+            'sys',
+            'timers',
+            'tty',
+            'url',
+            'util',
+            'vm',
+            'zlib',
+          ]
+        }));
+
         // Use the defined styleguide alias that should match with the template
         // alias.
         if (config.resolve && config.resolve.alias) {
@@ -611,13 +646,16 @@ export class StyleguideCompiler extends Plugin {
       }
 
       module.exports = {
-        stories,
         addons,
+        core: {
+          builder: 'webpack5',
+        },
+        previewMainTemplate: '${previewMainTemplate}',
+        stories,
         staticDirs: [${
           this.environment.THEME_ENVIRONMENT !== 'production' ? `"${process.cwd()}"` : ''
         }],
         webpackFinal,
-        previewMainTemplate: '${previewMainTemplate}',
       }
     `;
 

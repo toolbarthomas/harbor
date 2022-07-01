@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.126.0",
+  "version": "0.200.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -103,5 +103,11 @@
     "uglify-js": "^3.16.1",
     "ws": "^8.8.0",
     "yaml-loader": "^0.8.0"
+  },
+  "devDependencies": {
+    "@storybook/builder-webpack5": "^6.5.9",
+    "@storybook/manager-webpack5": "^6.5.9",
+    "node-polyfill-webpack-plugin": "^2.0.0",
+    "webpack": "^5.73.0"
   }
 }
