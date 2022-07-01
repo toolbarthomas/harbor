@@ -160,7 +160,7 @@ export class SvgSpriteCompiler extends Worker {
       let result;
 
       try {
-        result = SVGO.optimize(b, this.config.options.svgo);
+        result = SVGO.optimize(b, this.getOption('svgo', {}));
       } catch (exception) {
         this.Console.error(exception);
       }

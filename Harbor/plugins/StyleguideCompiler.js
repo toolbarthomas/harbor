@@ -39,7 +39,7 @@ export class StyleguideCompiler extends Plugin {
     const script = Plugin.escapeCommand(path.resolve(`${nodeModules}/.bin/${bin}`));
 
     const config = Plugin.escapeCommand(path.resolve(StyleguideCompiler.configPath()));
-    let { staticDirectory } = this.config.options;
+    let staticDirectory = this.getOption('staticDirectory');
 
     if (this.environment.THEME_STATIC_DIRECTORY) {
       staticDirectory = this.environment.THEME_STATIC_DIRECTORY;
@@ -54,13 +54,13 @@ export class StyleguideCompiler extends Plugin {
     this.setupMain(config);
 
     // Extends the Storybook instance with the optional custom configuration.
-    if (this.config.options.configDirectory) {
+    if (this.getOption('configDirectory')) {
       const customConfigurations = glob
-        .sync(path.join(this.config.options.configDirectory, '/**'))
+        .sync(path.join(this.getOption('configDirectory'), '/**'))
         .filter(
           (configuration) =>
             [
-              path.basename(this.config.options.configDirectory),
+              path.basename(this.getOption('configDirectory')),
               'index.ejs',
               'main.js',
               'main.cjs',
@@ -69,7 +69,7 @@ export class StyleguideCompiler extends Plugin {
 
       if (customConfigurations.length) {
         this.Console.info(
-          `Using storybook configuration from: ${this.config.options.configDirectory}`
+          `Using storybook configuration from: ${this.getOption('configDirectory')}`
         );
 
         customConfigurations.forEach((configuration) => {
@@ -146,7 +146,7 @@ export class StyleguideCompiler extends Plugin {
    * defined Twig templates.
    */
   setupBuilder() {
-    const type = this.config.options && this.config.options.useLegacyCompiler ? 'sync' : 'async';
+    const type = this.getOption('useLegacyCompiler') ? 'sync' : 'async';
 
     const cwd = path.resolve(
       path.dirname(fileURLToPath(import.meta.url)),
@@ -163,17 +163,17 @@ export class StyleguideCompiler extends Plugin {
       (m) => !initialFilters.includes(path.basename(m, '.cjs'))
     );
 
-    const customFilters = this.config.options.builderDirectory
-      ? queryEntry(this.config.options.builderDirectory, 'filters/**.cjs')
+    const customFilters = this.getOption('builderDirectory')
+      ? queryEntry(this.getOption('builderDirectory'), 'filters/**.cjs')
       : [];
 
-    const initialFunctions = this.config.options.useLegacyCompiler ? [] : ['dump'];
+    const initialFunctions = this.getOption('useLegacyCompiler') ? [] : ['dump'];
     const defaultFunctions = queryEntry(cwd, 'functions/**.cjs').filter(
       (m) => !initialFunctions.includes(path.basename(m, '.cjs'))
     );
 
-    const customFunctions = this.config.options.builderDirectory
-      ? queryEntry(this.config.options.builderDirectory, 'functions/**.cjs')
+    const customFunctions = this.getOption('builderDirectory')
+      ? queryEntry(this.getOption('builderDirectory'), 'functions/**.cjs')
       : [];
 
     const definedFilters = this.extendBuilder(defaultFilters, customFilters);
@@ -224,9 +224,9 @@ export class StyleguideCompiler extends Plugin {
       // Use namespace to maintain the exact include paths for both Drupal and
       // Storybook.
       if (typeof loader.addPath === 'function') {
-        if (${this.config.options.alias !== undefined}) {
+        if (${this.getOption('alias') !== undefined}) {
           try {
-            const alias = ${JSON.stringify(this.config.options.alias, null, 2)};
+            const alias = ${JSON.stringify(this.getOption('alias'), null, 2)};
 
             if (alias) {
               Object.keys(alias).forEach((name) => {
@@ -349,10 +349,10 @@ export class StyleguideCompiler extends Plugin {
               this.Console.info(`Loading data for: ${name} from ${sourcePath}`);
               this.renderContext[name] = Object.assign(this.renderContext[name], m.default);
 
-              if (this.config.options.globalMode) {
+              if (this.getOption('globalMode')) {
                 Object.keys(m.default).forEach((option) => {
                   // @todo Validate sensitivity of errors for this option.
-                  if (this.config.options.globalMode !== 'strict') {
+                  if (this.getOption('globalMode') !== 'strict') {
                     this.renderContext[option] = `%${option}%`;
                   } else if (!this.renderContext[option]) {
                     this.renderContext[option] = `%${option}%`;
@@ -374,10 +374,10 @@ export class StyleguideCompiler extends Plugin {
             if (proposal) {
               this.renderContext[name] = Object.assign(this.renderContext[name], proposal);
 
-              if (this.config.options.globalMode) {
+              if (this.getOption('globalMode')) {
                 Object.keys(proposal).forEach((option) => {
                   // @todo Validate sensitivity of errors for this option.
-                  if (this.config.options.globalMode !== 'strict') {
+                  if (this.getOption('globalMode') !== 'strict') {
                     this.renderContext[option] = `%${option}%`;
                   } else if (!this.renderContext[option]) {
                     this.renderContext[option] = `%${option}%`;
@@ -414,8 +414,7 @@ export class StyleguideCompiler extends Plugin {
       )
     );
 
-    let addons =
-      this.config.options && this.config.options.addons ? this.config.options.addons || [] : [];
+    let addons = this.getOption('addons', []);
 
     // Ensure the following addons are excluded since they will be imported by
     // @storybook/addon-essentials.
@@ -440,7 +439,7 @@ export class StyleguideCompiler extends Plugin {
     const environmentModulePath = path.resolve(StyleguideCompiler.configPath(), 'twing.cjs');
 
     // Implements the render Context for each storybook story.
-    if (stories.length && this.config.options && this.config.options.globalMode) {
+    if (stories.length && this.getOption('globalMode')) {
       await Promise.all(
         stories.map(
           (story) =>
@@ -584,7 +583,7 @@ export class StyleguideCompiler extends Plugin {
         // alias.
         if (config.resolve && config.resolve.alias) {
           config.resolve.alias = Object.assign(${JSON.stringify(
-            this.config.options.alias,
+            this.getOption('alias'),
             null,
             2
           )}, config.resolve.alias);
@@ -595,14 +594,14 @@ export class StyleguideCompiler extends Plugin {
           new webpack.DefinePlugin({
             THEME_LIBRARIES: JSON.stringify(libraries),
             THEME_LIBRARIES_OVERRIDES: JSON.stringify(${JSON.stringify(
-              this.config.options.librariesOverride || {},
+              this.getOption('librariesOverride') || {},
               null,
               2
             )}),
             THEME_DIST: '${path.normalize(this.environment.THEME_DIST)}/',
             THEME_ENVIRONMENT: '${this.environment.THEME_ENVIRONMENT}',
             THEME_SPRITES: JSON.stringify(sprites),
-            THEME_ALIAS: ${JSON.stringify(this.config.options.alias, null, 2)},
+            THEME_ALIAS: ${JSON.stringify(this.getOption('alias'), null, 2)},
             THEME_WEBSOCKET_PORT: ${this.environment.THEME_WEBSOCKET_PORT},
           })
         );
@@ -613,12 +612,12 @@ export class StyleguideCompiler extends Plugin {
 
         config.optimization = ${
           this.environment.THEME_ENVIRONMENT !== 'development'
-            ? JSON.stringify(this.config.options.optimization || {})
+            ? JSON.stringify(this.getOption('optimization', {}))
             : 'config.optimization || false'
         };
 
         process.env['THEME_ALIAS'] = JSON.stringify(${JSON.stringify(
-          this.config.options.alias,
+          this.getOption('alias'),
           null,
           2
         )});
@@ -626,20 +625,18 @@ export class StyleguideCompiler extends Plugin {
         return config;
       }
       ${
-        this.config.options && !this.config.options.useLegacyCompiler
+        !this.getOption('useLegacyCompiler')
           ? outdent`
               // Enforce the Harbor environment within the Webpack instance.
               // DefinePlugin does not give the desired result withing the Twing Builder.
               process.env.THEME_LIBRARIES = JSON.stringify(libraries);
               process.env.THEME_LIBRARIES_OVERRIDES = JSON.stringify(${JSON.stringify(
-                this.config.options.librariesOverride || {}
+                this.getOption('librariesOverride', {})
               )});
               process.env.THEME_DIST = '${path.normalize(this.environment.THEME_DIST)}/';
               process.env.THEME_ENVIRONMENT = '${this.environment.THEME_ENVIRONMENT}';
               process.env.THEME_SPRITES = JSON.stringify(sprites, null, 2);
-              process.env.THEME_ALIAS = JSON.stringify(${JSON.stringify(
-                this.config.options.alias
-              )});
+              process.env.THEME_ALIAS = JSON.stringify(${JSON.stringify(this.getOption('alias'))});
               process.env.THEME_WEBSOCKET_PORT = ${this.environment.THEME_WEBSOCKET_PORT};
             `
           : ''
@@ -650,6 +647,7 @@ export class StyleguideCompiler extends Plugin {
         core: {
           builder: 'webpack5',
         },
+        disableTelemetry: ${this.getOption('disableTelemetry')},
         previewMainTemplate: '${previewMainTemplate}',
         stories,
         staticDirs: [${
@@ -673,7 +671,7 @@ export class StyleguideCompiler extends Plugin {
    * Synchronizes the processed assets to the static stylguide directory.
    */
   async synchronizeAssets() {
-    let { staticDirectory } = this.config.options;
+    let staticDirectory = this.getOption('staticDirectory');
 
     if (this.environment.THEME_STATIC_DIRECTORY) {
       staticDirectory = this.environment.THEME_STATIC_DIRECTORY;
@@ -685,7 +683,7 @@ export class StyleguideCompiler extends Plugin {
     const assets = glob
       .sync(`${this.environment.THEME_DIST}/**/*`)
       .filter((asset) => asset.indexOf(staticBuildPath) < 0)
-      .filter((asset) => asset.indexOf(this.config.options.staticDirectory) < 0);
+      .filter((asset) => asset.indexOf(this.getOption('staticDirectory')) < 0);
 
     await Promise.all(
       assets.map(

@@ -155,7 +155,7 @@ export class Watcher extends Plugin {
           }
 
           this.instances[name].active = null;
-        }, this.config.options.delay || 500);
+        }, this.getOption('delay', 500));
 
         this.defineReset(name, done);
       }
@@ -193,7 +193,7 @@ export class Watcher extends Plugin {
         if (!Object.values(this.instances).filter(({ running }) => running).length) {
           this.Console.info(
             `Closing file watcher, no changes have been detected within ${
-              this.config.options.duration / 1000
+              this.getOption('duration') / 1000
             }s`
           );
 
@@ -208,6 +208,6 @@ export class Watcher extends Plugin {
 
         return null;
       });
-    }, this.config.options.duration || 1000 * 60 * 15);
+    }, this.getOption('duration', 1000 * 60 * 15));
   }
 }

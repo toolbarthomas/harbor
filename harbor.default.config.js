@@ -213,6 +213,7 @@ export default {
         alias: {
           '@theme': process.cwd(),
         },
+        disableTelemetry: true,
         useLegacyCompiler: false,
         globalMode: false,
         librariesOverride: {},

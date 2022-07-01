@@ -18,7 +18,7 @@ export class JsOptimizer extends Plugin {
       return super.resolve();
     }
 
-    if (this.config.options && this.config.options.bundle) {
+    if (this.getOption('bundle')) {
       await Promise.all(
         this.entry.map(
           (name, index) =>
@@ -60,7 +60,7 @@ export class JsOptimizer extends Plugin {
                 return super.resolve();
               }
 
-              const result = minify(data.toString(), this.config.options.minify || {});
+              const result = minify(data.toString(), this.getOption('minify', {}));
 
               if (!result.code || result.error) {
                 if (result.error) {
@@ -113,7 +113,7 @@ export class JsOptimizer extends Plugin {
       mkdirp.sync(path.dirname(bundle));
 
       try {
-        const minifiedResult = minify(result, this.config.options.minify || {});
+        const minifiedResult = minify(result, this.getOption('minify', {}));
 
         if (minifiedResult.error || !minifiedResult.code) {
           this.Console.log(`Writing bundle: ${bundle}`);

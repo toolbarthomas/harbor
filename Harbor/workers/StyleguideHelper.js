@@ -44,10 +44,10 @@ export class StyleguideHelper extends Worker {
       }
 
       let destinationDirectory = '';
-      if (this.config.options && this.config.options.destinationDirectory) {
+      if (this.getOption('destinationDirectory')) {
         destinationDirectory = path.resolve(
           this.environment.THEME_SRC,
-          this.config.options.destinationDirectory
+          this.getOption('destinationDirectory')
         );
 
         mkdirp.sync(destinationDirectory);
@@ -58,7 +58,7 @@ export class StyleguideHelper extends Worker {
       const queue = [];
       entry.forEach((source) => {
         const extname = path.extname(source);
-        const story = source.replace(extname, `.stories.${this.config.options.extname}`);
+        const story = source.replace(extname, `.stories.${this.getOption('extname')}`);
 
         const template = this.defineInitialTemplate(source);
         let destination = story;
@@ -77,7 +77,7 @@ export class StyleguideHelper extends Worker {
           destination = path.resolve(destinationDirectory, ...dirs, path.basename(story));
         }
 
-        if (this.config.options && !this.config.options.ignoreInitial) {
+        if (!this.getOption('ignoreInitial')) {
           if (fs.existsSync(destination)) {
             this.Console.log(`Skipping existing styleguide story: ${destination}`);
             return;
@@ -394,7 +394,7 @@ export class StyleguideHelper extends Worker {
    * @param {Boolean} force Forces the function to use the initial alias.
    */
   useAlias(source, force) {
-    if ((!force, this.config.options && this.config.options.disableAlias)) {
+    if ((!force, this.getOption('disableAlias'))) {
       return `./${path.basename(source)}`;
     }
 
@@ -462,7 +462,7 @@ export class StyleguideHelper extends Worker {
     const sep = super.getOption('sep', ' / ');
 
     let result = moduleName;
-    if (dirs.length && this.config.options && this.config.options.structuredTitle) {
+    if (dirs.length && this.getOption('structuredTitle')) {
       result = `${dirs.join(sep)}${sep}${moduleName}`;
     }
 

@@ -196,7 +196,7 @@ export class SassCompiler extends Worker {
       this.Console.log(`Compiling: ${entry}`);
 
       this.compiler.render(
-        Object.assign(this.config.options || {}, {
+        Object.assign(this.getOptions(), {
           file: entry,
           includePaths: [this.environment.THEME_SRC],
           sourceMap: this.parseEnvironmentProperty('THEME_DEBUG'),

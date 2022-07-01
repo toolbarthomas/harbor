@@ -19,7 +19,8 @@ import { Worker } from './Worker.js';
 export class StyleguideTester extends Worker {
   async init() {
     const script = path.resolve(fileURLToPath(import.meta.url), '../../../index.js');
-    const { staticDirectory, outputPath } = this.config.options;
+    const staticDirectory = this.getOption('staticDirectory');
+    const outputPath = this.getOption('outputPath');
     const { THEME_DIST } = this.environment;
     const manifest = path.resolve(THEME_DIST, staticDirectory, outputPath);
     const initialCwd = path.resolve('node_modules/@storybook/cli/bin/index.js');
@@ -74,7 +75,7 @@ export class StyleguideTester extends Worker {
 
     this.Console.info('Successfully prepared all required assets, creating snapshots...');
 
-    const { excludeScenarios, scenarioDefaults, ...config } = this.config.options.backstopJS || {};
+    const { excludeScenarios, scenarioDefaults, ...config } = this.getOption('backstopJS', {});
 
     const backstopConfig = {
       scenarios: [],
@@ -104,7 +105,7 @@ export class StyleguideTester extends Worker {
       });
     });
 
-    const customScenarios = glob.sync(`${this.config.options.scenarioDirectory}/**/*.{json,yaml}`);
+    const customScenarios = glob.sync(`${this.getOption('scenarioDirectory')}/**/*.{json,yaml}`);
     if (customScenarios.length) {
       this.Console.info(`Importing ${customScenarios.length} backstopJS scenarios...`);
 

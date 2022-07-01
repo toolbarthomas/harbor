@@ -37,11 +37,22 @@ export class Core {
    * @param {*} defaultValue Returns the fallback value instead.
    */
   getOption(name, defaultValue) {
+    if (!name && this.config.options) {
+      return this.getOptions();
+    }
+
     if (this.config.options && this.config.options[name] != null) {
       return this.config.options[name];
     }
 
     return defaultValue;
+  }
+
+  /**
+   * Helper function to return the defined option for the Harbor Service.
+   */
+  getOptions() {
+    return this.config.options;
   }
 
   /**
