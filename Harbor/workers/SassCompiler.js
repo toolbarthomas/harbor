@@ -78,7 +78,13 @@ export class SassCompiler extends Worker {
             if (cwd.length) {
               this.renderCwd(cwd).then(cb);
             } else {
-              this.Console.warning(`Unable to find entry from: ${entry}`);
+              this.Console.warning(
+                `Skipping ${path.dirname(
+                  entry[0]
+                )}, no entry stylesheet exists within the directory.`
+              );
+
+              entry.forEach((e) => this.Console.log(`Skipping: ${e}`));
 
               cb();
             }
