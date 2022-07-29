@@ -11,20 +11,21 @@ import { Logger } from './Logger.js';
  * @param {object} options Defines the specific Harbor instance configuration that
  * should not be customized.
  * @param {string} type Defines the new instance as Worker or Plugin.
+ * @param {string} typeName The name that will be used within the CLI.
  */
 export class Core {
-  constructor(services, options, type) {
+  constructor(services, options, type, typeName) {
     this.name = this.constructor.name;
 
-    this.Console = new Logger(this.environment);
-    this.type = type;
+    this.Console = new Logger();
 
-    this.services = Object.assign(this.services || {}, services || {});
+    this.type = type;
+    this.typeName = typeName || this.type;
 
     if (services) {
       this.Console.log(`Mounting services for ${this.name}: ${Object.keys(services).join(', ')}`);
 
-      this.services = Object.assign(this.services, services);
+      this.services = Object.assign(this.services || {}, services || {});
     }
 
     this.defineOptions(options);
@@ -154,14 +155,14 @@ export class Core {
    */
   defineEntry(useDestination) {
     if (!this.config.entry || !(this.config.entry instanceof Object)) {
-      this.Console.log(`Unable to define entry for: ${this.name}`);
+      this.Console.log(`Unable to start ${this.name}, no entry file has been configured...`);
       return;
     }
 
     const entries = Object.keys(this.config.entry);
 
     if (!entries.length) {
-      this.Console.log(`No entries found for: ${this.name}`);
+      this.Console.log(`Skipping ${this.name}, unable to find any entry files...`);
       return;
     }
 
@@ -224,7 +225,6 @@ export class Core {
    * Subscribes the init handler of the current Worker or Plugin to the
    * TaskManager.
    *
-   * @param {string} type Defines the Task as Plugin or Worker.
    * @param {string[]} hook Defines the publish hooks to call to subscription.
    */
   subscribe(hook) {
@@ -243,6 +243,7 @@ export class Core {
     TaskManager.subscribe(
       this.type,
       this.name,
+      this.typeName,
       hook,
       TaskManager.initIfAccepted(this.options)
         ? this.init.bind(this)
@@ -262,6 +263,8 @@ export class Core {
 
   /**
    * Resolves the subscribed Task Manager Service handler.
+   *
+   * @param {boolean} exit Exits the running Harbor process.
    */
   resolve(exit) {
     const { TaskManager } = this.services;
@@ -271,7 +274,7 @@ export class Core {
         `Unable to resolve ${this.name}, TaskManager has not been defined.`
       );
     }
-    this.Console.log(`${exit ? 'Rejecting' : 'Resolving'} ${this.type}: ${this.name}`);
+    this.Console.log(`${exit ? 'Rejecting' : 'Resolving'} ${this.typeName}: ${this.name}`);
 
     return TaskManager.resolve(this.type, this.name, exit);
   }
@@ -281,5 +284,25 @@ export class Core {
    */
   reject() {
     this.resolve(true);
+  }
+
+  /**
+   * Defines the existing console class within the current service.
+   *
+   * @param {Logger} Console The existing Logger instance that will be assigned
+   * to the Class instance.
+   */
+  defineConsole(Console) {
+    if (!Console) {
+      return;
+    }
+
+    if (this.Console) {
+      Console.log(`Updating Console instance for ${this.name}...`);
+    }
+
+    this.Console = Console;
+
+    this.Console.log(`Initial console assigned to ${this.name}`);
   }
 }

@@ -229,7 +229,8 @@ export default {
     Watcher: {
       options: {
         delay: 200,
-        duration: 1000 * 60 * 5,
+        duration: 1000 * 60 * 15,
+        autoClose: false,
       },
       hook: 'watch',
       instances: {

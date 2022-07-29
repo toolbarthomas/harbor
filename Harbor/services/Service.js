@@ -6,18 +6,18 @@ export class Service {
   }
 
   /**
-   * Mounts the defined Core service to the current Service.
+   * Mounts the defined services to the current Class instance.
    *
    * @param {String} name The name of the mounted service.
-   * @param {any} instance The handler of the mounted service.
+   * @param {Service} service The handler of the mounted service.
    */
   mount(name, service) {
     if (name && !this[name] && this.acceptedServices.includes(name)) {
       this[name] = service;
     }
 
-    if (this.Console && this.Console.info) {
-      this.Console.log(`${name} assigned: ${this.name}`);
+    if (this.Console && this.Console.log) {
+      this.Console.log(`Assigning ${name} to ${this.name}...`);
     }
   }
 }

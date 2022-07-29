@@ -78,7 +78,7 @@ export class SassCompiler extends Worker {
             if (cwd.length) {
               this.renderCwd(cwd).then(cb);
             } else {
-              this.Console.warning(
+              this.Console.log(
                 `Skipping ${path.dirname(
                   entry[0]
                 )}, no entry stylesheet exists within the directory.`

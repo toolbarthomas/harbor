@@ -59,7 +59,7 @@ export class ConfigManager {
       config = ConfigManager.merge(defaultConfig, customConfig);
 
       if (Object.values(customConfig).length) {
-        Console.info(`Running Harbor with custom configuration from: ${source}`);
+        Console.info(`Launcing Harbor with custom configuration from: ${source}`);
       }
     } catch (exception) {
       Console.error(exception);

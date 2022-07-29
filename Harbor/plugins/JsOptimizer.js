@@ -15,6 +15,7 @@ export class JsOptimizer extends Plugin {
    */
   async init() {
     if (!this.entry || !this.entry.length) {
+      console.log('no entry');
       return super.resolve();
     }
 
@@ -57,6 +58,7 @@ export class JsOptimizer extends Plugin {
               }
 
               if (!data) {
+                this.Console.log(`Unable to optimize ${p} since the file is empty`);
                 return super.resolve();
               }
 

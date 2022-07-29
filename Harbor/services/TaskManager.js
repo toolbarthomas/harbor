@@ -1,5 +1,11 @@
 import { Service } from './Service.js';
 
+/**
+ * Subscribed class to define a Harbor plugin or worker. The actual tasks are
+ * subscribed from the created Harbor instance.
+ *
+ * @param {Service[]} The
+ */
 export class TaskManager extends Service {
   constructor(acceptedServices) {
     super(acceptedServices);
@@ -8,6 +14,9 @@ export class TaskManager extends Service {
       plugins: {},
       workers: {},
     };
+
+    // Keep track of the running instances.
+    this.activeJobs = {};
   }
 
   /**
@@ -52,13 +61,13 @@ export class TaskManager extends Service {
    * publish.
    * @param  {...any} args Optional handler arguments.
    */
-  subscribe(type, name, hook, handler, ...args) {
+  subscribe(type, name, typeName, hook, handler, ...args) {
     if (this.instances[type][name]) {
       this.Console.warning(`${name} is already registerd as task`);
       return;
     }
 
-    this.Console.log(`Subscribing ${name} within ${type} with hook: ${hook.join(', ')}`);
+    this.Console.log(`Subscribing ${typeName} within ${name}: ${hook.join(', ')}`);
 
     this.instances[type][name] = {
       hook,
@@ -83,6 +92,11 @@ export class TaskManager extends Service {
 
   /**
    * Marks the current task as resolved.
+   *
+   * @param {String} type The defined instance type to resolve.
+   * @param {String} name The actual instance to resolve that exists
+   * within the type.
+   * @param {Boolean} exit Optional flag to exit to Node process.
    */
   resolve(type, name, exit) {
     if (!this.instances[type][name]) {
@@ -101,7 +115,12 @@ export class TaskManager extends Service {
    * Initiates the subscribed handlers from the given hook. Each hook will
    * concurrently run each service in a sequential order.
    *
-   * @param {string[]} hook Initialtes the subscribed handlers from the given hooks.
+   * @param {String} type The instance type where the name should exist in.
+   * @param {String} name Publishes the defined instance from the given type
+   * and name.
+   * @param {String[]} initialTasks Should contain the initial hooks for the
+   * subscribe instance. This can be configured with the `hook` option for each
+   * worker and plugin.
    */
   async publish(type, name, initialTasks) {
     if (!name) {
@@ -218,69 +237,95 @@ export class TaskManager extends Service {
     const completed = [];
     const exceptions = [];
 
-    const postRun = (exit, n) => {
+    const postRun = (exit, activeService) => {
       if (!exit) {
-        this.Console.info(`Done: ${n}`);
+        this.Console.success(`Done: ${activeService}`);
 
-        completed.push(n);
+        completed.push(activeService);
       } else {
-        exceptions.push(n);
+        exceptions.push(activeService);
       }
+
+      delete this.activeJobs[activeService];
     };
 
-    await jobs.reduce(
-      (instance, job) =>
-        instance.then(async () => {
-          // Ensures the process to wait for all parallel tasks to complete
-          // before the next job can continue.
-          const JIT = [];
+    await jobs.reduce((instance, job) => {
+      const { hook, tasks } = job;
 
-          const { hook, tasks } = job;
+      // Mark the current jobs as active so each instance which instance is
+      // active.
+      const hooks = tasks.reduce((previousValue, currentValue) => {
+        if (!currentValue.hook) {
+          return previousValue;
+        }
 
-          if (tasks.length) {
-            this.Console.log(`Starting: ${hook}`);
-          }
+        return previousValue.concat(currentValue.hook);
+      }, []);
 
-          for (let i = 0; i < tasks.length; i += 1) {
-            const task = tasks[i];
+      const activeService = Object.keys(this.instances)
+        .map((i) => {
+          const services = this.instances[i];
 
-            this.Console.info(`Launching: ${task.hook[0]}`);
+          return Object.keys(services)
+            .map((service) => (services[service].hook[0] === hooks[0] ? service : null))
+            .filter((s) => s != null && s.length);
+        })[0]
+        .filter((s) => s !== null && s.length);
 
-            if (type === 'plugins' || !task.hook.filter((h) => h.indexOf('::') > 0).length) {
-              // Collects the callback within the JIT for the current asynchronous
-              // job to ensure it is not finished before all parallel tasks are
-              // finished.
+      return instance.then(async () => {
+        // Ensures the process to wait for all parallel tasks to complete
+        // before the next job can continue.
+        const JIT = [];
 
-              if (type === 'plugins') {
-                task.fn().then((exit) => postRun(exit, task.hook[0]));
-              } else {
-                JIT.push(
-                  new Promise((cc) => {
-                    task.fn().then((exit) => {
-                      postRun(exit, task.hook[0]);
+        if (tasks.length) {
+          this.Console.log(`Starting: ${hook}`);
+        }
 
-                      cc();
-                    });
-                  })
-                );
-              }
+        for (let i = 0; i < tasks.length; i += 1) {
+          const task = tasks[i];
+
+          this.Console.log(`Launching: ${task.hook[0]}`);
+
+          this.activeJobs[activeService.length ? activeService : task.hook[0]] = true;
+
+          if (type === 'plugins' || !task.hook.filter((h) => h.indexOf('::') > 0).length) {
+            // Collects the callback within the JIT for the current asynchronous
+            // job to ensure it is not finished before all parallel tasks are
+            // finished.
+
+            if (type === 'plugins') {
+              task
+                .fn()
+                .then((exit) => postRun(exit, activeService.length ? activeService : task.hook[0]));
             } else {
-              // @TODO: Await needs to return directly within the upper scope
-              // otherwise it would initiate grouped tasks in paralel.
-              //
-              // eslint-disable-next-line no-await-in-loop
-              await task.fn().then((exit) => postRun(exit, task.hook[0]));
+              JIT.push(
+                new Promise((cc) => {
+                  task.fn().then((exit) => {
+                    postRun(exit, activeService.length ? activeService : task.hook[0]);
+
+                    cc();
+                  });
+                })
+              );
             }
+          } else {
+            // @TODO: Await needs to return directly within the upper scope
+            // otherwise it would initiate grouped tasks in paralel.
+            //
+            // eslint-disable-next-line no-await-in-loop
+            await task
+              .fn()
+              .then((exit) => postRun(exit, activeService.length ? activeService : task.hook[0]));
           }
+        }
 
-          if (JIT.length) {
-            await Promise.all(JIT);
+        if (JIT.length) {
+          await Promise.all(JIT);
 
-            this.Console.log(`Hook completed: ${hook}`);
-          }
-        }),
-      Promise.resolve()
-    );
+          this.Console.log(`Hook completed: ${hook}`);
+        }
+      });
+    }, Promise.resolve());
 
     return {
       completed,
@@ -288,10 +333,26 @@ export class TaskManager extends Service {
     };
   }
 
+  /**
+   * Helper function to publish the subscribed plugins for the current Harbro
+   * process.
+   *
+   * @param {String} name Should contain the available hooks that are inserted
+   * from the CLI.
+   * @param {String} tasks The initial hooks that are available for the current
+   * instance.
+   */
   publishPlugins(name, tasks) {
     return this.publish('plugins', name, tasks);
   }
 
+  /**
+   * Helper function to publish the subscribed workers for the current Harbor
+   * process.
+   *
+   * @param {String} name Should contain the available hooks that are inserted
+   * from the CLI.
+   */
   publishWorkers(name) {
     return this.publish('workers', name);
   }
@@ -299,6 +360,8 @@ export class TaskManager extends Service {
   /**
    * Prevents the execution if the current environment is not included
    * within the acceptedEnvironments option.
+   *
+   * @param {Object} options The configured options for the subscribed instance.
    */
   initIfAccepted(options) {
     if (!options) {

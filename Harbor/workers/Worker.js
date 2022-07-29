@@ -13,6 +13,6 @@ import { Core } from '../common/Core.js';
  */
 export class Worker extends Core {
   constructor(services, options) {
-    super(services, options, 'workers');
+    super(services, options, 'workers', 'worker');
   }
 }

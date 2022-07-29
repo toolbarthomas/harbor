@@ -1,6 +1,6 @@
 node_modules
 dist
-src
+./src
 !example/*/src
 
 *.map
@@ -16,3 +16,5 @@ harbor.config.js
 
 backstopJS
 .DS_Store
+
+docs/src/styleguide

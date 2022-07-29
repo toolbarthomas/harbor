@@ -36,7 +36,7 @@ export class Watcher extends Plugin {
     // Enables HMR within the styleguide for the generated assets.
     if (this.environment.THEME_WEBSOCKET_PORT) {
       if (WebSocketServer) {
-        this.Console.log(`Preparing Socket...`);
+        this.Console.log(`Starting Websocket Server to enable live reloading...`);
 
         this.wss = new WebSocketServer({
           port: this.parseEnvironmentProperty('THEME_WEBSOCKET_PORT'),
@@ -58,7 +58,11 @@ export class Watcher extends Plugin {
             : [this.config.instances[name].path]
         ).map((p) => path.join(this.environment.THEME_SRC, p));
 
-        this.Console.log(`Creating Watcher instance: ${name} => ${query.join(', ')}`);
+        this.Console.log(
+          `Creating ${this.name} instance, ${name} will watch for changes within '${query.join(
+            ', '
+          )}'`
+        );
 
         this.defineWatcher(name, query, done);
 
@@ -92,7 +96,7 @@ export class Watcher extends Plugin {
    * that should be called to resolve the initial Worker.
    */
   defineWatcher(name, query, done) {
-    this.Console.info(`Defining watcher: ${name}.`);
+    this.Console.info(`Watching ${name} entry files: ${query.join(' | ')}`);
 
     const { TaskManager } = this.services;
 
@@ -141,16 +145,16 @@ export class Watcher extends Plugin {
               await TaskManager.publish('workers', hook || worker);
 
               if (this.wss && this.wss.clients) {
+                this.Console.log(`Sending ${name} update state to Websocket Server`);
+
                 this.wss.clients.forEach((client) => {
                   if (client.readyState === WebSocket.OPEN) {
-                    this.Console.info('Sending update state to Websocket Server');
-
                     client.send(`Published hook: ${hook || worker}`);
                   }
                 });
               }
 
-              this.Console.info(`Resuming watcher: ${name} => ${hook || worker}`);
+              this.Console.log(`Resuming watcher: ${name} => ${hook || worker}`);
             }
           }
 
@@ -172,7 +176,7 @@ export class Watcher extends Plugin {
    */
   defineReset(name, callback) {
     if (this.instances[name].reset) {
-      this.Console.info(`Resetting watcher instance: ${name} `);
+      this.Console.log(`Resetting ${name} watcher...`);
     }
 
     // The actual shutdown handler that will close the current Watcher.
@@ -180,6 +184,8 @@ export class Watcher extends Plugin {
       if (!this.instances[name].instance.close) {
         return;
       }
+
+      const { TaskManager } = this.services;
 
       this.Console.log(`Closing watcher instance: ${name}`);
 
@@ -191,17 +197,29 @@ export class Watcher extends Plugin {
         clearTimeout(this.instances[name].reset);
 
         if (!Object.values(this.instances).filter(({ running }) => running).length) {
-          this.Console.info(
-            `Closing file watcher, no changes have been detected within ${
-              this.getOption('duration') / 1000
-            }s`
-          );
+          if (this.getOption('autoClose') && this.wss && this.wss.close) {
+            this.Console.info(`Closing Socket Connection...`);
 
-          // if (this.wss && this.wss.close) {
-          //   this.Console.info(`Closing Socket Connection...`);
+            this.wss.close();
+          } else if (TaskManager.activeJobs.StyleguideCompiler) {
+            this.Console.info(
+              `Pausing ${name} ${this.name}, no changes have been detected within ${
+                this.getOption('duration') / 1000
+              }s`
+            );
 
-          //   this.wss.close();
-          // }
+            this.Console.info(
+              `You can resume the ${name} ${this.name} by refreshing your Storybook development environment...`
+            );
+          } else {
+            this.Console.info(
+              `${this.name} has been closed, no changes have been detected within ${
+                this.getOption('duration') / 1000
+              }s`
+            );
+
+            this.wss.close();
+          }
 
           return callback();
         }
