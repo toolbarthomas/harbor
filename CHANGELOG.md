@@ -1,10 +1,17 @@
-## 0.200.2 (Jul 26, 2022)
+## 0.203.0 (Jul 26, 2022)
+
+### Features
+
+- Minimizes Console message amount for non verbose instances.
+- Auto close the Watcher instance if the StyleguideCompiler is not running.
+
+## 0.202.0 (Jul 26, 2022)
 
 ### Maintenance
 
 - Implements NPM package maintenance.
 
-## 0.200.1 (Jul 25, 2022)
+## 0.201.0 (Jul 25, 2022)
 
 ### Maintenance
 

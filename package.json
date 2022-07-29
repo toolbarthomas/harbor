@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.202.0",
+  "version": "0.203.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -64,7 +64,7 @@
     "@storybook/cli": "^6.5.9",
     "@storybook/html": "^6.5.9",
     "@storybook/manager-webpack5": "^6.5.9",
-    "autoprefixer": "^10.4.7",
+    "autoprefixer": "^10.4.8",
     "babel-loader": "^8.2.5",
     "babel-plugin-module-resolver": "^4.1.0",
     "backstopjs": "^6.1.0",
