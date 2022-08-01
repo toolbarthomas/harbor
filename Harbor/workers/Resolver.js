@@ -72,7 +72,7 @@ export class Resolver extends Worker {
                       queue += 1;
 
                       if (queue >= vendor.length) {
-                        this.Console.info(`Package resolved: ${name}`);
+                        this.Console.log(`Package resolved: ${name}`);
 
                         done();
                       }
