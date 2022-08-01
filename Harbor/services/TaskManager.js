@@ -278,13 +278,13 @@ export class TaskManager extends Service {
         const JIT = [];
 
         if (tasks.length) {
-          this.Console.log(`Starting: ${hook}`);
+          this.Console.log(`Launching: ${hook}`);
         }
 
         for (let i = 0; i < tasks.length; i += 1) {
           const task = tasks[i];
 
-          this.Console.log(`Launching: ${task.hook[0]}`);
+          this.Console.info(`Starting: ${task.hook[0]}`);
 
           this.activeJobs[activeService.length ? activeService : task.hook[0]] = true;
 

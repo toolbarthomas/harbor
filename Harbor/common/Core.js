@@ -251,9 +251,9 @@ export class Core {
             this.Console.warning(
               `${
                 this.name
-              } will not be launched since it is only accepted for the ${this.options.acceptedEnvironments.join(
+              } will not be launched since it is only accepted for the '${this.options.acceptedEnvironments.join(
                 ', '
-              )} environment(s).`
+              )}' environment(s).`
             );
 
             return this.resolve();

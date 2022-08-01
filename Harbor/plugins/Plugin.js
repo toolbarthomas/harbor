@@ -27,10 +27,6 @@ export class Plugin extends Core {
     }
   }
 
-  init() {
-    this.
-  }
-
   /**
    * Creates a collection of destination paths from the configured service entry
    * configuration.

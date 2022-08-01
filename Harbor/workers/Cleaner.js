@@ -19,7 +19,7 @@ export class Cleaner extends Worker {
         this.Console.log(`Cleaning directory: ${this.path}`);
 
         rimraf(this.path, () => {
-          this.Console.info(`Directory cleaned: ${this.path}`);
+          this.Console.log(`Directory cleaned: ${this.path}`);
 
           super.resolve();
         });

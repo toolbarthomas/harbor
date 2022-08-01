@@ -96,7 +96,7 @@ export class Watcher extends Plugin {
    * that should be called to resolve the initial Worker.
    */
   defineWatcher(name, query, done) {
-    this.Console.info(`Watching ${name} entry files: ${query.join(' | ')}`);
+    this.Console.info(`Watching '${name}' entry files: ${query.join(' | ')}`);
 
     const { TaskManager } = this.services;
 

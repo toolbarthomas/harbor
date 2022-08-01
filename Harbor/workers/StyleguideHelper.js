@@ -52,7 +52,9 @@ export class StyleguideHelper extends Worker {
 
         mkdirp.sync(destinationDirectory);
 
-        this.Console.info(`Destination directory created: ${destinationDirectory}`);
+        this.Console.log(
+          `Successfully created styleguide configuration directory: ${destinationDirectory}`
+        );
       }
 
       const queue = [];

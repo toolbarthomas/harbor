@@ -68,7 +68,7 @@ export class AssetExporter extends Worker {
                           return;
                         }
 
-                        this.Console.info(`Asset exported: ${entry} => ${destination}`);
+                        this.Console.log(`Asset exported: ${entry} => ${destination}`);
 
                         done();
                       });
