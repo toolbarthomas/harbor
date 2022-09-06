@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.210.0",
+  "version": "0.211.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -56,9 +56,9 @@
   "homepage": "https://github.com/toolbarthomas/harbor#readme",
   "dependencies": {
     "@babel/cli": "^7.18.10",
-    "@babel/core": "^7.18.13",
+    "@babel/core": "^7.19.0",
     "@babel/eslint-parser": "^7.18.9",
-    "@babel/preset-env": "^7.18.10",
+    "@babel/preset-env": "^7.19.0",
     "@storybook/addon-essentials": "^6.5.10",
     "@storybook/builder-webpack5": "^6.5.10",
     "@storybook/cli": "^6.5.10",
