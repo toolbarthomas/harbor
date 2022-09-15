@@ -1,3 +1,10 @@
+## 0.212.0 (6 Sep, 2022)
+
+### Maintenance
+
+- Ensures preview.js is resolved within ESM environments (package.json type="module").
+- Implements NPM package maintenance
+
 ## 0.211.0 (6 Sep, 2022)
 
 ### Maintenance

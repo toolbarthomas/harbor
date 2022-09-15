@@ -539,6 +539,12 @@ export class StyleguideCompiler extends Plugin {
           use: 'yaml-loader',
         });
 
+        // Fixes issue where the preview.js is not used as ESM mimetype.
+        config.module.rules.push({
+          test: /.storybook\\/preview.js/,
+          resolve: { fullySpecified: false },
+        })
+
         config.plugins.forEach((plugin, i) => {
           if (plugin.constructor.name === 'ProgressPlugin') {
             config.plugins.splice(i, 1);
