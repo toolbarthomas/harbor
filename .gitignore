@@ -1,6 +1,7 @@
 node_modules
 dist
-./src
+src
+docs
 !example/*/src
 
 *.map
