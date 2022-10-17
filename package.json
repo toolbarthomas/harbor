@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.214.0",
+  "version": "0.215.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -100,7 +100,7 @@
     "stringify-object": "^4.0.1",
     "stylelint-config-recommended-scss": "^7.0.0",
     "stylelint-scss": "^4.3.0",
-    "stylelint": "^14.13.0",
+    "stylelint": "^14.14.0",
     "svgo": "^2.8.0",
     "svgstore": "^3.0.1",
     "twing-loader": "^4.0.0",
