@@ -2,19 +2,19 @@
 
 This document contains some basic information on how you can setup a styleguide environment that is compatible with the Twig template that will be used within your Drupal environment.
 
-1. [Creating custom Twig Templates](#1)
-2. [About the Drupal variable usage](#2)
-3. [Twig Usage](#3)
-4. [Generating Storybook stories from existing Twig templates](#4)
-5. [Including assets via attach_library Twig function](#5)
-6. [Exporting assets as JS module to Web Components](#6)
-7. [Implementing Lit element within the Harbor structure](#7)
-8. [Using BackstopJS testing suite](#8)
+1. [Creating custom Twig Templates](#tips-1)
+2. [About the Drupal variable usage](#tips-2)
+3. [Twig Usage](#tips-3)
+4. [Generating Storybook stories from existing Twig templates](#tips-4)
+5. [Including assets via attach_library Twig function](#tips-5)
+6. [Exporting assets as JS module to Web Components](#tips-6)
+7. [Implementing Lit element within the Harbor structure](#tips-7)
+8. [Using BackstopJS testing suite](#tips-8)
 
 <br />
 <br />
 
-# 1. Creating custom Twig Templates <a id="1"></a>
+# 1. Creating custom Twig Templates <a id="tips-1"></a>
 
 A Harbor environment expects that the general Twig templates are splitted from the Drupal templates. Instead of directly inserting any markup within the Drupal template we define standalone Twig templates. These standalone templates should be included within the required Drupal templates and should use semantic variables instead of the Drupal reserved variables like render arrays.
 
@@ -53,7 +53,7 @@ The actual CMS values should be used during the include of the Drupal template:
 <br />
 <br />
 
-# 2. About the Drupal variable usage <a id="2"></a>
+# 2. About the Drupal variable usage <a id="tips-2"></a>
 
 Drupal makes heavy use of the their Render arrays and sometimes it can be difficult to include these variables within your custom templates.
 
@@ -183,7 +183,7 @@ The mocking function ignores the defined function parameters and will return the
 <br />
 <br />
 
-# 4. Generating Storybook stories from the existing templates <a id="4"></a>
+# 4. Generating Storybook stories from the existing templates <a id="tips-4"></a>
 
 It is possible to generate the Storybook components with optional data by creating a configuration file relative to your Twig template. A Storybook story can be automatically generated with dynamic data by using `$ harbor --setup` or `node node_modules/@toolbarthomas/harbor/index.js --setup`. You should define your configuration as: `JSON`, `YAML` or `JS modules [MJS/JS]`.
 
@@ -224,7 +224,7 @@ Default.args = ResponsiveMenuConfiguration;
 <br />
 <br />
 
-# 5. Including assets via attach_library Twig function <a id="5"></a>
+# 5. Including assets via attach_library Twig function <a id="tips-5"></a>
 
 You can use the `attach_library` Drupal function within [Storybook](https://storybook.js.org/docs/html/get-started/introduction) in order to include the required CSS & JS assets within your custom templates, to ensure you don't need to add them specificly within Storybook.
 The library files are compatible with your Drupal theme, more information regarding [Asset Management](https://www.drupal.org/docs/creating-custom-modules/adding-assets-css-js-to-a-drupal-module-via-librariesyml) can be found at Drupal.org.
@@ -270,7 +270,7 @@ Adding Javascript files is also possible, but keep in mind that you want to defi
 <br />
 <br />
 
-# 6. Exporting assets as JS module for Web Components <a id="6"></a>
+# 6. Exporting assets as JS module for Web Components <a id="tips-6"></a>
 
 With the `Harbor Asset Exporter` you can export the generated assets as a JS module. It can be used to preprocess your stylesheets so it can be included within a Web Component like [Lit Element](https://lit.dev/).
 
@@ -305,7 +305,7 @@ Keep in mind that you need to resolve in a [relative path](https://developer.moz
 <br/>
 <br/>
 
-# 7. Implementing Lit Element within the Harbor structure <a id="7"></a>
+# 7. Implementing Lit Element within the Harbor structure <a id="tips-7"></a>
 
 With the following example you can include Lit element within your theme that should be also compatible with the Drupal structure.
 We need to setup the Lit element dependencies first so it can be used in your template, the dependency will be assigned to each library:
@@ -372,7 +372,7 @@ This is just a simple example to setup a Lit Element, keep in mind that you can 
 <br/>
 <br/>
 
-# 8. Using BackstopJS testing suite <a id="8"></a>
+# 8. Using BackstopJS testing suite <a id="tips-8"></a>
 
 It is possible to run Snapshot tests with BackstopJS for all created Storybook stories.
 Storybook first generates a stories manifest in order to define the components to test.

@@ -651,6 +651,7 @@ export class StyleguideCompiler extends Plugin {
       module.exports = {
         addons,
         core: {
+          disableTelemetry: true,
           builder: 'webpack5',
         },
         disableTelemetry: ${this.getOption('disableTelemetry')},
