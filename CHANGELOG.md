@@ -1,3 +1,9 @@
+## 0.217.2 (2 Nov, 2022)
+
+### Maintenance
+
+- Resolves React 18 peer dependency
+
 ## 0.217.1 (2 Nov, 2022)
 
 ### Maintenance
