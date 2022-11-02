@@ -1,3 +1,15 @@
+## 0.217.4 (2 Nov, 2022)
+
+### Maintenance
+
+- Resolve THEME_PORT environment issue for StyleguideTester
+
+## 0.217.3 (2 Nov, 2022)
+
+### Maintenance
+
+- Resolves React 18 peer dependency (move as dependcy instead of devdependency)
+
 ## 0.217.2 (2 Nov, 2022)
 
 ### Maintenance

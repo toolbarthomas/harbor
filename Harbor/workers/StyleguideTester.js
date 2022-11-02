@@ -85,9 +85,9 @@ export class StyleguideTester extends Worker {
     // Define the scenario from the generated Storybook instance.
     // @TODO Should implement option to test a single scenario.
     Object.values(stories).forEach((value) => {
-      const url = `http://localhost:${this.parseEnvironmentProperty(
-        this.environment.THEME_PORT
-      )}/iframe.html?id=${value.id}`;
+      const url = `http://localhost:${this.parseEnvironmentProperty('THEME_PORT')}/iframe.html?id=${
+        value.id
+      }`;
 
       if (Array.isArray(excludeScenarios) && excludeScenarios.includes(value.id)) {
         this.Console.log(`Excluding scenario: ${value.id}`);
