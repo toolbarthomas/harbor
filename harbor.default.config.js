@@ -152,11 +152,14 @@ export default {
                   convertColors: {
                     currentColor: true,
                   },
-                  removeAttrs: {
-                    preserveCurrentColor: true,
-                    attrs: '(stroke|fill)',
-                  },
                 },
+              },
+            },
+            {
+              name: 'removeAttrs',
+              params: {
+                preserveCurrentColor: true,
+                attrs: '(stroke|fill)',
               },
             },
           ],

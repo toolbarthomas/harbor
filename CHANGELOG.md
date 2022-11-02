@@ -1,3 +1,10 @@
+## 0.217.1 (2 Nov, 2022)
+
+### Maintenance
+
+- Implements NPM package maintenance
+- Resolve SVGO removeAttr default option order issue.
+
 ## 0.217.0 (28 Oct, 2022)
 
 ### Maintenance
