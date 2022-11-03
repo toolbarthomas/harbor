@@ -8,7 +8,6 @@ import path from 'path';
 import YAML from 'yaml';
 
 // @TODO should install within instance like the node-sass fallback.
-import backstop from 'backstopjs';
 import rimraf from 'rimraf';
 
 import { Worker } from './Worker.js';
@@ -28,6 +27,36 @@ export class StyleguideTester extends Worker {
     let hasError = false;
 
     this.Console.log('Preparing test server...');
+
+    const backstopPath = 'backstopjs/core/runner.js';
+    let backstop;
+
+    try {
+      backstop = await import(backstopPath).then((m) => m && m.default);
+    } catch (error) {
+      await import('child_process')
+        .then(async (m) => {
+          this.Console.info(`Installing backstopjs, please wait...`);
+
+          m.default.execSync('npm install backstopjs --quiet --no-progress --no-save', {
+            stdio: 'inherit',
+          });
+
+          backstop = await import(backstopPath).then((m) => m && m.default);
+          console.log(backstop);
+        })
+        .catch((exception) => {
+          if (!exception) {
+            return;
+          }
+
+          this.Console.error(exception);
+
+          this.reject();
+
+          process.exit(1);
+        });
+    }
 
     // Prepare to build a new Storybook snapshot.
     try {

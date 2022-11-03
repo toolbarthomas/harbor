@@ -1,3 +1,9 @@
+## 0.219.0 (3 Nov, 2022)
+
+### Maintenance
+
+- Install backstopjs within worker to improve initial NPM install.
+
 ## 0.218.0 (3 Nov, 2022)
 
 ### Features
