@@ -168,4 +168,30 @@ export class SvgSpriteCompiler extends Worker {
       return result.data && Buffer.from(result.data);
     };
   }
+
+  /**
+   * Helper function that should remove the invalid SVG attributes from the
+   * sprite.
+   *
+   * @param {Object} item The SVGO entry that is defined from the plugin
+   * context.
+   */
+  static cleanupAttributes(item) {
+    if (!item) {
+      return;
+    }
+
+    const { children, attributes } = item;
+
+    if (attributes && attributes instanceof Object) {
+      if (attributes['xlink:href']) {
+        attributes.href = attributes['xlink:href'];
+        delete attributes['xlink:href'];
+      }
+    }
+
+    if (children.length) {
+      children.forEach((child) => SvgSpriteCompiler.cleanupAttributes(child));
+    }
+  }
 }

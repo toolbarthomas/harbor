@@ -6,6 +6,7 @@ import autoprefixer from 'autoprefixer';
 import combineDuplicateSelectors from 'postcss-combine-duplicated-selectors';
 import cssnano from 'cssnano';
 import stylelint from 'stylelint';
+import { SvgSpriteCompiler } from './Harbor/workers/SvgSpriteCompiler.js';
 
 const babelConfig = glob.sync('.babelrc*');
 const browserListConfig = glob.sync('.browserlistrc*');
@@ -161,6 +162,11 @@ export default {
                 preserveCurrentColor: true,
                 attrs: '(stroke|fill)',
               },
+            },
+            {
+              name: 'cleanupAttributes',
+              type: 'perItem',
+              fn: (item) => SvgSpriteCompiler.cleanupAttributes(item),
             },
           ],
         },

@@ -1,3 +1,9 @@
+## 0.218.0 (3 Nov, 2022)
+
+### Features
+
+- Cleanup xlink:href attributes from the SVG sprite.
+
 ## 0.217.4 (2 Nov, 2022)
 
 ### Maintenance
