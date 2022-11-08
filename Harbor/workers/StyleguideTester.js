@@ -42,8 +42,7 @@ export class StyleguideTester extends Worker {
             stdio: 'inherit',
           });
 
-          backstop = await import(backstopPath).then((m) => m && m.default);
-          console.log(backstop);
+          backstop = await import(backstopPath).then((b) => b && b.default);
         })
         .catch((exception) => {
           if (!exception) {

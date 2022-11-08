@@ -15,7 +15,6 @@ export class JsOptimizer extends Plugin {
    */
   async init() {
     if (!this.entry || !this.entry.length) {
-      console.log('no entry');
       return super.resolve();
     }
 
