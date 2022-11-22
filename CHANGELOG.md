@@ -1,3 +1,15 @@
+## 0.221.0 (22 Nov, 2022)
+
+### Maintenance
+
+- Implements Node package management.
+
+## 0.220.2 (8 Nov, 2022)
+
+### Maintenance
+
+- Reverts npm audit fix
+
 ## 0.220.0 (8 Nov, 2022)
 
 ### Maintenance
