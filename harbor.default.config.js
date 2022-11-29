@@ -160,11 +160,15 @@ export default {
               name: 'removeAttrs',
               params: {
                 preserveCurrentColor: true,
-                attrs: '(stroke|fill)',
+                attrs: '(stroke|fill|fill-rule)',
               },
             },
             {
-              name: 'cleanupAttributes',
+              name: 'inlineStyles',
+              type: 'perItem',
+            },
+            {
+              name: 'cleanupAttrs',
               type: 'perItem',
               fn: (item) => SvgSpriteCompiler.cleanupAttributes(item),
             },

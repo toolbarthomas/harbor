@@ -165,7 +165,7 @@ export class SvgSpriteCompiler extends Worker {
         this.Console.error(exception);
       }
 
-      return result.data && Buffer.from(result.data);
+      return result && result.data ? Buffer.from(result.data) : Buffer.from(b);
     };
   }
 

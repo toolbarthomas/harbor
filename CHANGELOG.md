@@ -1,3 +1,9 @@
+## 0.222.1 (29 Nov, 2022)
+
+### Maintenance
+
+- SVGSpriteCompiler: Use inline style SVGO plugin to catch CSS styled SVG images.
+
 ## 0.222.0 (28 Nov, 2022)
 
 ### Maintenance
