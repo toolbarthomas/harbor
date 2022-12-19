@@ -1,3 +1,8 @@
+## 0.224.0 (19 Dec, 2022)
+
+### Maintenance
+- Node: Implements NPM package maintenance
+
 ## 0.223.1 (12 Dec, 2022)
 
 ### Maintenance
