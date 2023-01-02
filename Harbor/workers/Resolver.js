@@ -57,7 +57,7 @@ export class Resolver extends Worker {
                   // Define the destination path for the current module.
                   const dest = path.resolve(
                     this.environment.THEME_DIST,
-                    this.config.cwd || 'vendors',
+                    this.getOption('cwd', 'vendors'),
                     name,
                     path.basename(p)
                   );

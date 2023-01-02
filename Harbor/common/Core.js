@@ -187,7 +187,7 @@ export class Core {
           map.push(
             ...glob
               .sync(p, {
-                ignore: this.getOption('ignore', []),
+                ignore: this.config.ignore || [],
               })
               .filter((e) => {
                 if (!fs.statSync(e).size) {

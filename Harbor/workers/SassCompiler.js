@@ -44,7 +44,7 @@ export class SassCompiler extends Worker {
     const nodeSassPath = 'node-sass/lib/index.js';
 
     // Select the defined Sass compiler: Dart Sass or Node Sass.
-    if (this.config.useLegacyCompiler) {
+    if (this.getOption('useLegacyCompiler', false)) {
       try {
         await import(nodeSassPath);
       } catch (error) {
@@ -62,7 +62,9 @@ export class SassCompiler extends Worker {
       }
     }
 
-    await import(this.config.useLegacyCompiler ? nodeSassPath : 'sass').then((m) => {
+    const target = this.getOption('useLegacyCompiler', false) ? nodeSassPath : 'sass';
+
+    await import(target).then((m) => {
       // Should update as legacy warning in the future.
       this.Console.log(`Using Sass compiler "${m.default.info}"`);
 
@@ -91,11 +93,6 @@ export class SassCompiler extends Worker {
           })
       )
     );
-
-    //     const method =
-    //   this.environment.THEME_ENVIRONMENT === 'production' ? 'error' : 'warning';
-
-    // // this.Console[method](exception);
 
     this.stylelintExceptions = this.stylelintExceptions.filter(
       (item, index) => this.stylelintExceptions.indexOf(item) === index

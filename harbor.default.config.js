@@ -48,7 +48,9 @@ export default {
     },
     SassCompiler: {
       hook: ['sass', 'stylesheets', 'compile', 'default::1', 'run::3'],
-      options: {},
+      options: {
+        useLegacyCompiler: false,
+      },
       plugins: {
         stylelint: {
           configFile: styleLintConfig.length
@@ -137,11 +139,11 @@ export default {
     },
     SvgSpriteCompiler: {
       hook: ['svg', 'images', 'compile', 'default::1', 'run::5'],
-      prefix: '',
       entry: {
         svgsprite: 'images/*/**.svg',
       },
       options: {
+        prefix: '',
         svgo: {
           plugins: [
             {

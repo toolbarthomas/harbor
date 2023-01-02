@@ -20,7 +20,8 @@ export class SvgSpriteCompiler extends Worker {
       return super.resolve();
     }
 
-    this.prefix = typeof this.config.prefix === 'string' ? this.config.prefix : 'svg--';
+    // @TODO 'svg--' is still used to include support for Harbor -0.100.x...
+    this.prefix = this.getOption('prefix', 'svg--');
 
     const entries = Object.keys(this.config.entry);
 
