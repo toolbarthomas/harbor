@@ -1,3 +1,13 @@
+## 0.226.0 (2 Jan, 2023)
+
+### Features
+
+- Core: Include `ignore` option to exclude the defined paths for the given Worker & Plugin.
+
+### Maintenance
+
+- Node: Implements NPM package maintenance
+
 ## 0.225.0 (22 Dec, 2022)
 
 ### Maintenance

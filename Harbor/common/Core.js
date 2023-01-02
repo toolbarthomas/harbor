@@ -185,13 +185,17 @@ export class Core {
           );
 
           map.push(
-            ...glob.sync(p).filter((e) => {
-              if (!fs.statSync(e).size) {
-                this.Console.log(`Skipping empty entry: ${e}`);
-              }
+            ...glob
+              .sync(p, {
+                ignore: this.getOption('ignore', []),
+              })
+              .filter((e) => {
+                if (!fs.statSync(e).size) {
+                  this.Console.log(`Skipping empty entry: ${e}`);
+                }
 
-              return fs.statSync(e).size > 0 ? e : null;
-            })
+                return fs.statSync(e).size > 0 ? e : null;
+              })
           );
         });
 

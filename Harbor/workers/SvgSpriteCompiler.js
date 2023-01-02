@@ -84,9 +84,14 @@ export class SvgSpriteCompiler extends Worker {
 
       this.Console.log(`Generating sprite.`);
 
+      const entry =
+        typeof this.config.entry[filename] === 'string'
+          ? this.config.entry[filename]
+          : this.config.entry[filename][0];
+
       const basePath = path.join(
         this.environment.THEME_SRC,
-        this.config.entry[filename].substring(0, this.config.entry[filename].indexOf('/*'))
+        entry.substring(0, entry.indexOf('/*'))
       );
 
       const destination = path
