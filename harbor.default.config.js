@@ -259,7 +259,7 @@ export default {
           path: '**/**.js',
           workers: ['JsCompiler'],
         },
-        svgprites: {
+        svgsprites: {
           event: 'all',
           path: '**/**.svg',
           workers: ['SvgSpriteCompiler'],
