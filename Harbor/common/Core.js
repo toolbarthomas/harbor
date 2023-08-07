@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import glob from 'glob';
+import { globSync } from 'glob';
 
 import { Logger } from './Logger.js';
 
@@ -185,17 +185,15 @@ export class Core {
           );
 
           map.push(
-            ...glob
-              .sync(p, {
-                ignore: this.config.ignore || [],
-              })
-              .filter((e) => {
-                if (!fs.statSync(e).size) {
-                  this.Console.log(`Skipping empty entry: ${e}`);
-                }
+            ...globSync(p, {
+              ignore: this.config.ignore || [],
+            }).filter((e) => {
+              if (!fs.statSync(e).size) {
+                this.Console.log(`Skipping empty entry: ${e}`);
+              }
 
-                return fs.statSync(e).size > 0 ? e : null;
-              })
+              return fs.statSync(e).size > 0 ? e : null;
+            })
           );
         });
 

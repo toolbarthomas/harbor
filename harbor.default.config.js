@@ -1,17 +1,17 @@
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import path from 'path';
-import glob from 'glob';
+import { globSync } from 'glob';
 import autoprefixer from 'autoprefixer';
 import combineDuplicateSelectors from 'postcss-combine-duplicated-selectors';
 import cssnano from 'cssnano';
 import stylelint from 'stylelint';
 import { SvgSpriteCompiler } from './Harbor/workers/SvgSpriteCompiler.js';
 
-const babelConfig = glob.sync('.babelrc*');
-const browserListConfig = glob.sync('.browserlistrc*');
-const prettierConfig = glob.sync('.prettierrc*');
-const styleLintConfig = glob.sync('.stylelintrc*');
+const babelConfig = globSync('.babelrc*');
+const browserListConfig = globSync('.browserlistrc*');
+const prettierConfig = globSync('.prettierrc*');
+const styleLintConfig = globSync('.stylelintrc*');
 
 export default {
   workers: {

@@ -1,7 +1,7 @@
 import { execSync, spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-import glob from 'glob';
+import { globSync } from 'glob';
 import http from 'http';
 import os from 'os';
 import path from 'path';
@@ -133,7 +133,7 @@ export class StyleguideTester extends Worker {
       });
     });
 
-    const customScenarios = glob.sync(`${this.getOption('scenarioDirectory')}/**/*.{json,yaml}`);
+    const customScenarios = globSync(`${this.getOption('scenarioDirectory')}/**/*.{json,yaml}`);
     if (customScenarios.length) {
       this.Console.info(`Importing ${customScenarios.length} backstopJS scenarios...`);
 

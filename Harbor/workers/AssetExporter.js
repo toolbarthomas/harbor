@@ -1,6 +1,6 @@
 import { outdent } from 'outdent';
 import fs from 'fs';
-import glob from 'glob';
+import { globSync } from 'glob';
 import path from 'path';
 
 import { Worker } from './Worker.js';
@@ -25,9 +25,8 @@ export class AssetExporter extends Worker {
       super.flatten(
         entries
           .map((name) => [
-            ...glob
-              .sync(path.join(this.environment.THEME_DIST, this.config.entry[name]))
-              .map((entry) => {
+            ...globSync(path.join(this.environment.THEME_DIST, this.config.entry[name])).map(
+              (entry) => {
                 if (queue.includes(entry)) {
                   this.Console.warning(`Skipping existing asset: ${entry}`);
                   return null;
@@ -75,7 +74,8 @@ export class AssetExporter extends Worker {
                     }
                   });
                 });
-              }),
+              }
+            ),
           ])
           .filter((e) => e)
       )

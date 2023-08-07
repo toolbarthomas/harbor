@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 import { createRequire } from 'module';
 
 import { Worker } from './Worker.js';

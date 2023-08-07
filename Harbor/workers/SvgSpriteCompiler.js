@@ -1,6 +1,6 @@
 import fs from 'fs';
 import imagemin from 'imagemin';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 import path from 'path';
 import svgstore from 'svgstore';
 import SVGO from 'svgo';
@@ -154,13 +154,12 @@ export class SvgSpriteCompiler extends Worker {
   svgOptimize() {
     return async (buffer) => {
       let b = buffer;
-
-      if (!isSvg(buffer)) {
-        return Promise.resolve(buffer);
-      }
-
       if (Buffer.isBuffer(buffer)) {
         b = buffer.toString();
+      }
+
+      if (!isSvg(b)) {
+        return Promise.resolve(b);
       }
 
       let result;

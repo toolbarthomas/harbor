@@ -3,8 +3,8 @@ import { exec } from 'child_process';
 import { fileURLToPath } from 'url';
 import { snakeCase } from 'snake-case';
 import fs from 'fs';
-import glob from 'glob';
-import mkdirp from 'mkdirp';
+import { globSync } from 'glob';
+import { mkdirp } from 'mkdirp';
 import outdent from 'outdent';
 import path from 'path';
 
@@ -55,17 +55,17 @@ export class StyleguideCompiler extends Plugin {
 
     // Extends the Storybook instance with the optional custom configuration.
     if (this.getOption('configDirectory')) {
-      const customConfigurations = glob
-        .sync(path.join(this.getOption('configDirectory'), '/**'))
-        .filter(
-          (configuration) =>
-            [
-              path.basename(this.getOption('configDirectory')),
-              'index.ejs',
-              'main.js',
-              'main.cjs',
-            ].includes(path.basename(configuration)) === false
-        );
+      const customConfigurations = globSync(
+        path.join(this.getOption('configDirectory'), '/**')
+      ).filter(
+        (configuration) =>
+          [
+            path.basename(this.getOption('configDirectory')),
+            'index.ejs',
+            'main.js',
+            'main.cjs',
+          ].includes(path.basename(configuration)) === false
+      );
 
       if (customConfigurations.length) {
         this.Console.info(
@@ -98,7 +98,7 @@ export class StyleguideCompiler extends Plugin {
     if (this.environment.THEME_ENVIRONMENT === 'production') {
       const staticBuildPath = path.join(this.environment.THEME_DIST, staticDirectory);
 
-      const previousBuild = glob.sync(`${staticBuildPath}/**/*`);
+      const previousBuild = globSync(`${staticBuildPath}/**/*`);
 
       if (previousBuild.length === 0) {
         this.Console.info(`Clearing previous styleguide build...`);
@@ -156,7 +156,7 @@ export class StyleguideCompiler extends Plugin {
 
     const destination = path.resolve(StyleguideCompiler.configPath(), 'twing.cjs');
 
-    const queryEntry = (entry, query) => glob.sync(path.join(entry, query));
+    const queryEntry = (entry, query) => globSync(path.join(entry, query));
 
     const initialFilters = ['_date', '_escape'];
     const defaultFilters = queryEntry(cwd, 'filters/**.cjs').filter(
@@ -410,7 +410,7 @@ export class StyleguideCompiler extends Plugin {
     const stories = [].concat.apply(
       [],
       Object.values(this.config.entry).map((entry) =>
-        glob.sync(path.join(this.environment.THEME_SRC, entry)).map((e) => path.resolve(e))
+        globSync(path.join(this.environment.THEME_SRC, entry)).map((e) => path.resolve(e))
       )
     );
 
@@ -448,8 +448,8 @@ export class StyleguideCompiler extends Plugin {
               let name = path.basename(story);
               name = name.substring(0, name.indexOf('.'));
               const sources = [
-                ...glob.sync(path.join(dirname, `**/${name}.data.js`)),
-                ...glob.sync(path.join(dirname, `**/${name}.data.json`)),
+                ...globSync(path.join(dirname, `**/${name}.data.js`)),
+                ...globSync(path.join(dirname, `**/${name}.data.json`)),
               ];
 
               if (!sources.length) {
@@ -477,8 +477,7 @@ export class StyleguideCompiler extends Plugin {
 
       // Include the Drupal library context within the Storybook instance that
       // can be used for the Drupal related Twig extensions.
-      const libraryPaths = [${glob
-        .sync('*.libraries.yml')
+      const libraryPaths = [${globSync('*.libraries.yml')
         .map((p) => `'${p}'`)
         .join(',')}];
       const libraries = {};
@@ -687,8 +686,7 @@ export class StyleguideCompiler extends Plugin {
     const staticBuildPath = path.join(this.environment.THEME_DIST, staticDirectory);
 
     // Ensure the processed assets are also available for the static build.
-    const assets = glob
-      .sync(`${this.environment.THEME_DIST}/**/*`)
+    const assets = globSync(`${this.environment.THEME_DIST}/**/*`)
       .filter((asset) => asset.indexOf(staticBuildPath) < 0)
       .filter((asset) => asset.indexOf(this.getOption('staticDirectory')) < 0);
 

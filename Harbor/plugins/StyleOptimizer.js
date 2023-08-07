@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 import postcss from 'postcss';
 
 import { Plugin } from './Plugin.js';

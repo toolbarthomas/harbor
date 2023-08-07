@@ -1,7 +1,7 @@
 import { transformFileAsync } from '@babel/core';
 import fs from 'fs';
 import path from 'path';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 
 import { Worker } from './Worker.js';
 

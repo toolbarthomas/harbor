@@ -1,7 +1,7 @@
 import fs from 'fs';
-import glob from 'glob';
+import { globSync } from 'glob';
 import globImporter from 'node-sass-glob-importer';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 import outdent from 'outdent';
 import path from 'path';
 import stylelint from 'stylelint';
@@ -66,9 +66,17 @@ export class SassCompiler extends Worker {
 
     await import(target).then((m) => {
       // Should update as legacy warning in the future.
-      this.Console.log(`Using Sass compiler "${m.default.info}"`);
+      this.compiler = Object.entries(m).reduce((commit, current) => {
+        const [key, handle] = current
 
-      this.compiler = m.default;
+        if (key !== 'default') {
+          commit[key] = handle;
+        }
+
+        return commit;
+      }, {});
+
+      this.Console.log(`Using Sass compiler "${this.compiler.info}"`);
     });
 
     await Promise.all(
@@ -150,7 +158,7 @@ export class SassCompiler extends Worker {
     await stylelint
       .lint(
         Object.assign(this.config.plugins.stylelint, {
-          files: glob.sync(path.join(path.dirname(entry), '**/*.scss')),
+          files: globSync(path.join(path.dirname(entry), '**/*.scss')),
           customSyntax: 'postcss-scss',
         })
       )
