@@ -1,4 +1,4 @@
-import rimraf from 'rimraf';
+import { rimraf } from 'rimraf';
 import fs from 'fs';
 import path from 'path';
 
@@ -18,7 +18,7 @@ export class Cleaner extends Worker {
       if (fs.existsSync(this.path)) {
         this.Console.log(`Cleaning directory: ${this.path}`);
 
-        rimraf(this.path, () => {
+        rimraf(this.path).then(() => {
           this.Console.log(`Directory cleaned: ${this.path}`);
 
           super.resolve();
