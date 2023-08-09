@@ -29,14 +29,11 @@ export class StyleguideCompiler extends Plugin {
    * The initial handler that will be called by the Harbor TaskManager.
    */
   async init() {
-    const bin =
-      this.environment.THEME_ENVIRONMENT === 'production' ? 'build-storybook' : 'start-storybook';
-
-    const nodeModules = fs.existsSync(path.resolve(`node_modules/.bin/${bin}`))
+    const nodeModules = fs.existsSync(path.resolve(`node_modules/.bin/sb`))
       ? path.resolve('node_modules')
       : path.resolve(this.modulePath, 'node_modules');
 
-    const script = Plugin.escapeCommand(path.resolve(`${nodeModules}/.bin/${bin}`));
+    const script = Plugin.escapeCommand(path.resolve(`${nodeModules}/.bin/sb`));
 
     const config = Plugin.escapeCommand(path.resolve(StyleguideCompiler.configPath()));
     let staticDirectory = this.getOption('staticDirectory');
@@ -93,7 +90,7 @@ export class StyleguideCompiler extends Plugin {
       }
     }
 
-    let command;
+    let cmd;
 
     if (this.environment.THEME_ENVIRONMENT === 'production') {
       const staticBuildPath = path.join(this.environment.THEME_DIST, staticDirectory);
@@ -104,14 +101,14 @@ export class StyleguideCompiler extends Plugin {
         this.Console.info(`Clearing previous styleguide build...`);
         previousBuild.forEach((file) => fs.unlinkSync(file));
       }
-      command = `node ${script} -c ${config} -o ${staticBuildPath}`;
+      cmd = `node ${script} build -c ${config} -o ${staticBuildPath}`;
     } else {
       const commandOptions = this.parseEnvironmentProperty('THEME_AS_CLI') ? ` --ci` : '';
 
-      command = `node ${script} -c ${config} -p ${this.environment.THEME_PORT}${commandOptions}`;
+      cmd = `node ${script} dev -c ${config} -p ${this.environment.THEME_PORT}${commandOptions}`;
     }
 
-    const shell = exec(command);
+    const shell = exec(cmd);
 
     shell.stdout.on('data', (data) => {
       process.stdout.write(data);
@@ -654,6 +651,10 @@ export class StyleguideCompiler extends Plugin {
           builder: 'webpack5',
         },
         disableTelemetry: ${this.getOption('disableTelemetry')},
+        // features: {
+        //   storyStoreV7: false
+        // },
+        framework: "@storybook/html-webpack5",
         previewMainTemplate: '${previewMainTemplate}',
         stories,
         staticDirs: [${

@@ -1,13 +1,19 @@
+## 0.700.0 (9 Aug, 2023)
+This release includes the newly released Storybook version 7. Some modifications within your stories definities are required in order to correctly the Twig templates within the Storybook environment. You can follow the example for the default [Storybook HTML environment](https://storybook.js.org/docs/html/writing-stories/introduction).
+
+### Features
+
+- Storybook V7: See the release notes [@storybook](https://storybook.js.org/releases/7.0).
+
+
 ## 0.300.0 (9 Aug, 2023)
 This maintenance release updates to the current Node packages that are used within the build process.
 This is a in between maintenance release for Harbor Storybook 6.5. The migration for Storybook V7 is currently under development.
 Future release will be based from 0.700.0 version scheme that includes the update to Storybook V7
 
+### Maintenance
+
 - Node: Implements NPM package maintenance, does not update Storybook to V7.
-
-### Features
-
-- Core: Include `ignore` option to exclude the defined paths for the given Worker & Plugin.
 
 ## 0.226.1 (2 Jan, 2023)
 
