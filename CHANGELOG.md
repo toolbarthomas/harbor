@@ -1,3 +1,14 @@
+## 0.300.0 (9 Aug, 2023)
+This maintenance release updates to the current Node packages that are used within the build process.
+This is a in between maintenance release for Harbor Storybook 6.5. The migration for Storybook V7 is currently under development.
+Future release will be based from 0.700.0 version scheme that includes the update to Storybook V7
+
+- Node: Implements NPM package maintenance, does not update Storybook to V7.
+
+### Features
+
+- Core: Include `ignore` option to exclude the defined paths for the given Worker & Plugin.
+
 ## 0.226.1 (2 Jan, 2023)
 
 ### Features
