@@ -1,3 +1,10 @@
+## 0.701.0 (4 September, 2023)
+
+### Maintenance
+
+- Node: Implements minor NPM package maintenance
+- Storybook: Upgrade utilities to 7.5
+
 ## 0.700.0 (9 Aug, 2023)
 This release includes the newly released Storybook version 7. Some modifications within your stories definities are required in order to correctly the Twig templates within the Storybook environment. You can follow the example for the default [Storybook HTML environment](https://storybook.js.org/docs/html/writing-stories/introduction). (The README.md has also been updated regarding this breaking change.)
 
