@@ -1,3 +1,9 @@
+## 0.702.0 (6 September, 2023)
+
+### Maintenance
+
+- Node: Updates Babel packages to 7.22.15
+
 ## 0.701.0 (4 September, 2023)
 
 ### Maintenance
