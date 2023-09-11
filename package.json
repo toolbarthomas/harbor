@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.702.0",
+  "version": "0.703.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -56,7 +56,7 @@
   "homepage": "https://github.com/toolbarthomas/harbor#readme",
   "dependencies": {
     "@babel/cli": "^7.22.15",
-    "@babel/core": "^7.22.15",
+    "@babel/core": "^7.22.17",
     "@babel/eslint-parser": "^7.22.15",
     "@babel/plugin-proposal-decorators": "^7.22.15",
     "@babel/preset-env": "^7.22.15",
@@ -74,7 +74,7 @@
     "copyfiles": "^2.4.1",
     "cssnano": "^6.0.1",
     "dotenv": "16.3.1",
-    "eslint": "^8.48.0",
+    "eslint": "^8.49.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-import-resolver-babel-module": "^5.3.2",
@@ -91,7 +91,7 @@
     "outdent": "^0.8.0",
     "postcss": "^8.4.29",
     "postcss-combine-duplicated-selectors": "^10.0.3",
-    "postcss-scss": "^4.0.7",
+    "postcss-scss": "^4.0.8",
     "prettier": "^3.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -109,7 +109,7 @@
     "type-name": "^2.0.2",
     "uglify-js": "^3.17.4",
     "webpack": "^5.88.2",
-    "ws": "^8.13.0",
+    "ws": "^8.14.1",
     "yaml-loader": "^0.8.0"
   },
   "devDependencies": {

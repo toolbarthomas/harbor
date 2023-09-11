@@ -1,3 +1,9 @@
+## 0.703.0 (11 September, 2023)
+
+### Maintenance
+
+- Node: Implements minor NPM package maintenance
+
 ## 0.702.0 (6 September, 2023)
 
 ### Maintenance
