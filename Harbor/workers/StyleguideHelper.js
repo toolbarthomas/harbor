@@ -94,22 +94,26 @@ export class StyleguideHelper extends Worker {
           ([destination, template]) =>
             new Promise((callback) => {
               try {
-                fs.writeFile(
-                  destination,
-                  prettier.format(template, {
+                prettier
+                  .format(template, {
                     parser: 'babel',
                     ...super.getOption('prettier', {}),
-                  }),
-                  (exception) => {
-                    if (exception) {
-                      this.Console.warning(exception);
+                  })
+                  .then((result) => {
+                    if (!result) {
+                      return callback();
                     }
 
-                    this.Console.log(`Styleguide entry template created: ${destination}`);
+                    return fs.writeFile(destination, result, (exception) => {
+                      if (exception) {
+                        this.Console.warning(exception);
+                      }
 
-                    callback();
-                  }
-                );
+                      this.Console.log(`Styleguide entry template created: ${destination}`);
+
+                      callback();
+                    });
+                  });
               } catch (exception) {
                 this.Console.warning(exception);
               }
