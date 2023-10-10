@@ -107,11 +107,12 @@
         window.drupalSettings = {};
       </script>
 
-      <script>
+      <script defer>
         // Prevent callStacks for the runOnPageChange handler.
         let refresh;
         window.throttle = window.throttle || false;
         let awaitVendors;
+        let iterations = 0
 
         // https://github.com/storybookjs/storybook/issues/6113#issuecomment-473965255
         function runOnPageChange()
@@ -126,6 +127,20 @@
               return;
             }
 
+            if (!Object.keys(window.Drupal.behaviors).length) {
+              // @TODO max iterations should be dynamic in the future.
+              if (iterations > 1000) {
+                return
+              }
+
+              console.log('retry')
+
+              iterations++;
+              return runOnPageChange()
+            }
+
+            // console.log('beh', window.throttle, Object.keys(window.Drupal.behaviors));
+
             window.throttle = true;
 
             // Enables the required script logic from Drupal by calling the defined
@@ -137,6 +152,7 @@
               }
             });
 
+
             // We need to await a moment to let other local scripts use
             // the DomContentLoaded Event.
             if (awaitVendors) {
@@ -146,7 +162,7 @@
             awaitVendors = setTimeout(() =>
             {
               window.throttle = false;
-            }, 500);
+            }, 1000 / 60);
 
           }, 200);
         }

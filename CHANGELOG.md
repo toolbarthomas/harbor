@@ -1,3 +1,9 @@
+## 0.707.0 (10 October, 2023)
+
+### Maintenance
+
+- Storybook: Await JS dependencies to ensure the attach method is called for all `Drupal.behaviors` entries. This should resolve the issue where the `DOMContentLoaded` event was not completed during the initial runOnPageChange Storybook template callback.
+
 ## 0.706.0 (10 October, 2023)
 
 ### Maintenance

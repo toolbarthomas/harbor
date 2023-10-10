@@ -7,6 +7,11 @@ base:
     dist/javascripts/index.js: { attributes: { defer: true } }
   dependencies:
     - harbor/font-ibm-plex-sans
+    - harbor/async
+
+async:
+  js:
+    dist/javascripts/async.js: {}
 
 lit-element:
   js:
