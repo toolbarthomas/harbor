@@ -1,251 +1,251 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-<head>
-  <meta charset="utf-8" />
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= htmlWebpackPlugin.options.title || 'Storybook' %></title>
 
-  <title>
-    <%= htmlWebpackPlugin.options.title || 'Storybook' %>
-  </title>
-
-  <% if (htmlWebpackPlugin.files.favicon) { %>
+    <% if (htmlWebpackPlugin.files.favicon) { %>
     <link rel="shortcut icon" href="<%= htmlWebpackPlugin.files.favicon%>" />
     <% } %>
 
-      <script>
-        // Prepare the Drupal behaviors object in order to enable the logic within
-        // storybook without using a different syntax.
-        window.Drupal = {
-          /**
-           * The shared storage for the various module scripts.
-           */
-          behaviors: {},
+    <script>
+      // Prepare the Drupal behaviors object in order to enable the logic within
+      // storybook without using a different syntax.
+      window.Drupal = {
+        /**
+         * The shared storage for the various module scripts.
+         */
+        behaviors: {},
 
-          /**
-           * The displace method finds elements in the DOM marked with one of four
-           * attributes: data-offset-top, data-offset-right, data-offset-bottom
-           * or data-offset-left.
-           */
-          displace: (initial) =>
-          {
-            const targets = {
-              top: document.querySelector('[data-offset-top]') || document.body,
-              right: document.querySelector('[data-offset-right]') || document.body,
-              bottom: document.querySelector('[data-offset-bottom]') || document.body,
-              left: document.querySelector('[data-offset-left]') || document.body,
-            };
+        /**
+         * The displace method finds elements in the DOM marked with one of four
+         * attributes: data-offset-top, data-offset-right, data-offset-bottom
+         * or data-offset-left.
+         */
+        displace: (initial) => {
+          const targets = {
+            top: document.querySelector('[data-offset-top]') || document.body,
+            right: document.querySelector('[data-offset-right]') || document.body,
+            bottom: document.querySelector('[data-offset-bottom]') || document.body,
+            left: document.querySelector('[data-offset-left]') || document.body,
+          };
 
-            const offset = {
-              top: {
-                value: initial ? initial.top || 0 : 0,
-              },
-              right: {
-                value: initial ? initial.right || 0 : 0,
-              },
-              bottom: {
-                value: initial ? initial.bottom || 0 : 0,
-              },
-              left: {
-                value: initial ? initial.left || 0 : 0,
-              },
-            };
+          const offset = {
+            top: {
+              value: initial ? initial.top || 0 : 0,
+            },
+            right: {
+              value: initial ? initial.right || 0 : 0,
+            },
+            bottom: {
+              value: initial ? initial.bottom || 0 : 0,
+            },
+            left: {
+              value: initial ? initial.left || 0 : 0,
+            },
+          };
 
-            Object.keys(targets).forEach(target =>
-            {
-              let element = targets[target];
+          Object.keys(targets).forEach((target) => {
+            let element = targets[target];
 
-              if (!element) {
-                return;
+            if (!element) {
+              return;
+            }
+
+            // Append the offset of each parent element.
+            while (
+              element &&
+              !isNaN(element.offsetLeft || element.getBoundingClientRect().left) &&
+              !isNaN(element.offsetTop || element.getBoundingClientRect().top)
+            ) {
+              const top = !isNaN(parseFloat(element.offsetTop))
+                ? element.offsetTop
+                : element.getBoundingClientRect().top;
+              const left = !isNaN(parseFloat(element.offsetLeft))
+                ? element.offsetTop
+                : element.getBoundingClientRect().left;
+
+              if (!offset[target]) {
+                continue;
               }
 
-              // Append the offset of each parent element.
-              while (element && !isNaN(element.offsetLeft || element.getBoundingClientRect().left) && !isNaN(element.offsetTop || element.getBoundingClientRect().top)) {
-                const top = !isNaN(parseFloat(element.offsetTop)) ? element.offsetTop : element.getBoundingClientRect().top;
-                const left = !isNaN(parseFloat(element.offsetLeft)) ? element.offsetTop : element.getBoundingClientRect().left;
+              offset[target].position = {
+                x: 0,
+                y: 0,
+              };
 
-                if (!offset[target]) {
-                  continue;
-                }
+              offset[target].position.x += left - element.scrollLeft;
+              offset[target].position.y += top - element.scrollTop;
+              element = element.offsetParent;
+            }
 
-                offset[target].position = {
-                  x: 0,
-                  y: 0,
-                };
+            if (offset[target] && offset) {
+              const commit = {
+                value: offset[target].value,
+                position: offset[target].position,
+              };
 
-                offset[target].position.x += left - element.scrollLeft;
-                offset[target].position.y += top - element.scrollTop;
-                element = element.offsetParent;
-              }
+              offset[target] = commit;
+            }
+          });
 
-              if (offset[target] && offset) {
-                const commit = {
-                  value: offset[target].value,
-                  position: offset[target].position,
-                }
+          return {
+            top:
+              targets.top === document.body
+                ? offset.top.value
+                : offset.top.value + offset.top.position.y,
+            right:
+              targets.right === document.body
+                ? offset.right.value
+                : offset.right.value + offset.right.position.x + (targets.right.scrollWidth || 0),
+            bottom:
+              targets.bottom === document.body
+                ? offset.bottom.value
+                : offset.bottom.value +
+                  offset.bottom.position.y +
+                  (targets.bottom.scrollHeight || 0),
+            left:
+              targets.left === document.body
+                ? offset.left.value
+                : offset.left.value + offset.left.position.x,
+          };
+        },
 
-                offset[target] = commit;
-              }
-            });
+        /**
+         * Dummy translate function that would hook within the Drupal locale
+         * functionality.
+         */
+        t: (str) => str,
+      };
 
-            return {
-              top: targets.top === document.body ? offset.top.value : offset.top.value + offset.top.position.y,
-              right: targets.right === document.body ? offset.right.value : offset.right.value + offset.right.position.x + (targets.right.scrollWidth || 0),
-              bottom: targets.bottom === document.body ? offset.bottom.value : offset.bottom.value + offset.bottom.position.y + (targets.bottom.scrollHeight || 0),
-              left: targets.left === document.body ? offset.left.value : offset.left.value + offset.left.position.x,
-            };
-          },
+      window.drupalSettings = {};
+    </script>
 
-          /**
-           * Dummy translate function that would hook within the Drupal locale
-           * functionality.
-           */
-          t: (str) => str,
+    <script defer>
+      // Prevent callStacks for the runOnPageChange handler.
+      let refresh;
+      window.throttle = window.throttle || false;
+      let awaitVendors;
+      let iterations = 0;
+
+      // https://github.com/storybookjs/storybook/issues/6113#issuecomment-473965255
+      function runOnPageChange() {
+        if (refresh) {
+          clearTimeout(refresh);
         }
 
-        window.drupalSettings = {};
-      </script>
-
-      <script defer>
-        // Prevent callStacks for the runOnPageChange handler.
-        let refresh;
-        window.throttle = window.throttle || false;
-        let awaitVendors;
-        let iterations = 0
-
-        // https://github.com/storybookjs/storybook/issues/6113#issuecomment-473965255
-        function runOnPageChange()
-        {
-          if (refresh) {
-            clearTimeout(refresh);
+        refresh = setTimeout(() => {
+          if (window.throttle) {
+            return;
           }
 
-          refresh = setTimeout(() =>
-          {
-            if (window.throttle) {
+          if (!Object.keys(window.Drupal.behaviors).length) {
+            // @TODO max iterations should be dynamic in the future.
+            if (iterations > 100) {
               return;
             }
 
-            if (!Object.keys(window.Drupal.behaviors).length) {
-              // @TODO max iterations should be dynamic in the future.
-              if (iterations > 1000) {
-                return
-              }
+            iterations++;
+            return runOnPageChange();
+          }
 
-              console.log('retry')
+          // console.log('beh', window.throttle, Object.keys(window.Drupal.behaviors));
 
-              iterations++;
-              return runOnPageChange()
+          window.throttle = true;
+
+          // Enables the required script logic from Drupal by calling the defined
+          // attach Drupal handlers.
+          Object.values(window.Drupal.behaviors).forEach(function (handler) {
+            if (handler.attach) {
+              handler.attach();
             }
+          });
 
-            // console.log('beh', window.throttle, Object.keys(window.Drupal.behaviors));
+          // We need to await a moment to let other local scripts use
+          // the DomContentLoaded Event.
+          if (awaitVendors) {
+            clearTimeout(awaitVendors);
+          }
 
-            window.throttle = true;
+          awaitVendors = setTimeout(() => {
+            window.throttle = false;
+          }, 1000 / 60);
+        }, 200);
+      }
 
-            // Enables the required script logic from Drupal by calling the defined
-            // attach Drupal handlers.
-            Object.values(window.Drupal.behaviors).forEach(function (handler)
-            {
-              if (handler.attach) {
-                handler.attach();
+      let DOMReady = false;
+
+      document.addEventListener(
+        'DOMContentLoaded',
+        function () {
+          if (!DOMReady) {
+            return;
+          }
+
+          const callback = function (mutationsList) {
+            for (let i = 0, len = mutationsList.length; i < len; i++) {
+              if (mutationsList[i].type == 'childList') {
+                runOnPageChange();
+                break;
               }
-            });
-
-
-            // We need to await a moment to let other local scripts use
-            // the DomContentLoaded Event.
-            if (awaitVendors) {
-              clearTimeout(awaitVendors);
             }
-
-            awaitVendors = setTimeout(() =>
-            {
-              window.throttle = false;
-            }, 1000 / 60);
-
-          }, 200);
-        }
-
-        let DOMReady = false;
-
-        document.addEventListener(
-          'DOMContentLoaded',
-          function ()
-          {
-            if (!DOMReady) {
-              return;
-            }
-
-            const callback = function (mutationsList)
-            {
-              for (let i = 0, len = mutationsList.length; i < len; i++) {
-                if (mutationsList[i].type == 'childList') {
-                  runOnPageChange();
-                  break;
-                }
-              }
-            };
-            const observer = new MutationObserver(callback);
-            const config = { childList: true, subtree: false };
-            observer.observe(document.getElementById('storybook-root'), config);
-
-            runOnPageChange();
-          },
-          false
-        );
-
-        window.addEventListener('load', () =>
-        {
-          window.throttle = false;
+          };
+          const observer = new MutationObserver(callback);
+          const config = { childList: true, subtree: false };
+          observer.observe(document.getElementById('storybook-root'), config);
 
           runOnPageChange();
+        },
+        false
+      );
 
-          DOMReady = true;
-        });
-      </script>
+      window.addEventListener('load', () => {
+        window.throttle = false;
 
-      <% if (typeof headHtmlSnippet !=='undefined' ) { %>
-        <%= headHtmlSnippet %>
-          <% } %>
+        runOnPageChange();
 
-            <% htmlWebpackPlugin.files.css.forEach(file=> { %>
-              <link href="<%= file %>" rel="stylesheet" />
-              <% }); %>
+        DOMReady = true;
+      });
+    </script>
 
-                <style>
-                  #storybook-root[hidden],
-                  #storybook-docs[hidden] {
-                    display: none !important;
-                  }
-                </style>
-</head>
+    <% if (typeof headHtmlSnippet !=='undefined' ) { %> <%= headHtmlSnippet %> <% } %> <%
+    htmlWebpackPlugin.files.css.forEach(file=> { %>
+    <link href="<%= file %>" rel="stylesheet" />
+    <% }); %>
 
-<body>
-  <% if (typeof bodyHtmlSnippet !=='undefined' ) { %>
-    <%= bodyHtmlSnippet %>
-      <% } %>
+    <style>
+      #storybook-root[hidden],
+      #storybook-docs[hidden] {
+        display: none !important;
+      }
+    </style>
+  </head>
 
-        <div id="storybook-root"></div>
-        <div id="storybook-docs"></div>
+  <body>
+    <% if (typeof bodyHtmlSnippet !=='undefined' ) { %> <%= bodyHtmlSnippet %> <% } %>
 
-        <% if (typeof globals !=='undefined' && Object.keys(globals).length) { %>
-          <script>
+    <div id="storybook-root"></div>
+    <div id="storybook-docs"></div>
+
+    <% if (typeof globals !=='undefined' && Object.keys(globals).length) { %>
+    <script>
       <% for (var varName in globals) { %>
           <% if (globals[varName] != undefined) { %>
                 window['<%=varName%>'] = <%= JSON.stringify(globals[varName]) %>;
           <% } %>
       <% } %>
-          </script>
-          <% } %>
-            <script type="module">
+    </script>
+    <% } %>
+    <script type="module">
       import './sb-preview/runtime.js';
 
       <% htmlWebpackPlugin.files.js.forEach(file =>
       { %>
       import './<%= file %>';
       <% }); %>
-            </script>
-</body>
-
+    </script>
+  </body>
 </html>

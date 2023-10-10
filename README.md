@@ -6,7 +6,7 @@ With the help of [Storybook](https://storybookjs.org/) it can generate the Twig 
 
 The assets are processed on a very basic level, stylesheets can be compiled with the included compiler and Babel will transform the defined javascript files to enable JS compatibility for older browsers.
 
-It is optional to use the bundled workers but they ensure that they work correctly within Drupal and your styleguide. It is possible to include other frameworks within the environment by simply adding it within a compatible theme library configuration.
+It is optional to use the bundled workers but this ensures that everything works correctly within Drupal and your styleguide environment. It is also possible to include other frameworks within the environment by simply adding it within a compatible theme library configuration.
 
 [Get more information](./TIPS.md) for implementing Harbor in your current Drupal environment.
 
