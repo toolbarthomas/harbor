@@ -1,3 +1,9 @@
+## 0.707.1 (10 October, 2023)
+
+### Maintenance
+
+- Storybook: Optimize Asset loading interval.
+
 ## 0.707.0 (10 October, 2023)
 
 ### Maintenance

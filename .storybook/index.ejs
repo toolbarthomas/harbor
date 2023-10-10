@@ -129,7 +129,7 @@
       let refresh;
       window.throttle = window.throttle || false;
       let awaitVendors;
-      let iterations = 0;
+      let cycle = 0;
 
       // https://github.com/storybookjs/storybook/issues/6113#issuecomment-473965255
       function runOnPageChange() {
@@ -143,16 +143,17 @@
           }
 
           if (!Object.keys(window.Drupal.behaviors).length) {
-            // @TODO max iterations should be dynamic in the future.
-            if (iterations > 100) {
+            // @TODO max cycle should be dynamic in the future.
+            if (cycle > 100) {
               return;
             }
 
-            iterations++;
-            return runOnPageChange();
-          }
+            cycle++;
 
-          // console.log('beh', window.throttle, Object.keys(window.Drupal.behaviors));
+            return runOnPageChange();
+          } else {
+            cycle = 0;
+          }
 
           window.throttle = true;
 
