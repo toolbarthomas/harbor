@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.708.0",
+  "version": "0.709.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -99,7 +99,7 @@
     "sass": "^1.69.3",
     "snake-case": "^3.0.4",
     "stringify-object": "^5.0.0",
-    "stylelint": "^15.10.3",
+    "stylelint": "^15.11.0",
     "stylelint-config-recommended-scss": "^13.0.0",
     "stylelint-scss": "^5.2.1",
     "svgo": "^3.0.2",
@@ -108,7 +108,7 @@
     "twing-loader": "^4.0.0",
     "type-name": "^2.0.2",
     "uglify-js": "^3.17.4",
-    "webpack": "^5.88.2",
+    "webpack": "^5.89.0",
     "ws": "^8.14.2",
     "yaml-loader": "^0.8.0"
   },
