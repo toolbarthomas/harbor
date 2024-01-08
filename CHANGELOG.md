@@ -1,3 +1,15 @@
+## 0.720.0 (1 Janurary, 2024)
+
+### Maintenance
+
+- Node: Implements minor NPM package maintenance.
+
+## 0.712.0 (02 November, 2023)
+
+### Maintenance
+
+- Node: Implements minor NPM package maintenance.
+
 ## 0.711.0 (26 October, 2023)
 
 ### Maintenance
