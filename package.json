@@ -1,13 +1,13 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.712.0",
+  "version": "0.720.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
   "bin": {
     "harbor": "./index.js"
   },
-  "node": "^12.22.0 || ^14.17.0 || >=16.0.0",
+  "node": ">=18.0.0",
   "scripts": {
     "development": "node ./index.js --watch --styleguide",
     "export": "node ./index.js --task=export",
@@ -72,7 +72,7 @@
     "chokidar": "^3.5.3",
     "concat": "^1.0.3",
     "copyfiles": "^2.4.1",
-    "cssnano": "^6.0.1",
+    "cssnano": "^6.0.3",
     "dotenv": "16.3.1",
     "eslint": "^8.56.0",
     "eslint-config-airbnb-base": "^15.0.0",
@@ -113,6 +113,6 @@
     "yaml-loader": "^0.8.0"
   },
   "devDependencies": {
-    "@storybook/preview-api": "^7.5.2"
+    "@storybook/preview-api": "^7.6.7"
   }
 }
