@@ -1,3 +1,9 @@
+## 0.724.0 (26 March, 2024)
+
+### Maintenance
+
+- Node: Implements minor NPM package maintenance.
+
 ## 0.723.0 (6 March, 2024)
 
 ### Maintenance
