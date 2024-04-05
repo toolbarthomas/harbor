@@ -1,30 +1,61 @@
 import { execSync, spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
-import glob from 'glob';
+import { globSync } from 'glob';
 import http from 'http';
 import os from 'os';
 import path from 'path';
 import YAML from 'yaml';
 
 // @TODO should install within instance like the node-sass fallback.
-import backstop from 'backstopjs';
+import { rimraf } from 'rimraf';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
 /**
  * Enables Snapshot testing for all valid Storybook stories.
  */
-class StyleguideTester extends Worker {
+export class StyleguideTester extends Worker {
   async init() {
     const script = path.resolve(fileURLToPath(import.meta.url), '../../../index.js');
-    const { staticDirectory, outputPath } = this.config.options;
+    const staticDirectory = this.getOption('staticDirectory');
+    const outputPath = this.getOption('outputPath');
     const { THEME_DIST } = this.environment;
     const manifest = path.resolve(THEME_DIST, staticDirectory, outputPath);
     const initialCwd = path.resolve('node_modules/@storybook/cli/bin/index.js');
+    const destinationDirectory = path.resolve(THEME_DIST, staticDirectory);
     let hasError = false;
 
     this.Console.log('Preparing test server...');
+
+    const backstopPath = 'backstopjs/core/runner.js';
+    let backstop;
+
+    try {
+      backstop = await import(backstopPath).then((m) => m && m.default);
+    } catch (error) {
+      await import('child_process')
+        .then(async (m) => {
+          this.Console.info(`Installing backstopjs, please wait...`);
+
+          m.default.execSync('npm install backstopjs --quiet --no-progress --no-save', {
+            stdio: 'inherit',
+          });
+
+          backstop = await import(backstopPath).then((b) => b && b.default);
+        })
+        .catch((exception) => {
+          if (!exception) {
+            return;
+          }
+
+          this.Console.error(exception);
+
+          this.reject();
+
+          process.exit(1);
+        });
+    }
 
     // Prepare to build a new Storybook snapshot.
     try {
@@ -42,10 +73,10 @@ class StyleguideTester extends Worker {
       ? initialCwd
       : path.resolve('../../@storybook/cli/bin/index.js');
 
-    this.Console.info(`Extracting stories from ${path.resolve(THEME_DIST, staticDirectory)}`);
+    this.Console.info(`Extracting stories from ${destinationDirectory}`);
 
     // Extract the generated stories from the defined snapshot directory.
-    execSync(`${cwd} extract ${path.resolve(THEME_DIST, staticDirectory)} ${manifest}`, {
+    execSync(`${cwd} extract ${destinationDirectory} ${manifest}`, {
       stdio: 'inherit',
     });
 
@@ -72,7 +103,7 @@ class StyleguideTester extends Worker {
 
     this.Console.info('Successfully prepared all required assets, creating snapshots...');
 
-    const { excludeScenarios, scenarioDefaults, ...config } = this.config.options.backstopJS || {};
+    const { excludeScenarios, scenarioDefaults, ...config } = this.getOption('backstopJS', {});
 
     const backstopConfig = {
       scenarios: [],
@@ -82,7 +113,9 @@ class StyleguideTester extends Worker {
     // Define the scenario from the generated Storybook instance.
     // @TODO Should implement option to test a single scenario.
     Object.values(stories).forEach((value) => {
-      const url = `http://localhost:${this.environment.THEME_PORT}/iframe.html?id=${value.id}`;
+      const url = `http://localhost:${this.parseEnvironmentProperty('THEME_PORT')}/iframe.html?id=${
+        value.id
+      }`;
 
       if (Array.isArray(excludeScenarios) && excludeScenarios.includes(value.id)) {
         this.Console.log(`Excluding scenario: ${value.id}`);
@@ -100,7 +133,7 @@ class StyleguideTester extends Worker {
       });
     });
 
-    const customScenarios = glob.sync(`${this.config.options.scenarioDirectory}/**/*.{json,yaml}`);
+    const customScenarios = globSync(`${this.getOption('scenarioDirectory')}/**/*.{json,yaml}`);
     if (customScenarios.length) {
       this.Console.info(`Importing ${customScenarios.length} backstopJS scenarios...`);
 
@@ -184,14 +217,21 @@ class StyleguideTester extends Worker {
     process.kill(-server.pid);
 
     server.on('close', () => {
-      // Reject afterwards so we can close any instances within the Worker scope.
-      if (hasError) {
-        super.reject();
+      if (fs.existsSync(destinationDirectory)) {
+        this.Console.log(`Removing previous styleguide build: ${destinationDirectory}`);
 
-        return process.exit(1);
+        rimraf(destinationDirectory).then(() => {
+          if (hasError) {
+            this.Console.warning(`Backstop test has failed since it encountered some errors`);
+            // Reject afterwards so we can close any instances within the Worker scope.
+            super.reject();
+
+            return process.exit(1);
+          }
+
+          return super.resolve();
+        });
       }
-
-      return super.resolve();
     });
 
     return null;
@@ -214,7 +254,7 @@ class StyleguideTester extends Worker {
             {
               host: 'localhost',
               path: '/iframe.html',
-              port: this.environment.THEME_PORT,
+              port: this.parseEnvironmentProperty('THEME_PORT'),
             },
             (response) => {
               response.on('data', () => {
@@ -249,5 +289,3 @@ class StyleguideTester extends Worker {
     });
   }
 }
-
-export default StyleguideTester;

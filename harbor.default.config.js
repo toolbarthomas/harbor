@@ -1,31 +1,32 @@
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 import path from 'path';
-import glob from 'glob';
+import { globSync } from 'glob';
 import autoprefixer from 'autoprefixer';
 import combineDuplicateSelectors from 'postcss-combine-duplicated-selectors';
 import cssnano from 'cssnano';
 import stylelint from 'stylelint';
+import { SvgSpriteCompiler } from './Harbor/workers/SvgSpriteCompiler.js';
 
-const babelConfig = glob.sync('.babelrc*');
-const browserListConfig = glob.sync('.browserlistrc*');
-const prettierConfig = glob.sync('.prettierrc*');
-const styleLintConfig = glob.sync('.stylelintrc*');
+const babelConfig = globSync('.babelrc*');
+const browserListConfig = globSync('.browserlistrc*');
+const prettierConfig = globSync('.prettierrc*');
+const styleLintConfig = globSync('.stylelintrc*');
 
 export default {
   workers: {
     AssetExporter: {
       entry: {},
-      hook: 'export',
+      hook: ['export', 'generate::0'],
       options: {
         includeLiteral: [],
       },
     },
     Cleaner: {
-      hook: ['clean', 'prepare::0', 'default::0'],
+      hook: ['clean', 'prepare::0', 'default::0', 'run::0'],
     },
     FileSync: {
-      hook: ['sync', 'prepare::1', 'default::1'],
+      hook: ['sync', 'prepare::1', 'default::1', 'run::1'],
       patterns: ['images', 'webfonts'],
     },
     JsCompiler: {
@@ -34,7 +35,7 @@ export default {
         components: '**/components/**/*.js',
         modules: '**/modules/**/*.js',
       },
-      hook: ['js', 'javascripts', 'compile', 'default::1'],
+      hook: ['js', 'javascripts', 'compile', 'default::1', 'run::4'],
       plugins: {
         transform: babelConfig.length
           ? null
@@ -46,8 +47,10 @@ export default {
       },
     },
     SassCompiler: {
-      hook: ['sass', 'stylesheets', 'compile', 'default::1'],
-      options: {},
+      hook: ['sass', 'stylesheets', 'compile', 'default::1', 'run::3'],
+      options: {
+        useLegacyCompiler: false,
+      },
       plugins: {
         stylelint: {
           configFile: styleLintConfig.length
@@ -64,7 +67,7 @@ export default {
       },
     },
     StyleguideHelper: {
-      hook: ['setup'],
+      hook: ['setup', 'generate::1', 'run::6'],
       entry: {
         main: '**/*.twig',
       },
@@ -76,7 +79,8 @@ export default {
               : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.prettierrc')
           )
         ),
-        configurationExtensions: ['yml', 'yaml', 'json', 'js', 'mjs'],
+        ignoreKeywords: ['harbor'],
+        configurationExtensions: ['yml', 'yaml', 'json'],
         destinationDirectory: 'styleguide',
         defaultModuleName: 'Default',
         disableAlias: false,
@@ -134,12 +138,12 @@ export default {
       },
     },
     SvgSpriteCompiler: {
-      hook: ['svg', 'images', 'compile', 'default::1'],
-      prefix: '',
+      hook: ['svg', 'images', 'compile', 'default::1', 'run::5'],
       entry: {
         svgsprite: 'images/*/**.svg',
       },
       options: {
+        prefix: '',
         svgo: {
           plugins: [
             {
@@ -151,19 +155,31 @@ export default {
                   convertColors: {
                     currentColor: true,
                   },
-                  removeAttrs: {
-                    preserveCurrentColor: true,
-                    attrs: '(stroke|fill)',
-                  },
                 },
               },
+            },
+            {
+              name: 'removeAttrs',
+              params: {
+                preserveCurrentColor: true,
+                attrs: '(stroke|fill|fill-rule)',
+              },
+            },
+            {
+              name: 'inlineStyles',
+              type: 'perItem',
+            },
+            {
+              name: 'cleanupAttrs',
+              type: 'perItem',
+              fn: (item) => SvgSpriteCompiler.cleanupAttributes(item),
             },
           ],
         },
       },
     },
     Resolver: {
-      hook: ['resolve', 'prepare::2', 'default::2'],
+      hook: ['resolve', 'prepare::2', 'default::2', 'run::2'],
       cwd: 'vendors',
       entry: {},
     },
@@ -191,11 +207,16 @@ export default {
                 overrideBrowserslist: [('> 2%', 'last 2 versions')],
               }
         ),
-        cssnano: cssnano({ mergeLonghand: false }),
+        cssnano: cssnano({
+          mergeLonghand: false,
+          discardComments: true,
+        }),
         combineDuplicateSelectors: combineDuplicateSelectors({ removeDuplicatedProperties: true }),
       },
       entry: {
-        main: '**/stylesheets/*.css',
+        main: '**/stylesheets/**/*.css',
+        modules: '**/modules/**/*.css',
+        components: '**/components/**/*.css',
       },
     },
     StyleguideCompiler: {
@@ -207,6 +228,7 @@ export default {
         alias: {
           '@theme': process.cwd(),
         },
+        disableTelemetry: true,
         useLegacyCompiler: false,
         globalMode: false,
         librariesOverride: {},
@@ -222,21 +244,22 @@ export default {
     Watcher: {
       options: {
         delay: 200,
-        duration: 1000 * 60 * 5,
+        duration: 1000 * 60 * 15,
+        autoClose: false,
       },
       hook: 'watch',
       instances: {
         stylesheets: {
           event: 'change',
           path: '**/**.scss',
-          workers: ['SassCompiler', 'JsCompiler'],
+          workers: ['SassCompiler', 'JsCompiler', 'AssetExporter'],
         },
         javascripts: {
           event: 'change',
           path: '**/**.js',
           workers: ['JsCompiler'],
         },
-        svgprites: {
+        svgsprites: {
           event: 'all',
           path: '**/**.svg',
           workers: ['SvgSpriteCompiler'],

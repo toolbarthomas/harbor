@@ -1,15 +1,15 @@
 import path from 'path';
 import fs from 'fs';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 import postcss from 'postcss';
 
-import Plugin from './Plugin.js';
+import { Plugin } from './Plugin.js';
 
 /**
  * Optimizes the compiled stylesheet entries within the defined THEME_DIST
  * directory.
  */
-class StyleOptimizer extends Plugin {
+export class StyleOptimizer extends Plugin {
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
@@ -119,5 +119,3 @@ class StyleOptimizer extends Plugin {
     });
   }
 }
-
-export default StyleOptimizer;

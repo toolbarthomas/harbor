@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import Harbor from './Harbor/index.js';
+import { Harbor } from './Harbor/index.js';
 
 const instance = new Harbor();
 

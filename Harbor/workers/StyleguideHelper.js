@@ -1,14 +1,14 @@
 import { outdent } from 'outdent';
 import camelcase from 'camelcase';
 import fs from 'fs';
-import glob from 'glob';
-import mkdirp from 'mkdirp';
+import { globSync } from 'glob';
+import { mkdirp } from 'mkdirp';
 import path from 'path';
 import prettier from 'prettier';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
-class StyleguideHelper extends Worker {
+export class StyleguideHelper extends Worker {
   constructor(services) {
     super(services);
 
@@ -44,21 +44,23 @@ class StyleguideHelper extends Worker {
       }
 
       let destinationDirectory = '';
-      if (this.config.options && this.config.options.destinationDirectory) {
+      if (this.getOption('destinationDirectory')) {
         destinationDirectory = path.resolve(
           this.environment.THEME_SRC,
-          this.config.options.destinationDirectory
+          this.getOption('destinationDirectory')
         );
 
         mkdirp.sync(destinationDirectory);
 
-        this.Console.info(`Destination directory created: ${destinationDirectory}`);
+        this.Console.log(
+          `Successfully created styleguide configuration directory: ${destinationDirectory}`
+        );
       }
 
       const queue = [];
       entry.forEach((source) => {
         const extname = path.extname(source);
-        const story = source.replace(extname, `.stories.${this.config.options.extname}`);
+        const story = source.replace(extname, `.stories.${this.getOption('extname')}`);
 
         const template = this.defineInitialTemplate(source);
         let destination = story;
@@ -77,7 +79,7 @@ class StyleguideHelper extends Worker {
           destination = path.resolve(destinationDirectory, ...dirs, path.basename(story));
         }
 
-        if (this.config.options && !this.config.options.ignoreInitial) {
+        if (!this.getOption('ignoreInitial')) {
           if (fs.existsSync(destination)) {
             this.Console.log(`Skipping existing styleguide story: ${destination}`);
             return;
@@ -92,22 +94,26 @@ class StyleguideHelper extends Worker {
           ([destination, template]) =>
             new Promise((callback) => {
               try {
-                fs.writeFile(
-                  destination,
-                  prettier.format(template, {
+                prettier
+                  .format(template, {
                     parser: 'babel',
                     ...super.getOption('prettier', {}),
-                  }),
-                  (exception) => {
-                    if (exception) {
-                      this.Console.warning(exception);
+                  })
+                  .then((result) => {
+                    if (!result) {
+                      return callback();
                     }
 
-                    this.Console.log(`Styleguide entry template created: ${destination}`);
+                    return fs.writeFile(destination, result, (exception) => {
+                      if (exception) {
+                        this.Console.warning(exception);
+                      }
 
-                    callback();
-                  }
-                );
+                      this.Console.log(`Styleguide entry template created: ${destination}`);
+
+                      callback();
+                    });
+                  });
               } catch (exception) {
                 this.Console.warning(exception);
               }
@@ -142,7 +148,9 @@ class StyleguideHelper extends Worker {
    */
   defineInitialTemplate(source) {
     const basename = path.basename(source, path.extname(source));
-    const moduleName = camelcase(basename, { pascalCase: true }).replace(/[^a-zA-Z]+/g, '');
+    const moduleName = this.filterKeywords(
+      camelcase(basename, { pascalCase: true }).replace(/[^a-zA-Z]+/g, '')
+    );
     const variantQueue = this.loadVariants(source);
 
     const template = outdent`
@@ -170,10 +178,36 @@ class StyleguideHelper extends Worker {
   }
 
   /**
+   * Removes the defined options.ignoreKeywords for the defined styleguide
+   * entry.
+   *
+   * @param {String} value Removes the keywords from the defined String.
+   */
+  filterKeywords(value) {
+    if (typeof value !== 'string') {
+      return value;
+    }
+
+    const ignoreKeywords = this.getOption('ignoreKeywords');
+
+    if (!ignoreKeywords || !ignoreKeywords.length) {
+      return value;
+    }
+
+    let v = value;
+
+    ignoreKeywords.forEach((keyword) => {
+      v = v.replace(new RegExp(keyword, 'ig'), '');
+    });
+
+    return v;
+  }
+
+  /**
    * Ensures the defined value is within the correct module syntax.
+   *
    * @param {String} value The actual name to escape.
    * @param {String} index Inserts an additional suffix.
-   * @returns
    */
   static escapeName(value, suffix) {
     const name = camelcase(value.replace(/[^a-zA-Z]+/g, '-'), {
@@ -181,6 +215,19 @@ class StyleguideHelper extends Worker {
     }).replace(/[^a-zA-Z]+/g, '');
 
     return suffix ? `${name}${suffix}` : name;
+  }
+
+  /**
+   * Ensures spaces are inserted for the given string value.
+   *
+   * @param {String} value The defined value to insert spaces into.
+   */
+  static ensureSpacing(value) {
+    if (typeof value !== 'string') {
+      return value;
+    }
+
+    return value.replace(/([A-Z])/g, ' $1').trim();
   }
 
   /**
@@ -307,7 +354,7 @@ class StyleguideHelper extends Worker {
 
     const config = super.flatten(
       configurationExtensions
-        .map((extension) => glob.sync(`${path.dirname(source)}/**/*.${extension}`))
+        .map((extension) => globSync(`${path.dirname(source)}/**/*.${extension}`))
         .filter((e) => e && e.length)
     );
 
@@ -353,7 +400,7 @@ class StyleguideHelper extends Worker {
    * @param {Boolean} force Forces the function to use the initial alias.
    */
   useAlias(source, force) {
-    if ((!force, this.config.options && this.config.options.disableAlias)) {
+    if ((!force, this.getOption('disableAlias'))) {
       return `./${path.basename(source)}`;
     }
 
@@ -421,7 +468,7 @@ class StyleguideHelper extends Worker {
     const sep = super.getOption('sep', ' / ');
 
     let result = moduleName;
-    if (dirs.length && this.config.options && this.config.options.structuredTitle) {
+    if (dirs.length && this.getOption('structuredTitle')) {
       result = `${dirs.join(sep)}${sep}${moduleName}`;
     }
 
@@ -448,7 +495,7 @@ class StyleguideHelper extends Worker {
       );
     }
 
-    return result;
+    return this.filterKeywords(StyleguideHelper.ensureSpacing(result));
   }
 
   /**
@@ -477,7 +524,7 @@ class StyleguideHelper extends Worker {
         if (includeDirectories && includeDirectories.length) {
           includeDirectories.forEach((directory) => {
             const cwd = path.resolve(this.environment.THEME_SRC, directory);
-            const proposal = glob.sync(`${cwd}/**/${path.basename(externalSource)}`);
+            const proposal = globSync(`${cwd}/**/${path.basename(externalSource)}`);
 
             if (!proposal.length) {
               return;
@@ -528,5 +575,3 @@ class StyleguideHelper extends Worker {
     return queue;
   }
 }
-
-export default StyleguideHelper;

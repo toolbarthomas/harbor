@@ -1,17 +1,17 @@
 import fs from 'fs';
-import glob from 'glob';
+import { globSync } from 'glob';
 import globImporter from 'node-sass-glob-importer';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 import outdent from 'outdent';
 import path from 'path';
 import stylelint from 'stylelint';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
 /**
  * Compiles the configured entries with Node Sass.
  */
-class SassCompiler extends Worker {
+export class SassCompiler extends Worker {
   constructor(services) {
     super(services);
 
@@ -44,7 +44,7 @@ class SassCompiler extends Worker {
     const nodeSassPath = 'node-sass/lib/index.js';
 
     // Select the defined Sass compiler: Dart Sass or Node Sass.
-    if (this.config.useLegacyCompiler) {
+    if (this.getOption('useLegacyCompiler', false)) {
       try {
         await import(nodeSassPath);
       } catch (error) {
@@ -62,11 +62,21 @@ class SassCompiler extends Worker {
       }
     }
 
-    await import(this.config.useLegacyCompiler ? nodeSassPath : 'sass').then((m) => {
-      // Should update as legacy warning in the future.
-      this.Console.log(`Using Sass compiler "${m.default.info}"`);
+    const target = this.getOption('useLegacyCompiler', false) ? nodeSassPath : 'sass';
 
-      this.compiler = m.default;
+    await import(target).then((m) => {
+      // Should update as legacy warning in the future.
+      this.compiler = Object.entries(m).reduce((commit, current) => {
+        const [key, handle] = current
+
+        if (key !== 'default') {
+          commit[key] = handle;
+        }
+
+        return commit;
+      }, {});
+
+      this.Console.log(`Using Sass compiler "${this.compiler.info}"`);
     });
 
     await Promise.all(
@@ -78,18 +88,19 @@ class SassCompiler extends Worker {
             if (cwd.length) {
               this.renderCwd(cwd).then(cb);
             } else {
-              this.Console.warning(`Unable to find entry from: ${entry}`);
+              this.Console.log(
+                `Skipping ${path.dirname(
+                  entry[0]
+                )}, no entry stylesheet exists within the directory.`
+              );
+
+              entry.forEach((e) => this.Console.log(`Skipping: ${e}`));
 
               cb();
             }
           })
       )
     );
-
-    //     const method =
-    //   this.environment.THEME_ENVIRONMENT === 'production' ? 'error' : 'warning';
-
-    // // this.Console[method](exception);
 
     this.stylelintExceptions = this.stylelintExceptions.filter(
       (item, index) => this.stylelintExceptions.indexOf(item) === index
@@ -147,7 +158,7 @@ class SassCompiler extends Worker {
     await stylelint
       .lint(
         Object.assign(this.config.plugins.stylelint, {
-          files: glob.sync(path.join(path.dirname(entry), '**/*.scss')),
+          files: globSync(path.join(path.dirname(entry), '**/*.scss')),
           customSyntax: 'postcss-scss',
         })
       )
@@ -196,10 +207,10 @@ class SassCompiler extends Worker {
       this.Console.log(`Compiling: ${entry}`);
 
       this.compiler.render(
-        Object.assign(this.config.options || {}, {
+        Object.assign(this.getOptions(), {
           file: entry,
           includePaths: [this.environment.THEME_SRC],
-          sourceMap: Boolean(this.environment.THEME_DEBUG),
+          sourceMap: this.parseEnvironmentProperty('THEME_DEBUG'),
           importer: globImporter(),
           outFile: destination,
         }),
@@ -250,5 +261,3 @@ class SassCompiler extends Worker {
     });
   }
 }
-
-export default SassCompiler;

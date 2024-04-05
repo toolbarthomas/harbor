@@ -1,8 +1,8 @@
 import path from 'path';
 import fs from 'fs';
-import glob from 'glob';
+import { globSync } from 'glob';
 
-import Logger from './Logger.js';
+import { Logger } from './Logger.js';
 
 /**
  * Base Framework for defining Workers & Plugins.
@@ -11,20 +11,21 @@ import Logger from './Logger.js';
  * @param {object} options Defines the specific Harbor instance configuration that
  * should not be customized.
  * @param {string} type Defines the new instance as Worker or Plugin.
+ * @param {string} typeName The name that will be used within the CLI.
  */
-class Core {
-  constructor(services, options, type) {
+export class Core {
+  constructor(services, options, type, typeName) {
     this.name = this.constructor.name;
 
-    this.Console = new Logger(this.environment);
-    this.type = type;
+    this.Console = new Logger();
 
-    this.services = Object.assign(this.services || {}, services || {});
+    this.type = type;
+    this.typeName = typeName || this.type;
 
     if (services) {
       this.Console.log(`Mounting services for ${this.name}: ${Object.keys(services).join(', ')}`);
 
-      this.services = Object.assign(this.services, services);
+      this.services = Object.assign(this.services || {}, services || {});
     }
 
     this.defineOptions(options);
@@ -37,11 +38,54 @@ class Core {
    * @param {*} defaultValue Returns the fallback value instead.
    */
   getOption(name, defaultValue) {
+    if (!name && this.config.options) {
+      return this.getOptions();
+    }
+
     if (this.config.options && this.config.options[name] != null) {
       return this.config.options[name];
     }
 
     return defaultValue;
+  }
+
+  /**
+   * Helper function to return the defined option for the Harbor Service.
+   */
+  getOptions() {
+    return this.config.options;
+  }
+
+  /**
+   * Parse the requested Environment variable to the correct Primitive.
+   *
+   * @param {String} name Transforms the defined Environment variable if it
+   * exists.
+   */
+  parseEnvironmentProperty(name) {
+    const prop = this.environment[name];
+
+    if (!prop) {
+      this.Console.warning(`Unable to use Environment value since '${name}' is not defined...`);
+    }
+
+    //
+    if (!Number.isNaN(parseFloat(prop))) {
+      return Number(prop);
+    }
+
+    // Ensures the given property is transformed as Boolean.
+    if (typeof prop === 'string') {
+      if (prop.toLowerCase() === 'false') {
+        return false;
+      }
+
+      if (prop.toLowerCase() === 'true') {
+        return true;
+      }
+    }
+
+    return prop;
   }
 
   /**
@@ -111,14 +155,14 @@ class Core {
    */
   defineEntry(useDestination) {
     if (!this.config.entry || !(this.config.entry instanceof Object)) {
-      this.Console.log(`Unable to define entry for: ${this.name}`);
+      this.Console.log(`Unable to start ${this.name}, no entry file has been configured...`);
       return;
     }
 
     const entries = Object.keys(this.config.entry);
 
     if (!entries.length) {
-      this.Console.log(`No entries found for: ${this.name}`);
+      this.Console.log(`Skipping ${this.name}, unable to find any entry files...`);
       return;
     }
 
@@ -141,7 +185,9 @@ class Core {
           );
 
           map.push(
-            ...glob.sync(p).filter((e) => {
+            ...globSync(p, {
+              ignore: this.config.ignore || [],
+            }).filter((e) => {
               if (!fs.statSync(e).size) {
                 this.Console.log(`Skipping empty entry: ${e}`);
               }
@@ -181,7 +227,6 @@ class Core {
    * Subscribes the init handler of the current Worker or Plugin to the
    * TaskManager.
    *
-   * @param {string} type Defines the Task as Plugin or Worker.
    * @param {string[]} hook Defines the publish hooks to call to subscription.
    */
   subscribe(hook) {
@@ -200,6 +245,7 @@ class Core {
     TaskManager.subscribe(
       this.type,
       this.name,
+      this.typeName,
       hook,
       TaskManager.initIfAccepted(this.options)
         ? this.init.bind(this)
@@ -207,9 +253,9 @@ class Core {
             this.Console.warning(
               `${
                 this.name
-              } will not be launched since it is only accepted for the ${this.options.acceptedEnvironments.join(
+              } will not be launched since it is only accepted for the '${this.options.acceptedEnvironments.join(
                 ', '
-              )} environment(s).`
+              )}' environment(s).`
             );
 
             return this.resolve();
@@ -219,6 +265,8 @@ class Core {
 
   /**
    * Resolves the subscribed Task Manager Service handler.
+   *
+   * @param {boolean} exit Exits the running Harbor process.
    */
   resolve(exit) {
     const { TaskManager } = this.services;
@@ -228,7 +276,7 @@ class Core {
         `Unable to resolve ${this.name}, TaskManager has not been defined.`
       );
     }
-    this.Console.log(`${exit ? 'Rejecting' : 'Resolving'} ${this.type}: ${this.name}`);
+    this.Console.log(`${exit ? 'Rejecting' : 'Resolving'} ${this.typeName}: ${this.name}`);
 
     return TaskManager.resolve(this.type, this.name, exit);
   }
@@ -239,6 +287,24 @@ class Core {
   reject() {
     this.resolve(true);
   }
-}
 
-export default Core;
+  /**
+   * Defines the existing console class within the current service.
+   *
+   * @param {Logger} Console The existing Logger instance that will be assigned
+   * to the Class instance.
+   */
+  defineConsole(Console) {
+    if (!Console) {
+      return;
+    }
+
+    if (this.Console) {
+      Console.log(`Updating Console instance for ${this.name}...`);
+    }
+
+    this.Console = Console;
+
+    this.Console.log(`Initial console assigned to ${this.name}`);
+  }
+}

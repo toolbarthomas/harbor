@@ -1,30 +1,30 @@
-import Argv from './common/Argv.js';
-import ConfigManager from './common/ConfigManager.js';
-import Environment from './common/Environment.js';
-import Logger from './common/Logger.js';
+import { Argv } from './common/Argv.js';
+import { ConfigManager } from './common/ConfigManager.js';
+import { Environment } from './common/Environment.js';
+import { Logger } from './common/Logger.js';
 
-import ConfigPublisher from './services/ConfigPublisher.js';
-import TaskManager from './services/TaskManager.js';
+import { ConfigPublisher } from './services/ConfigPublisher.js';
+import { TaskManager } from './services/TaskManager.js';
 
-import AssetExporter from './workers/AssetExporter.js';
-import Cleaner from './workers/Cleaner.js';
-import FileSync from './workers/FileSync.js';
-import JsCompiler from './workers/JsCompiler.js';
-import Resolver from './workers/Resolver.js';
-import SassCompiler from './workers/SassCompiler.js';
-import StyleguideHelper from './workers/StyleguideHelper.js';
-import StyleguideTester from './workers/StyleguideTester.js';
-import SvgSpriteCompiler from './workers/SvgSpriteCompiler.js';
+import { AssetExporter } from './workers/AssetExporter.js';
+import { Cleaner } from './workers/Cleaner.js';
+import { FileSync } from './workers/FileSync.js';
+import { JsCompiler } from './workers/JsCompiler.js';
+import { Resolver } from './workers/Resolver.js';
+import { SassCompiler } from './workers/SassCompiler.js';
+import { StyleguideHelper } from './workers/StyleguideHelper.js';
+import { StyleguideTester } from './workers/StyleguideTester.js';
+import { SvgSpriteCompiler } from './workers/SvgSpriteCompiler.js';
 
-import JsOptimizer from './plugins/JsOptimizer.js';
-import StyleguideCompiler from './plugins/StyleguideCompiler.js';
-import StyleOptimizer from './plugins/StyleOptimizer.js';
-import Watcher from './plugins/Watcher.js';
+import { JsOptimizer } from './plugins/JsOptimizer.js';
+import { StyleguideCompiler } from './plugins/StyleguideCompiler.js';
+import { StyleOptimizer } from './plugins/StyleOptimizer.js';
+import { Watcher } from './plugins/Watcher.js';
 
 /**
  * Factory setup for Harbor.
  */
-class Harbor {
+export class Harbor {
   constructor() {
     this.Argv = new Argv();
 
@@ -70,7 +70,7 @@ class Harbor {
     this.Console = new Logger(this.env);
 
     if (ci) {
-      this.Console.info(`Running Harbor in CI mode...`);
+      this.Console.info(`Launcing Harbor in CI mode...`);
     }
     this.env.THEME_AS_CLI = ci;
 
@@ -95,7 +95,7 @@ class Harbor {
     const unusedCustomArgs = customArgs;
     const config = await ConfigManager.load();
 
-    this.Console.info(`Starting Harbor...`);
+    this.Console.log(`Starting Harbor...`);
 
     // Assign the defined Console & environment to the TaskManager service.
     this.services.TaskManager.mount('Console', this.Console);
@@ -149,7 +149,6 @@ class Harbor {
       } else if (!Environment.hasBuild(this.env)) {
         this.Console.warning('Nothing has been processed for this current build!');
       }
-
       // Mount the actual plugins when all workers are completed to ensure
       // the plugin entries are defined correctly.
       if (plugins.length) {
@@ -199,21 +198,24 @@ class Harbor {
   mount(instances, config) {
     if (instances instanceof Object) {
       Object.keys(instances).forEach((name) => {
-        const handler = instances[name];
-        const { hook } = config[handler.type][name];
+        const Instance = instances[name];
+        const { hook } = config[Instance.type][name];
         const h = Array.isArray(hook) ? hook : [hook];
 
         // Define the environment for the current name.
-        handler.defineEnvironment(this.env || {});
+        Instance.defineEnvironment(this.env || {});
+
+        // Inherit the already created Console.
+        Instance.defineConsole(this.Console);
 
         // Define the configuration for the current name.
-        handler.defineConfig(config[handler.type][name]);
+        Instance.defineConfig(config[Instance.type][name]);
 
         // Define the configuration for the current name.
-        handler.defineEntry();
+        Instance.defineEntry();
 
         // Subscribe the current name to the Harbor TaskManager.
-        handler.subscribe(hook && hook !== name ? [name, ...h] : [...h]);
+        Instance.subscribe(hook && hook !== name ? [name, ...h] : [...h]);
       });
     }
   }
@@ -260,5 +262,3 @@ class Harbor {
     }
   }
 }
-
-export default Harbor;

@@ -1,18 +1,18 @@
 import chalk from 'chalk';
 import symbols from 'log-symbols';
 
-import Argv from './Argv.js';
+import { Argv } from './Argv.js';
 
 /**
  * Helper Class that writes messages to the stdout.
  */
-class Logger {
+export class Logger {
   constructor(environment) {
-    this.environment = environment;
+    this.environment = environment || {};
 
     const { args } = new Argv();
 
-    this.verbose = args.verbose;
+    this.verbose = args.verbose || false;
 
     this.styles = null;
   }
@@ -128,5 +128,3 @@ class Logger {
     return styles;
   }
 }
-
-export default Logger;

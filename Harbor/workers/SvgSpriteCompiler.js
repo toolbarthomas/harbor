@@ -1,17 +1,17 @@
 import fs from 'fs';
 import imagemin from 'imagemin';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 import path from 'path';
 import svgstore from 'svgstore';
 import SVGO from 'svgo';
 import isSvg from 'is-svg';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
 /**
  * Create SVG sprites from the configured entries.
  */
-class SvgSpriteCompiler extends Worker {
+export class SvgSpriteCompiler extends Worker {
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
@@ -20,7 +20,8 @@ class SvgSpriteCompiler extends Worker {
       return super.resolve();
     }
 
-    this.prefix = typeof this.config.prefix === 'string' ? this.config.prefix : 'svg--';
+    // @TODO 'svg--' is still used to include support for Harbor -0.100.x...
+    this.prefix = this.getOption('prefix', 'svg--');
 
     const entries = Object.keys(this.config.entry);
 
@@ -84,9 +85,14 @@ class SvgSpriteCompiler extends Worker {
 
       this.Console.log(`Generating sprite.`);
 
+      const entry =
+        typeof this.config.entry[filename] === 'string'
+          ? this.config.entry[filename]
+          : this.config.entry[filename][0];
+
       const basePath = path.join(
         this.environment.THEME_SRC,
-        this.config.entry[filename].substring(0, this.config.entry[filename].indexOf('/*'))
+        entry.substring(0, entry.indexOf('/*'))
       );
 
       const destination = path
@@ -148,26 +154,49 @@ class SvgSpriteCompiler extends Worker {
   svgOptimize() {
     return async (buffer) => {
       let b = buffer;
-
-      if (!isSvg(buffer)) {
-        return Promise.resolve(buffer);
-      }
-
       if (Buffer.isBuffer(buffer)) {
         b = buffer.toString();
+      }
+
+      if (!isSvg(b)) {
+        return Promise.resolve(b);
       }
 
       let result;
 
       try {
-        result = SVGO.optimize(b, this.config.options.svgo);
+        result = SVGO.optimize(b, this.getOption('svgo', {}));
       } catch (exception) {
         this.Console.error(exception);
       }
 
-      return result.data && Buffer.from(result.data);
+      return result && result.data ? Buffer.from(result.data) : Buffer.from(b);
     };
   }
-}
 
-export default SvgSpriteCompiler;
+  /**
+   * Helper function that should remove the invalid SVG attributes from the
+   * sprite.
+   *
+   * @param {Object} item The SVGO entry that is defined from the plugin
+   * context.
+   */
+  static cleanupAttributes(item) {
+    if (!item) {
+      return;
+    }
+
+    const { children, attributes } = item;
+
+    if (attributes && attributes instanceof Object) {
+      if (attributes['xlink:href']) {
+        attributes.href = attributes['xlink:href'];
+        delete attributes['xlink:href'];
+      }
+    }
+
+    if (children.length) {
+      children.forEach((child) => SvgSpriteCompiler.cleanupAttributes(child));
+    }
+  }
+}

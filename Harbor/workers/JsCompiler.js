@@ -1,14 +1,14 @@
 import { transformFileAsync } from '@babel/core';
 import fs from 'fs';
 import path from 'path';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
 /**
  * Compiles the configured entries with Babel.
  */
-class JsCompiler extends Worker {
+export class JsCompiler extends Worker {
   constructor(services, options) {
     super(services, options);
 
@@ -99,7 +99,7 @@ class JsCompiler extends Worker {
                       return super.reject();
                     }
 
-                    if (this.environment.THEME_DEBUG && map) {
+                    if (this.parseEnvironmentProperty('THEME_DEBUG') && map) {
                       fs.writeFileSync(`${destination}.map`, JSON.stringify(map));
                     }
 
@@ -125,5 +125,3 @@ class JsCompiler extends Worker {
     done();
   }
 }
-
-export default JsCompiler;

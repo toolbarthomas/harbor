@@ -1,15 +1,15 @@
 import fs from 'fs';
 import path from 'path';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 import { createRequire } from 'module';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
 /**
  * Resolves the configured Resolver entries to the environment destination
  * directory.
  */
-class Resolver extends Worker {
+export class Resolver extends Worker {
   /**
    * Resolves the configured Resolver entries.
    */
@@ -57,7 +57,7 @@ class Resolver extends Worker {
                   // Define the destination path for the current module.
                   const dest = path.resolve(
                     this.environment.THEME_DIST,
-                    this.config.cwd || 'vendors',
+                    this.getOption('cwd', 'vendors'),
                     name,
                     path.basename(p)
                   );
@@ -72,7 +72,7 @@ class Resolver extends Worker {
                       queue += 1;
 
                       if (queue >= vendor.length) {
-                        this.Console.info(`Package resolved: ${name}`);
+                        this.Console.log(`Package resolved: ${name}`);
 
                         done();
                       }
@@ -94,5 +94,3 @@ class Resolver extends Worker {
     return super.resolve();
   }
 }
-
-export default Resolver;

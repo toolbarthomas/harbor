@@ -2,14 +2,14 @@ import chokidar from 'chokidar';
 import path from 'path';
 import WebSocket, { WebSocketServer } from 'ws';
 
-import ConfigManager from '../common/ConfigManager.js';
-import Plugin from './Plugin.js';
+import { ConfigManager } from '../common/ConfigManager.js';
+import { Plugin } from './Plugin.js';
 
 /**
  * Creates a Watcher instance for each defined instance key and will run the
  * configured hook from the constructed TaskManager.
  */
-class Watcher extends Plugin {
+export class Watcher extends Plugin {
   constructor(services, options) {
     super(services, options);
 
@@ -36,10 +36,10 @@ class Watcher extends Plugin {
     // Enables HMR within the styleguide for the generated assets.
     if (this.environment.THEME_WEBSOCKET_PORT) {
       if (WebSocketServer) {
-        this.Console.log(`Preparing Socket...`);
+        this.Console.log(`Starting Websocket Server to enable live reloading...`);
 
         this.wss = new WebSocketServer({
-          port: this.environment.THEME_WEBSOCKET_PORT,
+          port: this.parseEnvironmentProperty('THEME_WEBSOCKET_PORT'),
         });
       }
     }
@@ -58,7 +58,11 @@ class Watcher extends Plugin {
             : [this.config.instances[name].path]
         ).map((p) => path.join(this.environment.THEME_SRC, p));
 
-        this.Console.log(`Creating Watcher instance: ${name} => ${query.join(', ')}`);
+        this.Console.log(
+          `Creating ${this.name} instance, ${name} will watch for changes within '${query.join(
+            ', '
+          )}'`
+        );
 
         this.defineWatcher(name, query, done);
 
@@ -74,6 +78,12 @@ class Watcher extends Plugin {
       });
     });
 
+    // Ensure the Websocket Server is closed before the Plugin is resolved.
+    if (this.wss && this.wss.close) {
+      this.Console.log(
+        `Closing WebSocket Server at: ${this.parseEnvironmentProperty('THEME_WEBSOCKET_PORT')}`
+      );
+    }
     super.resolve();
   }
 
@@ -86,7 +96,7 @@ class Watcher extends Plugin {
    * that should be called to resolve the initial Worker.
    */
   defineWatcher(name, query, done) {
-    this.Console.info(`Defining watcher: ${name}.`);
+    this.Console.info(`Watching '${name}' entry files: ${query.join(' | ')}`);
 
     const { TaskManager } = this.services;
 
@@ -135,21 +145,21 @@ class Watcher extends Plugin {
               await TaskManager.publish('workers', hook || worker);
 
               if (this.wss && this.wss.clients) {
+                this.Console.log(`Sending ${name} update state to Websocket Server`);
+
                 this.wss.clients.forEach((client) => {
                   if (client.readyState === WebSocket.OPEN) {
-                    this.Console.info('Sending update state to Websocket Server');
-
                     client.send(`Published hook: ${hook || worker}`);
                   }
                 });
               }
 
-              this.Console.info(`Resuming watcher: ${name} => ${hook || worker}`);
+              this.Console.log(`Resuming watcher: ${name} => ${hook || worker}`);
             }
           }
 
           this.instances[name].active = null;
-        }, this.config.options.delay || 500);
+        }, this.getOption('delay', 500));
 
         this.defineReset(name, done);
       }
@@ -166,7 +176,7 @@ class Watcher extends Plugin {
    */
   defineReset(name, callback) {
     if (this.instances[name].reset) {
-      this.Console.info(`Resetting watcher instance: ${name} `);
+      this.Console.log(`Resetting ${name} watcher...`);
     }
 
     // The actual shutdown handler that will close the current Watcher.
@@ -174,6 +184,8 @@ class Watcher extends Plugin {
       if (!this.instances[name].instance.close) {
         return;
       }
+
+      const { TaskManager } = this.services;
 
       this.Console.log(`Closing watcher instance: ${name}`);
 
@@ -185,25 +197,35 @@ class Watcher extends Plugin {
         clearTimeout(this.instances[name].reset);
 
         if (!Object.values(this.instances).filter(({ running }) => running).length) {
-          this.Console.info(
-            `Closing file watcher, no changes have been detected within ${
-              this.config.options.duration / 1000
-            }s`
-          );
+          if (this.getOption('autoClose') && this.wss && this.wss.close) {
+            this.Console.info(`Closing Socket Connection...`);
 
-          // if (this.wss && this.wss.close) {
-          //   this.Console.info(`Closing Socket Connection...`);
+            this.wss.close();
+          } else if (TaskManager.activeJobs.StyleguideCompiler) {
+            this.Console.info(
+              `Pausing ${name} ${this.name}, no changes have been detected within ${
+                this.getOption('duration') / 1000
+              }s`
+            );
 
-          //   this.wss.close();
-          // }
+            this.Console.info(
+              `You can resume the ${name} ${this.name} by refreshing your Storybook development environment...`
+            );
+          } else {
+            this.Console.info(
+              `${this.name} has been closed, no changes have been detected within ${
+                this.getOption('duration') / 1000
+              }s`
+            );
+
+            this.wss.close();
+          }
 
           return callback();
         }
 
         return null;
       });
-    }, this.config.options.duration || 1000 * 60 * 15);
+    }, this.getOption('duration', 1000 * 60 * 15));
   }
 }
-
-export default Watcher;

@@ -2,14 +2,14 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
-import Environment from './Environment.js';
-import Logger from './Logger.js';
+import { Environment } from './Environment.js';
+import { Logger } from './Logger.js';
 
 /**
  * The Configmanager exposes the given Harbor option from the default and
  * custom configuration.
  */
-class ConfigManager {
+export class ConfigManager {
   /**
    * Merges the defined Objects and use the default values for all missing
    * properties.
@@ -59,7 +59,7 @@ class ConfigManager {
       config = ConfigManager.merge(defaultConfig, customConfig);
 
       if (Object.values(customConfig).length) {
-        Console.info(`Running Harbor with custom configuration from: ${source}`);
+        Console.info(`Launcing Harbor with custom configuration from: ${source}`);
       }
     } catch (exception) {
       Console.error(exception);
@@ -141,5 +141,3 @@ class ConfigManager {
     return output;
   }
 }
-
-export default ConfigManager;

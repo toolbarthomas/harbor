@@ -1,4 +1,4 @@
-import Core from '../common/Core.js';
+import { Core } from '../common/Core.js';
 
 /**
  * Creates a new Harbor Plugin that will be registered to the TaskManager.
@@ -10,10 +10,13 @@ import Core from '../common/Core.js';
  *
  * @param {Object} options Defines the Harbor specific options for the current
  * service.
+ *
+ * @param {Worker[]} workers Exposes the loaded worker within the Plugin
+ * instance.
  */
-class Plugin extends Core {
+export class Plugin extends Core {
   constructor(services, options, workers) {
-    super(services, options, 'plugins', workers);
+    super(services, options, 'plugins', 'plugin');
 
     if (workers && workers instanceof Object) {
       Object.keys(workers).forEach((worker) =>
@@ -35,5 +38,3 @@ class Plugin extends Core {
     super.defineEntry(true);
   }
 }
-
-export default Plugin;

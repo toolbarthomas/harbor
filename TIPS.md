@@ -2,18 +2,19 @@
 
 This document contains some basic information on how you can setup a styleguide environment that is compatible with the Twig template that will be used within your Drupal environment.
 
-1. [Creating custom Twig Templates](#1)
-2. [About the Drupal variable usage](#2)
-3. [Generating Storybook stories from existing Twig templates](#3)
-4. [Including assets via attach_library Twig function](#4)
-5. [Exporting assets as JS module to Web Components](#5)
-6. [Implementing Lit element within the Harbor structure](#6)
-7. [Using BackstopJS testing suite](#7)
+1. [Creating custom Twig Templates](#tips-1)
+2. [About the Drupal variable usage](#tips-2)
+3. [Twig Usage](#tips-3)
+4. [Generating Storybook stories from existing Twig templates](#tips-4)
+5. [Including assets via attach_library Twig function](#tips-5)
+6. [Exporting assets as JS module to Web Components](#tips-6)
+7. [Implementing Lit element within the Harbor structure](#tips-7)
+8. [Using BackstopJS testing suite](#tips-8)
 
 <br />
 <br />
 
-# 1. Creating custom Twig Templates <a id="1"></a>
+# 1. Creating custom Twig Templates <a id="tips-1"></a>
 
 A Harbor environment expects that the general Twig templates are splitted from the Drupal templates. Instead of directly inserting any markup within the Drupal template we define standalone Twig templates. These standalone templates should be included within the required Drupal templates and should use semantic variables instead of the Drupal reserved variables like render arrays.
 
@@ -52,7 +53,7 @@ The actual CMS values should be used during the include of the Drupal template:
 <br />
 <br />
 
-# 2. About the Drupal variable usage <a id="2"></a>
+# 2. About the Drupal variable usage <a id="tips-2"></a>
 
 Drupal makes heavy use of the their Render arrays and sometimes it can be difficult to include these variables within your custom templates.
 
@@ -126,9 +127,63 @@ Using `.0` within the simple variables ensures the RAW value is generated from D
 <br />
 <br />
 
+# 3. Twig Usage
+
+Harbor has included support for the available Twig functions that are available for Drupal 8 & 9. It uses the Twing NPM package in order to use the Twig Syntax within the Storybook environment and it should match with the Drupal API.
+
+You could use these Drupal specific filters & functions within Storybook but keep in mind that some of them just return the original value; since they don't add any specific markup to the templates and we want to keep it clean as possible.
+
+See [Twig Functions](https://twig.symfony.com/doc/2.x/functions/index.html) & [Twig Filters](https://twig.symfony.com/doc/2.x/filters/index.html) for more information about the default Twig functionalities.
+
+Get more information about the Drupal specific [Filters](https://www.drupal.org/docs/theming-drupal/twig-in-drupal/filters-modifying-variables-in-twig-templates) & [Functions](https://www.drupal.org/docs/theming-drupal/twig-in-drupal/functions-in-twig-templates)
+
+### Usable filters
+
+The following filters can be used and should output the same output as it's Drupal counterpart:
+
+1. format_date - This filter should return the formatted date from the defined string. It is an actual alias for the date filter.
+2. placeholder - Should wrap the defined String parameter in an emphasis tag.
+3. safe_join - The safe_join filter joins several strings together with a supplied separator.
+4. without - The without filter creates a copy of the renderable array and removes child elements by key specified through arguments passed to the filter. The copy can be printed without these elements. The original renderable array is still available and can be used to print child elements in their entirety in the twig template.
+
+### Usable functions
+
+The following function can be used and should output the same output as it's Drupal counterpart:
+
+1. add_svg - Generates markup to display an inline-svg element.
+2. attach_library - Function that should include the configured library assets to the template. [More information](https://www.drupal.org/docs/theming-drupal/adding-assets-css-js-to-a-drupal-theme-via-librariesyml)
+3. svg_path - This is an actual alias for `add_svg`.
+
+### Mocking filters
+
+The mocking filter ignores the defined function parameters and will return the inital value directly.
+
+1. clean_class - This filter prepares a string for use as a valid HTML class name.
+2. clean_id - This filter prepares a string for use as a valid HTML ID.
+3. drupal_escape - This filter should escape the defined string. It is an actual alias for the escape filter.
+4. render - This filter is a wrapper for the render() function. It takes a render array and outputs rendered HTML markup. This can be useful if you want to apply an additional filter (such as stripping tags), or if you want to make a conditional based on the rendered output (for example, if you have a non-empty render array that returns an empty string). It also can be used on strings and certain objects, mainly those implementing the toString() method.
+5. trans - This filter (alternatively, t) will run the variable through the Drupal t() function, which will return a translated string. This filter should be used for any interface strings manually placed in the template that will appear for users.
+6. t - This filter (alternatively, trans) will run the variable through the Drupal t() function, which will return a translated string. This filter should be used for any interface strings manually placed in the template that will appear for users.
+
+### Mocking functions
+
+The mocking function ignores the defined function parameters and will return the inital value directly.
+
+1. active_theme - Prints the machine name of the active theme.
+2. active_theme_path - Prints the relative path to the active theme.
+3. create_attribute - Create new Attribute objects using the `create_attribute()` function inside a Twig template. These objects can then be manipulated just like other Attribute objects coming into the Twig template.
+4. file_url - This helper function accepts a URI to a file and creates a relative URL path to the file.
+5. link - This helper function accepts as the first parameter the text and as the second parameter the URI. The optional third parameter is the attributes object that can be used to provide eg. additional CSS classes.
+6. path - Generates a `relative` URL path given a route name and parameters.
+7. render_var - Convenience function around render().
+8. url - Generate an absolute URL given a route name and parameters:
+
 ####
 
-# 3. Generating Storybook stories from the existing templates <a id="3"></a>
+<br />
+<br />
+
+# 4. Generating Storybook stories from the existing templates <a id="tips-4"></a>
 
 It is possible to generate the Storybook components with optional data by creating a configuration file relative to your Twig template. A Storybook story can be automatically generated with dynamic data by using `$ harbor --setup` or `node node_modules/@toolbarthomas/harbor/index.js --setup`. You should define your configuration as: `JSON`, `YAML` or `JS modules [MJS/JS]`.
 
@@ -169,7 +224,7 @@ Default.args = ResponsiveMenuConfiguration;
 <br />
 <br />
 
-# 4. Including assets via attach_library Twig function <a id="4"></a>
+# 5. Including assets via attach_library Twig function <a id="tips-5"></a>
 
 You can use the `attach_library` Drupal function within [Storybook](https://storybook.js.org/docs/html/get-started/introduction) in order to include the required CSS & JS assets within your custom templates, to ensure you don't need to add them specificly within Storybook.
 The library files are compatible with your Drupal theme, more information regarding [Asset Management](https://www.drupal.org/docs/creating-custom-modules/adding-assets-css-js-to-a-drupal-module-via-librariesyml) can be found at Drupal.org.
@@ -199,7 +254,9 @@ With the above example you can assign the required assets within your custom com
 <div class="standalone-component">...</div>
 ```
 
-Adding Javascript files is also possible, but keep in mind that you wan't to define the script within the [Drupal](https://drupaljs.net/Drupal.html) Javascript global.
+Adding Javascript files is also possible, but keep in mind that you want to define the script within the [Drupal](https://drupaljs.net/Drupal.html) Javascript as possible.
+
+### global.
 
 ```js
 (function standaloneComponent(Drupal) {
@@ -213,7 +270,7 @@ Adding Javascript files is also possible, but keep in mind that you wan't to def
 <br />
 <br />
 
-# 5. Exporting assets as JS module for Web Components <a id="5"></a>
+# 6. Exporting assets as JS module for Web Components <a id="tips-6"></a>
 
 With the `Harbor Asset Exporter` you can export the generated assets as a JS module. It can be used to preprocess your stylesheets so it can be included within a Web Component like [Lit Element](https://lit.dev/).
 
@@ -248,7 +305,7 @@ Keep in mind that you need to resolve in a [relative path](https://developer.moz
 <br/>
 <br/>
 
-# 6. Implementing Lit Element within the Harbor structure <a id="6"></a>
+# 7. Implementing Lit Element within the Harbor structure <a id="tips-7"></a>
 
 With the following example you can include Lit element within your theme that should be also compatible with the Drupal structure.
 We need to setup the Lit element dependencies first so it can be used in your template, the dependency will be assigned to each library:
@@ -315,7 +372,7 @@ This is just a simple example to setup a Lit Element, keep in mind that you can 
 <br/>
 <br/>
 
-# 7. Using BackstopJS testing suite <a id="7"></a>
+# 8. Using BackstopJS testing suite <a id="tips-8"></a>
 
 It is possible to run Snapshot tests with BackstopJS for all created Storybook stories.
 Storybook first generates a stories manifest in order to define the components to test.

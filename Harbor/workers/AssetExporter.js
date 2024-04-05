@@ -1,11 +1,11 @@
 import { outdent } from 'outdent';
 import fs from 'fs';
-import glob from 'glob';
+import { globSync } from 'glob';
 import path from 'path';
 
-import Worker from './Worker.js';
+import { Worker } from './Worker.js';
 
-class AssetExporter extends Worker {
+export class AssetExporter extends Worker {
   async init() {
     if (!this.config.entry) {
       return super.resolve();
@@ -25,9 +25,8 @@ class AssetExporter extends Worker {
       super.flatten(
         entries
           .map((name) => [
-            ...glob
-              .sync(path.join(this.environment.THEME_DIST, this.config.entry[name]))
-              .map((entry) => {
+            ...globSync(path.join(this.environment.THEME_DIST, this.config.entry[name])).map(
+              (entry) => {
                 if (queue.includes(entry)) {
                   this.Console.warning(`Skipping existing asset: ${entry}`);
                   return null;
@@ -68,14 +67,15 @@ class AssetExporter extends Worker {
                           return;
                         }
 
-                        this.Console.info(`Asset exported: ${entry} => ${destination}`);
+                        this.Console.log(`Asset exported: ${entry} => ${destination}`);
 
                         done();
                       });
                     }
                   });
                 });
-              }),
+              }
+            ),
           ])
           .filter((e) => e)
       )
@@ -91,5 +91,3 @@ class AssetExporter extends Worker {
     super.defineEntry(true);
   }
 }
-
-export default AssetExporter;

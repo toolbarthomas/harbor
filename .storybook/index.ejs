@@ -1,16 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title><%= htmlWebpackPlugin.options.title || 'Storybook'%></title>
+    <title><%= htmlWebpackPlugin.options.title || 'Storybook' %></title>
 
     <% if (htmlWebpackPlugin.files.favicon) { %>
     <link rel="shortcut icon" href="<%= htmlWebpackPlugin.files.favicon%>" />
     <% } %>
-
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <script>
       // Prepare the Drupal behaviors object in order to enable the logic within
@@ -49,7 +48,7 @@
             },
           };
 
-          Object.keys(targets).forEach(target => {
+          Object.keys(targets).forEach((target) => {
             let element = targets[target];
 
             if (!element) {
@@ -57,9 +56,17 @@
             }
 
             // Append the offset of each parent element.
-            while (element && !isNaN(element.offsetLeft || element.getBoundingClientRect().left) && !isNaN(element.offsetTop || element.getBoundingClientRect().top)) {
-              const top = !isNaN(parseFloat(element.offsetTop)) ? element.offsetTop : element.getBoundingClientRect().top;
-              const left = !isNaN (parseFloat(element.offsetLeft)) ? element.offsetTop : element.getBoundingClientRect().left;
+            while (
+              element &&
+              !isNaN(element.offsetLeft || element.getBoundingClientRect().left) &&
+              !isNaN(element.offsetTop || element.getBoundingClientRect().top)
+            ) {
+              const top = !isNaN(parseFloat(element.offsetTop))
+                ? element.offsetTop
+                : element.getBoundingClientRect().top;
+              const left = !isNaN(parseFloat(element.offsetLeft))
+                ? element.offsetTop
+                : element.getBoundingClientRect().left;
 
               if (!offset[target]) {
                 continue;
@@ -79,17 +86,31 @@
               const commit = {
                 value: offset[target].value,
                 position: offset[target].position,
-              }
+              };
 
               offset[target] = commit;
             }
           });
 
           return {
-            top: targets.top === document.body ? offset.top.value : offset.top.value + offset.top.position.y,
-            right: targets.right === document.body ? offset.right.value : offset.right.value + offset.right.position.x + (targets.right.scrollWidth || 0),
-            bottom: targets.bottom === document.body ? offset.bottom.value : offset.bottom.value + offset.bottom.position.y  + (targets.bottom.scrollHeight || 0),
-            left: targets.left === document.body ? offset.left.value : offset.left.value + offset.left.position.x,
+            top:
+              targets.top === document.body
+                ? offset.top.value
+                : offset.top.value + offset.top.position.y,
+            right:
+              targets.right === document.body
+                ? offset.right.value
+                : offset.right.value + offset.right.position.x + (targets.right.scrollWidth || 0),
+            bottom:
+              targets.bottom === document.body
+                ? offset.bottom.value
+                : offset.bottom.value +
+                  offset.bottom.position.y +
+                  (targets.bottom.scrollHeight || 0),
+            left:
+              targets.left === document.body
+                ? offset.left.value
+                : offset.left.value + offset.left.position.x,
           };
         },
 
@@ -98,16 +119,17 @@
          * functionality.
          */
         t: (str) => str,
-      }
+      };
 
       window.drupalSettings = {};
     </script>
 
-    <script>
+    <script defer>
       // Prevent callStacks for the runOnPageChange handler.
       let refresh;
       window.throttle = window.throttle || false;
       let awaitVendors;
+      let cycle = 0;
 
       // https://github.com/storybookjs/storybook/issues/6113#issuecomment-473965255
       function runOnPageChange() {
@@ -120,11 +142,24 @@
             return;
           }
 
+          if (!Object.keys(window.Drupal.behaviors).length) {
+            // @TODO max cycle should be dynamic in the future.
+            if (cycle > 100) {
+              return;
+            }
+
+            cycle++;
+
+            return runOnPageChange();
+          } else {
+            cycle = 0;
+          }
+
           window.throttle = true;
 
           // Enables the required script logic from Drupal by calling the defined
           // attach Drupal handlers.
-          Object.values(window.Drupal.behaviors).forEach(function(handler) {
+          Object.values(window.Drupal.behaviors).forEach(function (handler) {
             if (handler.attach) {
               handler.attach();
             }
@@ -138,9 +173,8 @@
 
           awaitVendors = setTimeout(() => {
             window.throttle = false;
-          }, 500);
-
-        }, 200);
+          }, 1000 / 60);
+        }, 1000 / 60);
       }
 
       let DOMReady = false;
@@ -162,7 +196,7 @@
           };
           const observer = new MutationObserver(callback);
           const config = { childList: true, subtree: false };
-          observer.observe(document.getElementById('root'), config);
+          observer.observe(document.getElementById('storybook-root'), config);
 
           runOnPageChange();
         },
@@ -178,41 +212,41 @@
       });
     </script>
 
-    <% if (typeof headHtmlSnippet !== 'undefined') { %>
-      <%= headHtmlSnippet %>
-    <% } %>
-
-    <% htmlWebpackPlugin.files.css.forEach(file => { %>
+    <% if (typeof headHtmlSnippet !=='undefined' ) { %> <%= headHtmlSnippet %> <% } %> <%
+    htmlWebpackPlugin.files.css.forEach(file=> { %>
     <link href="<%= file %>" rel="stylesheet" />
     <% }); %>
 
     <style>
-      #root[hidden],
-      #docs-root[hidden] {
+      #storybook-root[hidden],
+      #storybook-docs[hidden] {
         display: none !important;
       }
     </style>
   </head>
+
   <body>
-    <% if (typeof bodyHtmlSnippet !== 'undefined') { %>
-      <%= bodyHtmlSnippet %>
+    <% if (typeof bodyHtmlSnippet !=='undefined' ) { %> <%= bodyHtmlSnippet %> <% } %>
+
+    <div id="storybook-root"></div>
+    <div id="storybook-docs"></div>
+
+    <% if (typeof globals !=='undefined' && Object.keys(globals).length) { %>
+    <script>
+      <% for (var varName in globals) { %>
+          <% if (globals[varName] != undefined) { %>
+                window['<%=varName%>'] = <%= JSON.stringify(globals[varName]) %>;
+          <% } %>
+      <% } %>
+    </script>
     <% } %>
+    <script type="module">
+      import './sb-preview/runtime.js';
 
-    <div id="root"></div>
-    <div id="docs-root"></div>
-
-    <% if (typeof globals !== 'undefined' && Object.keys(globals).length) { %>
-      <script>
-        <% for (var varName in globals) { %>
-            <% if (globals[varName] != undefined) { %>
-              window['<%=varName%>'] = <%= JSON.stringify(globals[varName]) %>;
-            <% } %>
-        <% } %>
-      </script>
-    <% } %>
-
-    <% htmlWebpackPlugin.files.js.forEach(file => { %>
-      <script src="<%= file %>"></script>
-    <% }); %>
+      <% htmlWebpackPlugin.files.js.forEach(file =>
+      { %>
+      import './<%= file %>';
+      <% }); %>
+    </script>
   </body>
 </html>

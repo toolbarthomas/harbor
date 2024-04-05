@@ -1,15 +1,15 @@
 import concat from 'concat';
 import fs from 'fs';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 import path from 'path';
 import { minify } from 'uglify-js';
 
-import Plugin from './Plugin.js';
+import { Plugin } from './Plugin.js';
 
 /**
  * Minifies the defined js entries within the THEME_DIST directory
  */
-class JsOptimizer extends Plugin {
+export class JsOptimizer extends Plugin {
   /**
    * The initial handler that will be called by the Harbor TaskManager.
    */
@@ -18,7 +18,7 @@ class JsOptimizer extends Plugin {
       return super.resolve();
     }
 
-    if (this.config.options && this.config.options.bundle) {
+    if (this.getOption('bundle')) {
       await Promise.all(
         this.entry.map(
           (name, index) =>
@@ -57,10 +57,11 @@ class JsOptimizer extends Plugin {
               }
 
               if (!data) {
+                this.Console.log(`Unable to optimize ${p} since the file is empty`);
                 return super.resolve();
               }
 
-              const result = minify(data.toString(), this.config.options.minify || {});
+              const result = minify(data.toString(), this.getOption('minify', {}));
 
               if (!result.code || result.error) {
                 if (result.error) {
@@ -106,14 +107,14 @@ class JsOptimizer extends Plugin {
       const directory = bundle.substring(0, bundle.indexOf('.bundle'));
       // Check if the current bundle can be placed.
       if (fs.existsSync(directory) && fs.lstatSync(directory).isDirectory()) {
-        this.Console.info(`Compatible bundle directory detected, writing to ${directory} instead`);
+        this.Console.info(`Compatible bundle directory detected, writing to ${directory}`);
         bundle = path.join(directory, path.basename(bundle));
       }
 
       mkdirp.sync(path.dirname(bundle));
 
       try {
-        const minifiedResult = minify(result, this.config.options.minify || {});
+        const minifiedResult = minify(result, this.getOption('minify', {}));
 
         if (minifiedResult.error || !minifiedResult.code) {
           this.Console.log(`Writing bundle: ${bundle}`);
@@ -155,5 +156,3 @@ class JsOptimizer extends Plugin {
     });
   }
 }
-
-export default JsOptimizer;

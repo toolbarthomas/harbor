@@ -1,6 +1,6 @@
-import Service from './Service.js';
+import { Service } from './Service.js';
 
-class ConfigPublisher extends Service {
+export class ConfigPublisher extends Service {
   constructor(acceptedServices) {
     super(acceptedServices);
 
@@ -21,13 +21,13 @@ class ConfigPublisher extends Service {
 
     if (!(config instanceof Object)) {
       this.Console.log(
-        `Unable to expose configuration for ${name}, no valid configuration Object has been defined.`
+        `Unable to expose configuration for ${name}, no configuration has been defined.`
       );
 
       return;
     }
 
-    this.Console.log(`Shared configuration defined for: ${name}`);
+    this.Console.log(`Defining '${name}' configuration...`);
 
     this.instances[name] = config;
   }
@@ -67,5 +67,3 @@ class ConfigPublisher extends Service {
     return instance[option];
   }
 }
-
-export default ConfigPublisher;

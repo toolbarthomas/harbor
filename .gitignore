@@ -1,6 +1,7 @@
 node_modules
 dist
 src
+docs
 !example/*/src
 
 *.map
@@ -15,3 +16,6 @@ storybook-static
 harbor.config.js
 
 backstopJS
+.DS_Store
+
+docs/src/styleguide

@@ -1,4 +1,4 @@
-import Core from '../common/Core.js';
+import { Core } from '../common/Core.js';
 
 /**
  * Creates a new Harbor Worker that will be registered to the TaskManager.
@@ -11,10 +11,8 @@ import Core from '../common/Core.js';
  * @param {Object} options Defines the Harbor specific options for the current
  * service.
  */
-class Worker extends Core {
+export class Worker extends Core {
   constructor(services, options) {
-    super(services, options, 'workers');
+    super(services, options, 'workers', 'worker');
   }
 }
-
-export default Worker;
