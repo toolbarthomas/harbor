@@ -1,13 +1,13 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.805.0",
+  "version": "0.806.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
   "bin": {
     "harbor": "./index.js"
   },
-  "node": ">=18.0.0",
+  "node": ">=18.18.0",
   "scripts": {
     "development": "node ./index.js --watch --styleguide",
     "export": "node ./index.js --task=export",
@@ -60,10 +60,10 @@
     "@babel/eslint-parser": "^7.24.1",
     "@babel/plugin-proposal-decorators": "^7.24.1",
     "@babel/preset-env": "^7.24.4",
-    "@storybook/addon-essentials": "^8.0.5",
-    "@storybook/builder-webpack5": "^8.0.5",
-    "@storybook/cli": "^8.0.5",
-    "@storybook/html-webpack5": "^8.0.5",
+    "@storybook/addon-essentials": "^8.0.6",
+    "@storybook/builder-webpack5": "^8.0.6",
+    "@storybook/cli": "^8.0.6",
+    "@storybook/html-webpack5": "^8.0.6",
     "autoprefixer": "^10.4.19",
     "babel-loader": "^9.1.3",
     "babel-plugin-module-resolver": "^5.0.0",
@@ -74,7 +74,7 @@
     "copyfiles": "^2.4.1",
     "cssnano": "^6.1.2",
     "dotenv": "16.4.5",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-babel-module": "^5.3.2",
@@ -113,6 +113,6 @@
     "yaml-loader": "^0.8.1"
   },
   "devDependencies": {
-    "@storybook/preview-api": "^8.0.5"
+    "@storybook/preview-api": "^8.0.6"
   }
 }
