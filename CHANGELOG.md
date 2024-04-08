@@ -1,3 +1,9 @@
+## 0.806.1 (8 April, 2024)
+
+### Maintenance
+
+- Eslint: Temporary Eslint downgrade from `9.0.0` to `8.57.0` to minimize PeerDependency issues. The Node version requirement has not been removed to ensure the usage of version 9.x within the future.
+
 ## 0.806.0 (8 April, 2024)
 
 ### Maintenance
@@ -13,7 +19,7 @@ environment (e.g. Drupal 10+).
 [Core](https://gitlab.com/nightlycommit/twing)
 [Loader](https://gitlab.com/nightlycommit/twing-loader)
 
-## 0.805.0 (8 April, 2024)
+## 0.805.0 (5 April, 2024)
 
 ### Maintenance
 
