@@ -1,3 +1,24 @@
+## 0.806.0 (8 April, 2024)
+
+### Maintenance
+
+- Node: Updates to Storybook 8.0.6
+- Eslint: Drop Support for Node.js < 18.18.x.
+
+Note: Fixed versions for twing@5.2.2 and twing-loader@4.0.1 are used to ensure
+the initial behaviour of Twig 2.x syntax. Harbor should work within any Twig 3.0
+environment (e.g. Drupal 10+).
+
+[API](https://twing.nightlycommit.com/)
+[Core](https://gitlab.com/nightlycommit/twing)
+[Loader](https://gitlab.com/nightlycommit/twing-loader)
+
+## 0.805.0 (8 April, 2024)
+
+### Maintenance
+
+- Node: Updates to Storybook 8.0.5
+
 ## 0.800.0 (27 March, 2024)
 
 ### Maintenance
