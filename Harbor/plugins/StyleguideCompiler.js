@@ -518,6 +518,53 @@ export class StyleguideCompiler extends Plugin {
         }
       }
 
+      // Include the Drupal library context within the Storybook instance that
+      // can be used for the Drupal related Twig extensions.
+      const libraryPaths = [${glob
+        .sync('*.libraries.yml')
+        .map((p) => `'${p}'`)
+        .join(',')}];
+      const libraries = {};
+      if (libraryPaths.length) {
+        libraryPaths.forEach((l) => {
+          const c = fs.readFileSync(l).toString();
+          console.log('Reading library: ' + l);
+
+          if (c && c.length) {
+            try {
+              libraries[path.basename(l)] = YAML.parse(c);
+            } catch (exception) {
+              console.log(exception);
+            }
+          }
+        });
+      }
+
+      // Enable the sprite paths within the Styleguide as global context.
+      const sprites = {};
+      const enableSprites = ${!!(
+        this.workers &&
+        this.workers.SvgSpriteCompiler &&
+        this.workers.SvgSpriteCompiler.config.entry
+      )};
+      if (enableSprites) {
+        try {
+          const entry = ${JSON.stringify(this.workers.SvgSpriteCompiler.config.entry)};
+
+          Object.keys(entry).forEach((n) => {
+            let p = path.normalize(path.dirname(entry[n])).replace('*', '');
+            p = path.join('${this.environment.THEME_DIST}', p, n + '.svg');
+
+            if (fs.existsSync(path.resolve(p))) {
+              sprites[n] = p;
+            }
+
+          });
+        } catch (exception) {
+          console.log('Unable to expose compiled inline SVG sprites:' + exception);
+        }
+      }
+
       const webpackFinal = (config) => {
         // Include the Twig loader to enable support from Drupal templates.
         config.module.rules.push({
@@ -643,6 +690,18 @@ export class StyleguideCompiler extends Plugin {
             `
           : ''
       }
+
+      // Enforce the Harbor environment within the Webpack instance.
+      // DefinePlugin does not give the desired result withing the Twing Builder.
+      process.env.THEME_LIBRARIES = JSON.stringify(libraries);
+      process.env.THEME_LIBRARIES_OVERRIDES = JSON.stringify(${JSON.stringify(
+        this.config.options.librariesOverride || {}
+      )});
+      process.env.THEME_DIST = '"${path.normalize(this.environment.THEME_DIST)}/"';
+      process.env.THEME_ENVIRONMENT = '"${this.environment.THEME_ENVIRONMENT}"';
+      process.env.THEME_SPRITES = JSON.stringify(sprites);
+      process.env.THEME_ALIAS = JSON.stringify(${JSON.stringify(this.config.options.alias)});
+      process.env.THEME_WEBSOCKET_PORT = '${this.environment.THEME_WEBSOCKET_PORT}';
 
       module.exports = {
         addons,
