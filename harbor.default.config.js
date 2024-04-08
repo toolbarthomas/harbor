@@ -79,6 +79,7 @@ export default {
               : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '.prettierrc')
           )
         ),
+        ignoreDrupalTemplates: true,
         ignoreKeywords: ['harbor'],
         configurationExtensions: ['yml', 'yaml', 'json'],
         destinationDirectory: 'styleguide',

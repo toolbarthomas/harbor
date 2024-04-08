@@ -59,6 +59,12 @@ export class StyleguideHelper extends Worker {
 
       const queue = [];
       entry.forEach((source) => {
+        if (this.getOption('ignoreDrupalTemplates')) {
+          if (source.endsWith('.html.twig')) {
+            return;
+          }
+        }
+
         const extname = path.extname(source);
         const story = source.replace(extname, `.stories.${this.getOption('extname')}`);
 
