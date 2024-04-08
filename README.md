@@ -54,6 +54,24 @@ $ harbor
 $ harbor --styleguide --watch
 ```
 
+You can also use the `harbor` command instead if you installed it globally:
+This will only run the default workers but you can use additional parameters like the local commands.
+Keep in mind that you need to be in the correct working directory in order to run
+it correctly.
+
+```sh
+$ npm install -g @toolbarthomas/harbor
+```
+
+Installing Harbor globally will lock you in a specific version so keep in mind
+it can break your workflow if you installed the newest version without fixing the breaking-changes.
+
+```sh
+$ harbor
+# or
+$ harbor --styleguide --watch
+```
+
 ## Workers
 
 A worker provides the core tasks for Harbor and can be adjusted within the configuration.

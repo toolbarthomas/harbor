@@ -1,4 +1,4 @@
 /**
  * Default return function as a valid Twig function.
  */
-module.exports = () => null;
+module.exports = (context) => Promise.resolve(context);
