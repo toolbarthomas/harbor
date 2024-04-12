@@ -334,7 +334,7 @@ export class StyleguideCompiler extends Plugin {
       }
 
       if (context) {
-        if (!this.renderContext[name]._context instanceof Object) {
+        if ((!this.renderContext[name]._context) instanceof Object) {
           this.renderContext[name]._context = {};
         }
       }
@@ -503,53 +503,6 @@ export class StyleguideCompiler extends Plugin {
       if (enableSprites) {
         try {
           const entry = ${JSON.stringify(this.workers.SvgSpriteCompiler.config.entry, null, 2)};
-
-          Object.keys(entry).forEach((n) => {
-            let p = path.normalize(path.dirname(entry[n])).replace('*', '');
-            p = path.join('${this.environment.THEME_DIST}', p, n + '.svg');
-
-            if (fs.existsSync(path.resolve(p))) {
-              sprites[n] = p;
-            }
-
-          });
-        } catch (exception) {
-          console.log('Unable to expose compiled inline SVG sprites:' + exception);
-        }
-      }
-
-      // Include the Drupal library context within the Storybook instance that
-      // can be used for the Drupal related Twig extensions.
-      const libraryPaths = [${glob
-        .sync('*.libraries.yml')
-        .map((p) => `'${p}'`)
-        .join(',')}];
-      const libraries = {};
-      if (libraryPaths.length) {
-        libraryPaths.forEach((l) => {
-          const c = fs.readFileSync(l).toString();
-          console.log('Reading library: ' + l);
-
-          if (c && c.length) {
-            try {
-              libraries[path.basename(l)] = YAML.parse(c);
-            } catch (exception) {
-              console.log(exception);
-            }
-          }
-        });
-      }
-
-      // Enable the sprite paths within the Styleguide as global context.
-      const sprites = {};
-      const enableSprites = ${!!(
-        this.workers &&
-        this.workers.SvgSpriteCompiler &&
-        this.workers.SvgSpriteCompiler.config.entry
-      )};
-      if (enableSprites) {
-        try {
-          const entry = ${JSON.stringify(this.workers.SvgSpriteCompiler.config.entry)};
 
           Object.keys(entry).forEach((n) => {
             let p = path.normalize(path.dirname(entry[n])).replace('*', '');
