@@ -17,6 +17,10 @@ Define, develop and test any Twig pattern within Storybook; implements these pat
 
 ## 🥚 The Concept:
 
+1. A composed Twig template that can directly be included within Drupal & Storybook
+2. Modular asset management by using the included `attach_library` template function.
+3.
+
 @WIP
 
 ## 🚀 Let's begin:
