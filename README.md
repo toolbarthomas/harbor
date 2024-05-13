@@ -15,14 +15,6 @@ Define, develop and test any Twig pattern within Storybook; implements these pat
 - Modular functionality with no dependency fragmentation.
 - Use the classic Drupal front-end or include popular framework tooling like [Lit Element](https://lit.dev/), [React](https://react.dev/), [Vue](https://vuejs.org/) or any other custom framework.
 
-## 🥚 The Concept:
-
-1. A composed Twig template that can directly be included within Drupal & Storybook
-2. Modular asset management by using the included `attach_library` template function.
-3.
-
-@WIP
-
 ## 🚀 Let's begin:
 
 Harbor is specifically used during the development of your Twig components for a custom Drupal theme or module.
