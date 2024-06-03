@@ -1,3 +1,10 @@
+## 0.811.0 (3 Jun, 2024)
+
+### Maintenance
+
+- Node: Updates to Storybook 8.1.5
+- Node: Minor package dependency upgrades
+
 ## 0.810.0 (27 May, 2024)
 
 ### Maintenance
