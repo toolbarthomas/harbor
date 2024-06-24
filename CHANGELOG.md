@@ -1,9 +1,14 @@
+## 0.813.2 (24 Jun, 2024)
+
+### Maintenance
+
+- Node: Minor package dependency upgrades
+
 ## 0.813.1 (19 Jun, 2024)
 
 ### Maintenance
 
 - Node: Updates to Storybook Preview Api 8.1.10
-
 
 ## 0.813.0 (18 Jun, 2024)
 
