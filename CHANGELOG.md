@@ -1,3 +1,10 @@
+## 0.813.3 (2 Jul, 2024)
+
+### Maintenance
+
+- Node: Minor package dependency upgrades
+
+
 ## 0.813.2 (24 Jun, 2024)
 
 ### Maintenance
