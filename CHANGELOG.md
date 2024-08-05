@@ -1,9 +1,14 @@
-## 0.814 (9 Jul, 2024)
+## 0.814 (5 Aug, 2024)
 
 ### Maintenance
 
 - Node: Minor package dependency upgrades
 
+## 0.814 (9 Jul, 2024)
+
+### Maintenance
+
+- Node: Minor package dependency upgrades
 
 ## 0.813.3 (2 Jul, 2024)
 
