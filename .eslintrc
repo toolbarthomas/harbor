@@ -9,7 +9,6 @@
     "allowImportExportEverywhere": true
   },
   "extends": [
-    "eslint-config-airbnb-base",
     "prettier"
   ],
   "plugins": [

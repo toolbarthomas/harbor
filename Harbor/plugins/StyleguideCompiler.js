@@ -663,9 +663,6 @@ export class StyleguideCompiler extends Plugin {
           builder: 'webpack5',
         },
         disableTelemetry: ${this.getOption('disableTelemetry')},
-        // features: {
-        //   storyStoreV7: false
-        // },
         framework: "@storybook/html-webpack5",
         previewMainTemplate: '${previewMainTemplate}',
         stories,
