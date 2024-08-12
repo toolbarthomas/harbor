@@ -1,10 +1,15 @@
+## 0.901.0 (12 Aug, 2024)
+
+### Maintenance
+
+- Node: Minor package dependency upgrades
+
 ## 0.900.0 (9 Aug, 2024)
 
 ### Maintenance
 
 - Node: Minor package dependency upgrades
 - Eslint: Upgrade to version 9.8 and exclude configuration presets.
-
 
 ## 0.816.0 (6 Aug, 2024)
 
