@@ -1,3 +1,17 @@
+## 0.906.0 (19 Sep, 2024)
+
+### Maintenance
+
+- Chokidar: Resolve glob deprecation since Chokidar V4
+- Node: Minor package dependency upgrades
+
+## 0.905.0 (17 Sep, 2024)
+
+### Maintenance
+
+- Node: Minor package dependency upgrades
+
+
 ## 0.904.0 (29 Aug, 2024)
 
 ### Maintenance
