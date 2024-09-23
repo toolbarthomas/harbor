@@ -1,6 +1,6 @@
 {
   "name": "@toolbarthomas/harbor",
-  "version": "0.905.0",
+  "version": "0.906.0",
   "type": "module",
   "description": "Boilerplate for Drupal Themes",
   "exports": "./Harbor/index.js",
@@ -60,21 +60,21 @@
     "@babel/eslint-parser": "^7.25.1",
     "@babel/plugin-proposal-decorators": "^7.24.7",
     "@babel/preset-env": "^7.25.4",
-    "@storybook/addon-essentials": "^8.3.1",
-    "@storybook/builder-webpack5": "^8.3.1",
-    "@storybook/cli": "^8.3.1",
-    "@storybook/html-webpack5": "^8.3.1",
+    "@storybook/addon-essentials": "^8.3.2",
+    "@storybook/builder-webpack5": "^8.3.2",
+    "@storybook/cli": "^8.3.2",
+    "@storybook/html-webpack5": "^8.3.2",
     "autoprefixer": "^10.4.20",
     "babel-loader": "^9.2.1",
     "babel-plugin-module-resolver": "^5.0.2",
     "camelcase": "^8.0.0",
     "chalk": "^5.3.0",
-    "chokidar": "^4.0.0",
+    "chokidar": "^4.0.1",
     "concat": "^1.0.3",
     "copyfiles": "^2.4.1",
     "cssnano": "^7.0.6",
     "dotenv": "16.4.5",
-    "eslint": "^9.10.0",
+    "eslint": "^9.11.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-import-resolver-babel-module": "^5.3.2",
     "eslint-plugin-prettier": "^5.2.1",
@@ -94,7 +94,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rimraf": "^6.0.1",
-    "sass": "^1.79.1",
+    "sass": "^1.79.3",
     "snake-case": "^4.0.0",
     "stringify-object": "^5.0.0",
     "stylelint": "^16.9.0",
@@ -111,6 +111,6 @@
     "yaml-loader": "^0.8.1"
   },
   "devDependencies": {
-    "@storybook/preview-api": "^8.3.1"
+    "@storybook/preview-api": "^8.3.2"
   }
 }
