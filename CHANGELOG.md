@@ -1,3 +1,9 @@
+## 0.908.0 (09 Oct, 2024)
+
+### Maintenance
+
+- Node: Minor package dependency upgrades
+
 ## 0.907.0 (25 Sep, 2024)
 
 ### Maintenance
