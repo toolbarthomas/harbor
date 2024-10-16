@@ -335,7 +335,10 @@ export class StyleguideHelper extends Worker {
           };`);
       } else {
         output.push(
-          outdent`${variantName}.args = Object.assign(${moduleName}Configuration, ${variantName}Configuration);`
+          outdent`${variantName}.args = {
+            ...${moduleName}Configuration,
+            ...${variantName}Configuration
+          };`
         );
       }
 
