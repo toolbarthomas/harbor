@@ -1,3 +1,9 @@
+## 0.910.1 (27 Jan, 2025)
+
+### Hotfix
+
+- SVGSpriteCompiler: Convert uIntArray to Buffer, resolves empty svg sprites.
+
 ## 0.910.0 (16 Oct, 2024)
 
 ### Maintenance

@@ -116,9 +116,13 @@ export class SvgSpriteCompiler extends Worker {
 
           this.Console.log(`Writing optimized inline svg image: ${destination}`);
 
-          fs.writeFileSync(d, entry.data);
+          // Convert to original Buffer since SVGStore does not understand
+          // uIntArrays...
+          const data = Buffer.from(entry.data);
 
-          return store.add(this.prefix + path.basename(cwd[index], '.svg'), entry.data);
+          fs.writeFileSync(d, data);
+
+          return store.add(this.prefix + path.basename(cwd[index], '.svg'), data);
         },
         svgstore({
           inline: true,
